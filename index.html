@@ -224,7 +224,139 @@
  .fk-video-card{min-width:180px;height:240px}
 }
 </style>
+    
+/* SUBHA MEDICAL - FLIPKART STYLE PRODUCT LAYOUT */
 
+#products-container,
+#product-container,
+#products-grid,
+.products-grid,
+.product-grid,
+#best-sellers-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    align-items: stretch !important;
+}
+
+/* Product cards */
+.product-card,
+.product-item,
+.product,
+.medicine-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    background: #fff !important;
+    border: 1px solid #e8e8e8 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden !important;
+}
+
+/* Medicine images */
+.product-card img,
+.product-item img,
+.product img,
+.medicine-card img {
+    display: block !important;
+    width: 100% !important;
+    height: 145px !important;
+    object-fit: contain !important;
+    background: #fff !important;
+    margin: 0 auto 8px !important;
+}
+
+/* Product name */
+.product-card h3,
+.product-card h4,
+.product-item h3,
+.product-item h4,
+.product h3,
+.product h4,
+.medicine-card h3,
+.medicine-card h4 {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    font-weight: 600 !important;
+    color: #212121 !important;
+    margin: 5px 0 !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* Price */
+.product-card .price,
+.product-item .price,
+.product .price,
+.medicine-card .price {
+    color: #087f23 !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    margin: 6px 0 !important;
+}
+
+/* Buttons */
+.product-card button,
+.product-item button,
+.product button,
+.medicine-card button {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    cursor: pointer;
+    border-radius: 5px !important;
+}
+
+/* Tablet */
+@media (min-width: 600px) {
+    #products-container,
+    #product-container,
+    #products-grid,
+    .products-grid,
+    .product-grid,
+    #best-sellers-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+    }
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+    #products-container,
+    #product-container,
+    #products-grid,
+    .products-grid,
+    .product-grid,
+    #best-sellers-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+        padding: 16px 24px !important;
+    }
+
+    .product-card img,
+    .product-item img,
+    .product img,
+    .medicine-card img {
+        height: 175px !important;
+    }
+}
+
+/* Large desktop */
+@media (min-width: 1200px) {
+    #products-container,
+    #product-container,
+    #products-grid,
+    .products-grid,
+    .product-grid,
+    #best-sellers-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    }
+}
 
 <style id="subha-brand-theme">
 /* SUBHA MEDICAL BRAND THEME — based on the supplied logo */
