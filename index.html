@@ -360,7 +360,7 @@
             <div class="promo-container" id="store-promo-container">
                 <div id="store-promo-media-box"></div>
                 <div class="promo-overlay-bar">
-                    <span id="store-promo-caption">🎥 Subha Medical — 100% Genuine Healthcare & Doorstep Delivery</span>
+                    <span id="store-promo-caption">🎥 Subha Medical -- 100% Genuine Healthcare & Doorstep Delivery</span>
                     <span class="promo-live-tag">PROMO</span>
                 </div>
             </div>
@@ -624,7 +624,7 @@
     <div class="admin-screen" id="admin-screen">
         <div class="admin-header">
             <div>
-                <strong style="font-size:16px;" id="adm-header-title">SUBHA MEDICAL — ADMIN ERP</strong>
+                <strong style="font-size:16px;" id="adm-header-title">SUBHA MEDICAL -- ADMIN ERP</strong>
                 <div style="font-size:10px; opacity:0.8;">Store Management, POS Billing & Multi-Device Cloud Sync</div>
             </div>
             <button class="fk-offer-btn" onclick="closeAdminScreen()">Exit to Store</button>
@@ -747,11 +747,6 @@
 
                 <label style="font-size:11px; font-weight:700;">Top Moving Announcement Ticker Text:</label>
                 <input type="text" id="set-ticker" class="auth-input" placeholder="Announcement text...">
-                const DEFAULT_SUPABASE_URL = ""; 
-const DEFAULT_SUPABASE_KEY = "";
-const DEFAULT_SUPABASE_URL = "https://your-project.supabase.co"; 
-const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...";
-
 
                 <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
                 <h4 style="margin:0 0 6px;">🖼️ Pharmacy Logo (Navbar, Hero & GST Invoice)</h4>
@@ -808,9 +803,9 @@ const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...";
         /**************************************************************
          * 1. STORE CONFIGURATION, SUPABASE & MULTI-DEVICE SYNC ENGINE
          **************************************************************/
-        // Paste your Supabase Project URL & Anon Key here so all customer phones connect automatically:
-        const DEFAULT_SUPABASE_URL = ""; 
-        const DEFAULT_SUPABASE_KEY = "";
+        // Default Supabase credentials hardcoded as requested (no setup needed)
+        const DEFAULT_SUPABASE_URL = "https://ktqztbpmfxbbczojfdlr.supabase.co"; 
+        const DEFAULT_SUPABASE_KEY = "sb_publishable_C0bpzdEEotuWH3UpLyB5Fw_dCb3IrJf";
 
         let sbClient = null;
         const localChannel = new BroadcastChannel("subha_medical_channel");
@@ -824,7 +819,7 @@ const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...";
             tickerText: "⚕️ சுபா மெடிக்கல் (Subha Medical) - Perumanallur–Kunnathur Road, Vallipuram, Tiruppur | BP, Sugar and Weight Check Available! / ரத்த அழுத்தம், சர்க்கரை மற்றும் உடல் எடை பரிசோதனை வசதி உள்ளது! 🐾 Veterinary Medicines Available! / கால்நடை மருந்துகள் கிடைக்கும்!",
             logoUrl: "",
             promoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-            promoCaption: "🎥 Subha Medical — 100% Genuine Medicines, Veterinary Care & Fast Delivery",
+            promoCaption: "🎥 Subha Medical -- 100% Genuine Medicines, Veterinary Care & Fast Delivery",
             promoShow: true,
             adminUser: "admin",
             adminPass: "1234",
@@ -922,7 +917,7 @@ const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...";
             document.getElementById("nav-store-subtitle").innerText = storeConfig.storeTamil;
             document.getElementById("hero-store-title").innerText = storeConfig.storeName;
             document.getElementById("hero-store-address").innerHTML = `${storeConfig.storeAddress}<br>📞 +91 ${storeConfig.adminPhone} • Genuine Medicines & GST Invoice`;
-            document.getElementById("adm-header-title").innerText = `${storeConfig.storeName} — ADMIN ERP`;
+            document.getElementById("adm-header-title").innerText = `${storeConfig.storeName} -- ADMIN ERP`;
             document.getElementById("top-marquee-ticker").innerText = `${storeConfig.tickerText} 📞 +91 ${storeConfig.adminPhone}`;
 
             // Logo in Navbar & Hero
@@ -1779,7 +1774,7 @@ const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...";
         // WALK-IN POS COUNTER BILLING
         function renderPosMedicineDropdown() {
             const sel = document.getElementById("pos-med-select");
-            sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} — ₹${p.price} (Batch: ${p.batch || 'SM26'})</option>`).join("");
+            sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} -- ₹${p.price} (Batch: ${p.batch || 'SM26'})</option>`).join("");
         }
 
         function addPosItem() {
@@ -1825,7 +1820,7 @@ const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...";
                 id: "POS" + Math.floor(100000 + Math.random() * 900000),
                 customer_name: name,
                 customer_phone: phone,
-                address: "Counter Sale — " + storeConfig.storeName,
+                address: "Counter Sale -- " + storeConfig.storeName,
                 payment_mode: "Counter Cash / UPI",
                 items: [...posItems],
                 total: total,
@@ -1856,7 +1851,7 @@ const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ...";
             ordBox.innerHTML = orders.length ? orders.map(o => `
                 <div class="data-card">
                     <div style="display:flex; justify-content:space-between; font-weight:800; align-items:center; flex-wrap:wrap; gap:6px;">
-                        <span>#${o.id} — ${o.customer_name} (${o.customer_phone})</span>
+                        <span>#${o.id} -- ${o.customer_name} (${o.customer_phone})</span>
                         <span style="color:var(--brand); font-size:15px;">₹${o.total}</span>
                     </div>
                     <div style="font-size:11px; color:#555; margin:4px 0;">📍 ${o.address} | 🕒 ${o.created_at} | 💳 ${o.payment_mode || 'COD'}</div>
