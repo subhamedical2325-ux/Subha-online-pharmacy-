@@ -98,9 +98,10 @@
         .brands-carousel { display: flex; overflow-x: auto; gap: 12px; padding: 10px 14px; background: var(--yellow-bg); scrollbar-width: none; border-bottom: 1px solid #edf2f4; }
         .brands-carousel::-webkit-scrollbar { display: none; }
         .brand-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; flex-shrink: 0; }
-        .brand-circle { width: 56px; height: 56px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid #9bc8c6; font-weight: 900; font-size: 11px; color: var(--brand-navy); text-align: center; padding: 4px; transition: 0.2s; }
+        .brand-circle { width: 56px; height: 56px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid #9bc8c6; font-weight: 900; font-size: 11px; color: var(--brand-navy); text-align: center; padding: 4px; transition: 0.2s; overflow: hidden; }
+        .brand-circle img { width: 100%; height: 100%; object-fit: contain; }
         .brand-item.active .brand-circle { background: var(--brand); color: #fff; border-color: var(--brand-dark); }
-        .brand-label { font-size: 10px; margin-top: 5px; font-weight: 700; color: var(--text-dark); }
+        .brand-label { font-size: 10px; margin-top: 5px; font-weight: 700; color: var(--text-dark); max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         /* Top Categories Grid */
         .top-categories-bg { background: var(--yellow-bg); padding-bottom: 12px; }
@@ -110,7 +111,7 @@
         .tc-icon { font-size: 26px; margin-bottom: 5px; color: var(--brand); }
         .tc-card span { font-size: 11px; color: var(--text-dark); text-align: center; font-weight: 700; }
 
-        /* Flipkart / 1mg Product Grid */
+        /* Product Grid */
         .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 14px 15px; }
         @media (min-width: 650px) {
             .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
@@ -171,7 +172,7 @@
         .nav-item.active { color: var(--brand); }
         .cart-badge { position: absolute; top: -4px; right: 18%; background: var(--brand-red); color: #fff; font-size: 9px; font-weight: 800; border-radius: 10px; padding: 1px 5px; border: 1.5px solid #fff; display: none; }
 
-        /* Subha Order Tracking 5-Step Progress */
+        /* Order Tracking Progress */
         .subha-track { margin: 12px 0 8px; padding: 12px; background: #f7fbf8; border: 1px solid #e2eee6; border-radius: 10px; }
         .subha-track-title { font-size: 11px; font-weight: 800; color: #476258; margin-bottom: 10px; display: flex; justify-content: space-between; }
         .subha-track-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
@@ -360,7 +361,7 @@
             <div class="promo-container" id="store-promo-container">
                 <div id="store-promo-media-box"></div>
                 <div class="promo-overlay-bar">
-                    <span id="store-promo-caption">🎥 Subha Medical -- 100% Genuine Healthcare & Doorstep Delivery</span>
+                    <span id="store-promo-caption">🎥 Subha Medical — 100% Genuine Healthcare & Doorstep Delivery</span>
                     <span class="promo-live-tag">PROMO</span>
                 </div>
             </div>
@@ -382,9 +383,9 @@
                 <button class="fk-offer-btn" onclick="openReqModal()">Upload Rx</button>
             </div>
 
-            <!-- Shop By Brands -->
+            <!-- Shop By Brands / Pharmaceutical Companies -->
             <div class="section-header">
-                <h3>Shop by Popular Brands</h3>
+                <h3>Pharmaceutical Companies / Brands</h3>
                 <span class="view-more" onclick="filterByBrand('ALL')">Reset</span>
             </div>
             <div class="brands-carousel" id="brands-carousel"></div>
@@ -504,7 +505,7 @@
         </div>
     </div>
 
-    <!-- MODAL 1: MULTI-SYSTEM CUSTOMER LOGIN / ACCOUNT -->
+    <!-- MODAL 1: CUSTOMER LOGIN / ACCOUNT -->
     <div class="overlay" id="account-modal">
         <div class="modal-card">
             <span class="close-btn" onclick="closeModal('account-modal')">&times;</span>
@@ -530,7 +531,7 @@
         </div>
     </div>
 
-    <!-- MODAL 2: PRODUCT DETAILS & INTERACTIVE 5-STAR CUSTOMER REVIEWS -->
+    <!-- MODAL 2: PRODUCT DETAILS & 5-STAR REVIEWS -->
     <div class="overlay" id="pd-modal">
         <div class="modal-card">
             <span class="close-btn" onclick="closeModal('pd-modal')">&times;</span>
@@ -624,8 +625,8 @@
     <div class="admin-screen" id="admin-screen">
         <div class="admin-header">
             <div>
-                <strong style="font-size:16px;" id="adm-header-title">SUBHA MEDICAL -- ADMIN ERP</strong>
-                <div style="font-size:10px; opacity:0.8;">Store Management, POS Billing & Multi-Device Cloud Sync</div>
+                <strong style="font-size:16px;" id="adm-header-title">SUBHA MEDICAL — ADMIN ERP</strong>
+                <div style="font-size:10px; opacity:0.8;">Store Management, Brand Management & Cloud Sync</div>
             </div>
             <button class="fk-offer-btn" onclick="closeAdminScreen()">Exit to Store</button>
         </div>
@@ -635,7 +636,7 @@
                 <div class="fk-stat"><div class="lbl">TOTAL ORDERS</div><div class="num" id="stat-orders">0</div></div>
                 <div class="fk-stat"><div class="lbl">REVENUE (₹)</div><div class="num" id="stat-rev">₹0</div></div>
                 <div class="fk-stat"><div class="lbl">MEDICINES</div><div class="num" id="stat-prods">0</div></div>
-                <div class="fk-stat"><div class="lbl">RX REQUESTS</div><div class="num" id="stat-reqs">0</div></div>
+                <div class="fk-stat"><div class="lbl">BRANDS</div><div class="num" id="stat-brands">0</div></div>
             </div>
         </div>
 
@@ -643,9 +644,9 @@
             <button class="active" id="adm-tab-orders-btn" onclick="switchAdminTab('orders')">📦 Live Orders & GST Bill</button>
             <button id="adm-tab-pos-btn" onclick="switchAdminTab('pos')">🧾 Walk-In POS Billing</button>
             <button id="adm-tab-products-btn" onclick="switchAdminTab('products')">💊 Manage Medicines</button>
-            <button id="adm-tab-settings-btn" onclick="switchAdminTab('settings')">⚙️ Store, Logo & Promo Video</button>
+            <button id="adm-tab-brands-btn" onclick="switchAdminTab('brands')">🏷️ Brand Management</button>
+            <button id="adm-tab-settings-btn" onclick="switchAdminTab('settings')">⚙️ Store & Logo</button>
             <button id="adm-tab-requests-btn" onclick="switchAdminTab('requests')">📋 Rx Requests</button>
-            <button id="adm-tab-cloud-btn" onclick="switchAdminTab('cloud')">☁️ Supabase Cloud</button>
         </div>
 
         <!-- Admin Panel 1: Orders -->
@@ -653,7 +654,7 @@
             <div id="admin-orders-container"></div>
         </div>
 
-        <!-- Admin Panel 2: Walk-In POS Counter Billing -->
+        <!-- Admin Panel 2: POS Billing -->
         <div class="fk-admin-panel" id="adm-panel-pos">
             <div class="data-card">
                 <h4 style="margin-top:0;">Instant Walk-In Counter Billing (POS)</h4>
@@ -674,14 +675,17 @@
             </div>
         </div>
 
-        <!-- Admin Panel 3: Products -->
+        <!-- Admin Panel 3: Products Management -->
         <div class="fk-admin-panel" id="adm-panel-products">
             <div class="data-card">
                 <h4 style="margin-top:0;" id="prod-form-title">Add / Edit Medicine</h4>
                 <input type="hidden" id="p-edit-id">
                 <input type="text" id="p-name" class="auth-input" placeholder="Medicine Name (e.g. Dolo 650mg Strip)">
-                <input type="text" id="p-brand" class="auth-input" placeholder="Manufacturer / Brand (e.g. Micro Labs)">
-                <input type="text" id="p-use" class="auth-input" placeholder="Usage in Tamil/English (e.g. காய்ச்சல் & வலி / Fever)">
+                
+                <label style="font-size:11px; font-weight:700; color:#555;">Pharmaceutical Company / Brand:</label>
+                <select id="p-brand-select" class="auth-input" style="margin-top:2px;"></select>
+
+                <input type="text" id="p-use" class="auth-input" placeholder="Usage / Generic Name (e.g. Fever & Pain)">
                 <select id="p-cat" class="auth-input">
                     <option value="Fever & Pain">Fever & Pain</option>
                     <option value="Diabetes & BP">Diabetes & BP</option>
@@ -705,10 +709,10 @@
                 </div>
 
                 <label class="file-upload-box">
-                    <i class='bx bx-image-add'></i> Upload Product Image from Gallery / Camera
+                    <i class='bx bx-image-add'></i> Upload Product Image to Supabase Storage
                     <input type="file" id="p-img-file" accept="image/*" style="display:none;" onchange="handleProductImageUpload(this)">
                 </label>
-                <input type="text" id="p-img" class="auth-input" placeholder="Or Paste Product Image URL" oninput="previewProductImageUrl(this.value)">
+                <input type="text" id="p-img" class="auth-input" placeholder="Or Paste Image URL" oninput="previewProductImageUrl(this.value)">
                 <img id="p-img-preview" style="display:none; width:90px; height:90px; object-fit:contain; border:1px solid #ddd; border-radius:8px; margin:4px 0;">
 
                 <div style="display:flex; gap:16px; margin:8px 0; font-size:12px;">
@@ -720,19 +724,45 @@
                     </label>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn-primary" onclick="adminSaveProduct()">Save Medicine</button>
+                    <button class="btn-primary" onclick="adminSaveProduct()">Save Medicine to Supabase</button>
                     <button class="btn-secondary" style="width:120px; margin-top:8px;" onclick="resetProductForm()">Clear</button>
                 </div>
             </div>
             <div id="admin-products-list"></div>
         </div>
 
-        <!-- Admin Panel 4: Editable Store Name, Logo, Promo Video, Mobile Number & Staff Password -->
+        <!-- Admin Panel 4: Brand Management -->
+        <div class="fk-admin-panel" id="adm-panel-brands">
+            <div class="data-card">
+                <h4 style="margin-top:0;" id="brand-form-title">Add / Edit Pharmaceutical Company Brand</h4>
+                <input type="hidden" id="b-edit-id">
+                <input type="text" id="b-name" class="auth-input" placeholder="Brand / Company Name (e.g. Micro Labs, Glenmark)">
+                
+                <label class="file-upload-box">
+                    <i class='bx bx-cloud-upload'></i> Upload Brand Logo to Supabase Storage
+                    <input type="file" id="b-logo-file" accept="image/*" style="display:none;" onchange="handleBrandImageUpload(this)">
+                </label>
+                <input type="text" id="b-logo-url" class="auth-input" placeholder="Or Paste Brand Image URL" oninput="previewBrandLogoUrl(this.value)">
+                <img id="b-logo-preview" style="display:none; width:65px; height:65px; object-fit:contain; border:1px solid #ddd; border-radius:8px; margin:4px 0;">
+
+                <label style="font-size:12px; display:flex; align-items:center; gap:6px; margin:8px 0;">
+                    <input type="checkbox" id="b-active" checked> Active / Enabled in Carousel
+                </label>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-primary" onclick="adminSaveBrand()">Save Brand to Supabase</button>
+                    <button class="btn-secondary" style="width:120px; margin-top:8px;" onclick="resetBrandForm()">Clear</button>
+                </div>
+            </div>
+            <div class="data-card">
+                <input type="text" id="brand-search-input" class="auth-input" placeholder="Search saved brands..." oninput="renderAdminBrandsList()">
+                <div id="admin-brands-list" style="margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <!-- Admin Panel 5: Store Settings -->
         <div class="fk-admin-panel" id="adm-panel-settings">
             <div class="data-card">
                 <h4 style="margin-top:0;">🏥 Pharmacy Name, Logo & Contact Settings (Cloud Synced)</h4>
-                <p style="font-size:11px; color:var(--brand-dark); margin-top:0;">Changes saved here automatically sync via Supabase to every customer's mobile phone.</p>
-
                 <label style="font-size:11px; font-weight:700;">Medical / Pharmacy Name (English):</label>
                 <input type="text" id="set-store-name" class="auth-input" placeholder="SUBHA MEDICAL">
 
@@ -742,32 +772,19 @@
                 <label style="font-size:11px; font-weight:700;">Store Full Address:</label>
                 <input type="text" id="set-store-addr" class="auth-input" placeholder="Perumanallur–Kunnathur Road, Vallipuram, Tiruppur">
 
-                <label style="font-size:11px; font-weight:700;">Admin / Pharmacy Mobile Number (For WhatsApp Orders, Call & Bills):</label>
+                <label style="font-size:11px; font-weight:700;">Admin / Pharmacy Mobile Number:</label>
                 <input type="tel" id="set-admin-phone" class="auth-input" placeholder="10-Digit Mobile Number">
 
                 <label style="font-size:11px; font-weight:700;">Top Moving Announcement Ticker Text:</label>
                 <input type="text" id="set-ticker" class="auth-input" placeholder="Announcement text...">
 
                 <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
-                <h4 style="margin:0 0 6px;">🖼️ Pharmacy Logo (Navbar, Hero & GST Invoice)</h4>
+                <h4 style="margin:0 0 6px;">🖼️ Pharmacy Logo (Navbar & Hero)</h4>
                 <label class="file-upload-box">
-                    <i class='bx bx-upload'></i> Upload Pharmacy Logo Image from Device
-                    <input type="file" accept="image/*" style="display:none;" onchange="handleLogoFileUpload(this)">
+                    <i class='bx bx-upload'></i> Upload Pharmacy Logo to Supabase Storage
+                    <input type="file" accept="image/*" style="display:none;" onchange="handleStoreLogoUpload(this)">
                 </label>
-                <input type="text" id="set-logo-url" class="auth-input" placeholder="Or Paste Pharmacy Logo Image URL">
-                <img id="set-logo-preview" style="display:none; height:55px; object-fit:contain; border:1px solid #ddd; border-radius:6px; padding:4px; margin:4px 0;">
-
-                <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
-                <h4 style="margin:0 0 6px;">🎥 Storefront Promotion Video / Banner</h4>
-                <label class="file-upload-box">
-                    <i class='bx bx-video-plus'></i> Upload Promo Video (MP4) or Promo Banner Image
-                    <input type="file" accept="video/*,image/*" style="display:none;" onchange="handlePromoFileUpload(this)">
-                </label>
-                <input type="text" id="set-promo-url" class="auth-input" placeholder="Or Paste Promotion Video (.mp4) or Banner Image URL">
-                <input type="text" id="set-promo-caption" class="auth-input" placeholder="Promotion Caption Text">
-                <label style="font-size:12px; display:flex; align-items:center; gap:6px; margin:6px 0;">
-                    <input type="checkbox" id="set-promo-show" checked> Show Promotion Video/Banner on Storefront Home
-                </label>
+                <input type="text" id="set-logo-url" class="auth-input" placeholder="Or Paste Logo URL">
 
                 <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
                 <h4 style="margin:0 0 6px;">🔐 Change Admin Login Credentials</h4>
@@ -776,24 +793,13 @@
                     <input type="password" id="set-adm-pass" class="auth-input" placeholder="New Staff Password">
                 </div>
 
-                <button class="btn-primary" onclick="saveStoreBrandSettings()">Save & Sync Store Settings to All Devices</button>
+                <button class="btn-primary" onclick="saveStoreBrandSettings()">Save & Sync Store Settings to Supabase</button>
             </div>
         </div>
 
-        <!-- Admin Panel 5: Medicine Requests -->
+        <!-- Admin Panel 6: Medicine Requests -->
         <div class="fk-admin-panel" id="adm-panel-requests">
             <div id="admin-requests-container"></div>
-        </div>
-
-        <!-- Admin Panel 6: Supabase Multi-System Cloud Setup -->
-        <div class="fk-admin-panel" id="adm-panel-cloud">
-            <div class="data-card">
-                <h4 style="margin-top:0;">Supabase Cloud Multi-Device Configuration</h4>
-                <p style="font-size:12px; color:var(--text-light);">Connect your Supabase Project URL and Anon Key so all phones and computers stay synced in real time.</p>
-                <input type="text" id="cfg-sb-url" class="auth-input" placeholder="https://your-project.supabase.co">
-                <input type="text" id="cfg-sb-key" class="auth-input" placeholder="Supabase Anon Public Key">
-                <button class="btn-primary" onclick="saveSupabaseCredentials()">Save & Connect Realtime Cloud</button>
-            </div>
         </div>
     </div>
 
@@ -801,14 +807,13 @@
 
     <script>
         /**************************************************************
-         * 1. STORE CONFIGURATION, SUPABASE & MULTI-DEVICE SYNC ENGINE
+         * 1. SUPABASE CONFIGURATION & REALTIME SYNC ENGINE
          **************************************************************/
-        // Default Supabase credentials hardcoded as requested (no setup needed)
         const DEFAULT_SUPABASE_URL = "https://ktqztbpmfxbbczojfdlr.supabase.co"; 
         const DEFAULT_SUPABASE_KEY = "sb_publishable_C0bpzdEEotuWH3UpLyB5Fw_dCb3IrJf";
+        const STORAGE_BUCKET = "subha-storage"; // Make sure this bucket is created in Supabase Storage as Public
 
         let sbClient = null;
-        const localChannel = new BroadcastChannel("subha_medical_channel");
 
         const DEFAULT_STORE_CONFIG = {
             id: "main_config",
@@ -819,7 +824,7 @@
             tickerText: "⚕️ சுபா மெடிக்கல் (Subha Medical) - Perumanallur–Kunnathur Road, Vallipuram, Tiruppur | BP, Sugar and Weight Check Available! / ரத்த அழுத்தம், சர்க்கரை மற்றும் உடல் எடை பரிசோதனை வசதி உள்ளது! 🐾 Veterinary Medicines Available! / கால்நடை மருந்துகள் கிடைக்கும்!",
             logoUrl: "",
             promoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-            promoCaption: "🎥 Subha Medical -- 100% Genuine Medicines, Veterinary Care & Fast Delivery",
+            promoCaption: "🎥 Subha Medical — 100% Genuine Medicines, Veterinary Care & Fast Delivery",
             promoShow: true,
             adminUser: "admin",
             adminPass: "1234",
@@ -840,19 +845,23 @@
             { name: "First Aid", label: "முதலுதவி / First Aid", icon: "bx-band-aid" }
         ];
 
+        const DEFAULT_BRANDS = [
+            { id: "B1", name: "Micro Labs", logo: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200", active: true },
+            { id: "B2", name: "Glenmark", logo: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=200", active: true },
+            { id: "B3", name: "Himalaya Vet", logo: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=200", active: true },
+            { id: "B4", name: "Intas Pharma", logo: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=200", active: true },
+            { id: "B5", name: "Torrent Pharma", logo: "https://images.unsplash.com/photo-1550572017-edb959b55104?w=200", active: true }
+        ];
+
         const SEED_PRODUCTS = [
             { id: "P101", name: "Dolo 650mg Tablet (15 Tabs)", brand: "Micro Labs", category: "Fever & Pain", use: "காய்ச்சல் & உடல் வலி / Fever & Pain", price: 30, mrp: 35, batch: "DL6526", exp: "08/2028", hsn: "3004", gst: 12, rx: false, inStock: true, rating: 4.9, img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400", reviews: [{ author: "Ramesh K", stars: 5, text: "Genuine medicine, fast delivery in Vallipuram." }] },
             { id: "P102", name: "Telma 40mg Strip (15 Tabs)", brand: "Glenmark", category: "Diabetes & BP", use: "ரத்த அழுத்தம் / Blood Pressure", price: 195, mrp: 230, batch: "TM4012", exp: "11/2028", hsn: "3004", gst: 12, rx: true, inStock: true, rating: 4.8, img: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400", reviews: [] },
             { id: "P103", name: "Himalaya HimCal Veterinary Calcium (1L)", brand: "Himalaya Vet", category: "Veterinary", use: "கறவை மாடுகளுக்கான கால்சியம் / Cattle Calcium", price: 215, mrp: 250, batch: "HC904", exp: "06/2028", hsn: "2309", gst: 12, rx: false, inStock: true, rating: 4.9, img: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400", reviews: [] },
-            { id: "P104", name: "Albendazole Vet Bolus 3000mg", brand: "Intas Pharma", category: "Veterinary", use: "கால்நடை குடற்புழு நீக்கம் / Cattle Dewormer", price: 55, mrp: 70, batch: "AB302", exp: "09/2028", hsn: "3004", gst: 12, rx: false, inStock: true, rating: 4.7, img: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400", reviews: [] },
-            { id: "P105", name: "Glycomet GP 1mg/500mg", brand: "USV Pvt Ltd", category: "Diabetes & BP", use: "சர்க்கரை நோய் கட்டுப்பாடு / Diabetes Care", price: 118, mrp: 142, batch: "GP108", exp: "10/2028", hsn: "3004", gst: 12, rx: true, inStock: true, rating: 4.8, img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400", reviews: [] },
-            { id: "P106", name: "Shelcal 500mg Calcium + Vit D3", brand: "Torrent Pharma", category: "Vitamins & Care", use: "எலும்பு வலிமை / Bone Strength", price: 115, mrp: 138, batch: "SH509", exp: "07/2028", hsn: "3004", gst: 12, rx: false, inStock: true, rating: 4.9, img: "https://images.unsplash.com/photo-1550572017-edb959b55104?w=400", reviews: [] },
-            { id: "P107", name: "Digital Blood Glucose Test Strips (50s)", brand: "Accu-Chek", category: "Diabetes & BP", use: "சர்க்கரை பரிசோதனை ஸ்ட்ரிப்ஸ்", price: 890, mrp: 1050, batch: "AC501", exp: "05/2028", hsn: "3822", gst: 12, rx: false, inStock: true, rating: 4.9, img: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=400", reviews: [] },
-            { id: "P108", name: "Povidone Iodine Ointment & Cotton Kit", brand: "Subha First Aid", category: "First Aid", use: "காயம் மற்றும் முதலுதவி / Wound Care", price: 65, mrp: 85, batch: "FA204", exp: "12/2028", hsn: "3005", gst: 12, rx: false, inStock: true, rating: 4.7, img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400", reviews: [] }
+            { id: "P104", name: "Albendazole Vet Bolus 3000mg", brand: "Intas Pharma", category: "Veterinary", use: "கால்நடை குடற்புழு நீக்கம் / Cattle Dewormer", price: 55, mrp: 70, batch: "AB302", exp: "09/2028", hsn: "3004", gst: 12, rx: false, inStock: true, rating: 4.7, img: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400", reviews: [] }
         ];
 
-        // State Variables
         let products = JSON.parse(localStorage.getItem("subha_products")) || SEED_PRODUCTS;
+        let brands = JSON.parse(localStorage.getItem("subha_brands")) || DEFAULT_BRANDS;
         let orders = JSON.parse(localStorage.getItem("subha_orders")) || [];
         let medRequests = JSON.parse(localStorage.getItem("subha_requests")) || [];
         let users = JSON.parse(localStorage.getItem("subha_users")) || [];
@@ -877,237 +886,55 @@
             updateCartUI();
             updateUserHeader();
             renderCustomerOrders();
-
-            localChannel.onmessage = () => {
-                reloadFromLocalStorage();
-            };
         });
 
         function saveAllLocal() {
             localStorage.setItem("subha_store_cfg", JSON.stringify(storeConfig));
             localStorage.setItem("subha_products", JSON.stringify(products));
+            localStorage.setItem("subha_brands", JSON.stringify(brands));
             localStorage.setItem("subha_orders", JSON.stringify(orders));
             localStorage.setItem("subha_requests", JSON.stringify(medRequests));
             localStorage.setItem("subha_users", JSON.stringify(users));
             localStorage.setItem("subha_cart", JSON.stringify(cart));
             localStorage.setItem("subha_wishlist", JSON.stringify(wishlist));
             if (currentUser) localStorage.setItem("subha_current_user", JSON.stringify(currentUser));
-            localChannel.postMessage("SYNC");
-        }
-
-        function reloadFromLocalStorage() {
-            storeConfig = Object.assign({}, DEFAULT_STORE_CONFIG, JSON.parse(localStorage.getItem("subha_store_cfg") || "{}"));
-            products = JSON.parse(localStorage.getItem("subha_products")) || products;
-            orders = JSON.parse(localStorage.getItem("subha_orders")) || orders;
-            medRequests = JSON.parse(localStorage.getItem("subha_requests")) || medRequests;
-            applyStoreBrandingToDOM();
-            renderStoreProducts();
-            renderCustomerOrders();
-            if (document.getElementById("admin-screen").style.display === "block") {
-                renderAdminDashboard();
-            }
         }
 
         /**************************************************************
-         * 2. DYNAMIC BRANDING, LOGO & PROMO VIDEO RENDERER (CLOUD SYNCED)
+         * 2. SUPABASE STORAGE FILE UPLOAD HELPER
          **************************************************************/
-        function applyStoreBrandingToDOM() {
-            document.getElementById("page-title").innerText = `${storeConfig.storeName} | Online Pharmacy & Healthcare`;
-            document.getElementById("nav-store-title").innerText = storeConfig.storeName;
-            document.getElementById("nav-store-subtitle").innerText = storeConfig.storeTamil;
-            document.getElementById("hero-store-title").innerText = storeConfig.storeName;
-            document.getElementById("hero-store-address").innerHTML = `${storeConfig.storeAddress}<br>📞 +91 ${storeConfig.adminPhone} • Genuine Medicines & GST Invoice`;
-            document.getElementById("adm-header-title").innerText = `${storeConfig.storeName} -- ADMIN ERP`;
-            document.getElementById("top-marquee-ticker").innerText = `${storeConfig.tickerText} 📞 +91 ${storeConfig.adminPhone}`;
-
-            // Logo in Navbar & Hero
-            const navLogo = document.getElementById("nav-logo-box");
-            const heroLogo = document.getElementById("hero-logo-box");
-            if (storeConfig.logoUrl) {
-                navLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
-                heroLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
-            } else {
-                navLogo.innerHTML = `<i class='bx bx-plus-medical'></i>`;
-                heroLogo.innerHTML = `<i class='bx bx-plus-medical' style="font-size:28px; color:var(--brand);"></i>`;
-            }
-
-            // Promo Video / Banner
-            const promoBox = document.getElementById("store-promo-container");
-            const mediaBox = document.getElementById("store-promo-media-box");
-            document.getElementById("store-promo-caption").innerText = storeConfig.promoCaption || "";
-
-            if (storeConfig.promoShow && storeConfig.promoUrl) {
-                promoBox.style.display = "block";
-                const isVideo = storeConfig.promoUrl.startsWith("data:video") || /\.(mp4|webm|ogg)(\?.*)?$/i.test(storeConfig.promoUrl);
-                const currentMediaEl = mediaBox.firstElementChild;
-                const currentSrc = currentMediaEl ? currentMediaEl.getAttribute("src") : "";
-
-                if (currentSrc !== storeConfig.promoUrl) {
-                    if (isVideo) {
-                        mediaBox.innerHTML = `<video src="${storeConfig.promoUrl}" autoplay muted loop playsinline controls></video>`;
-                    } else {
-                        mediaBox.innerHTML = `<img src="${storeConfig.promoUrl}" alt="Pharmacy Promotion">`;
-                    }
-                }
-            } else {
-                promoBox.style.display = "none";
-            }
-            updateUserHeader();
-        }
-
-        function loadAdminSettingsInputs() {
-            document.getElementById("set-store-name").value = storeConfig.storeName || "";
-            document.getElementById("set-store-tamil").value = storeConfig.storeTamil || "";
-            document.getElementById("set-store-addr").value = storeConfig.storeAddress || "";
-            document.getElementById("set-admin-phone").value = storeConfig.adminPhone || "";
-            document.getElementById("set-ticker").value = storeConfig.tickerText || "";
-            document.getElementById("set-logo-url").value = storeConfig.logoUrl || "";
-            document.getElementById("set-promo-url").value = storeConfig.promoUrl || "";
-            document.getElementById("set-promo-caption").value = storeConfig.promoCaption || "";
-            document.getElementById("set-promo-show").checked = storeConfig.promoShow !== false;
-            document.getElementById("set-adm-user").value = storeConfig.adminUser || "";
-            document.getElementById("set-adm-pass").value = storeConfig.adminPass || "";
-
-            const logoPrev = document.getElementById("set-logo-preview");
-            if (storeConfig.logoUrl) {
-                logoPrev.src = storeConfig.logoUrl;
-                logoPrev.style.display = "block";
-            } else {
-                logoPrev.style.display = "none";
-            }
-        }
-
-        async function saveStoreBrandSettings() {
-            storeConfig.id = "main_config";
-            storeConfig.storeName = document.getElementById("set-store-name").value.trim() || "SUBHA MEDICAL";
-            storeConfig.storeTamil = document.getElementById("set-store-tamil").value.trim() || "சுபா மெடிக்கல்";
-            storeConfig.storeAddress = document.getElementById("set-store-addr").value.trim() || "";
-            storeConfig.adminPhone = document.getElementById("set-admin-phone").value.trim() || "9487165045";
-            storeConfig.tickerText = document.getElementById("set-ticker").value.trim() || "";
-            storeConfig.logoUrl = document.getElementById("set-logo-url").value.trim();
-            storeConfig.promoUrl = document.getElementById("set-promo-url").value.trim();
-            storeConfig.promoCaption = document.getElementById("set-promo-caption").value.trim();
-            storeConfig.promoShow = document.getElementById("set-promo-show").checked;
-
-            const newAdmUser = document.getElementById("set-adm-user").value.trim();
-            const newAdmPass = document.getElementById("set-adm-pass").value.trim();
-            if (newAdmUser) storeConfig.adminUser = newAdmUser;
-            if (newAdmPass) storeConfig.adminPass = newAdmPass;
-
-            saveAllLocal();
-            applyStoreBrandingToDOM();
-
-            if (sbClient) {
-                const payload = Object.assign({}, storeConfig, { updated_at: Date.now() });
-                const { error } = await sbClient.from("subha_settings").upsert([payload]);
-                if (error) {
-                    showToast("Saved locally (Run subha_settings SQL in Supabase for Cloud Sync)");
-                    return;
-                }
-            }
-            showToast("☁️ Store Branding, Logo & Promo Video Synced to All Devices!");
-        }
-
-        // Image Compression Helper
-        function compressImageFile(file, maxWidth, callback) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement("canvas");
-                    let w = img.width, h = img.height;
-                    if (w > maxWidth) {
-                        h = Math.round((h * maxWidth) / w);
-                        w = maxWidth;
-                    }
-                    canvas.width = w;
-                    canvas.height = h;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0, w, h);
-                    callback(canvas.toDataURL("image/jpeg", 0.82));
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function handleLogoFileUpload(input) {
-            if (!input.files || !input.files[0]) return;
-            compressImageFile(input.files[0], 320, (dataUrl) => {
-                document.getElementById("set-logo-url").value = dataUrl;
-                const prev = document.getElementById("set-logo-preview");
-                prev.src = dataUrl;
-                prev.style.display = "block";
-                showToast("Logo ready! Click Save & Sync Settings.");
+        async function uploadFileToSupabaseStorage(file, folder = "uploads") {
+            if (!sbClient) throw new Error("Supabase client not initialized");
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${folder}/${Date.now()}_${Math.random().toString(36.substring(2, 8))}.${fileExt}`;
+            
+            const { data, error } = await sbClient.storage.from(STORAGE_BUCKET).upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
             });
-        }
 
-        function handlePromoFileUpload(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            if (file.type.startsWith("image/")) {
-                compressImageFile(file, 700, (dataUrl) => {
-                    document.getElementById("set-promo-url").value = dataUrl;
-                    showToast("Promo Banner uploaded! Click Save & Sync Settings.");
-                });
-            } else {
-                if (file.size > 4 * 1024 * 1024) {
-                    showToast("Tip: For large videos (>4MB), paste a direct video URL for fastest cloud sync.");
-                }
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById("set-promo-url").value = e.target.result;
-                    showToast("Promo Video loaded! Click Save & Sync Settings.");
-                };
-                reader.readAsDataURL(file);
+            if (error) {
+                console.error("Storage upload error:", error);
+                throw error;
             }
-        }
 
-        function handleProductImageUpload(input) {
-            if (!input.files || !input.files[0]) return;
-            compressImageFile(input.files[0], 420, (dataUrl) => {
-                document.getElementById("p-img").value = dataUrl;
-                previewProductImageUrl(dataUrl);
-                showToast("Product photo compressed & attached!");
-            });
-        }
-
-        function previewProductImageUrl(url) {
-            const prev = document.getElementById("p-img-preview");
-            if (url && url.trim()) {
-                prev.src = url.trim();
-                prev.style.display = "block";
-            } else {
-                prev.style.display = "none";
-            }
-        }
-
-        function handleRxImageUpload(input) {
-            if (!input.files || !input.files[0]) return;
-            compressImageFile(input.files[0], 500, (dataUrl) => {
-                document.getElementById("req-rx-link").value = dataUrl;
-                const prev = document.getElementById("req-rx-preview");
-                prev.src = dataUrl;
-                prev.style.display = "block";
-                showToast("Prescription photo attached!");
-            });
+            const { data: publicUrlData } = sbClient.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+            return publicUrlData.publicUrl;
         }
 
         /**************************************************************
-         * 3. SUPABASE REALTIME CONNECTION (PRODUCTS, ORDERS, SETTINGS)
+         * 3. SUPABASE REALTIME CONNECTION & CENTRAL DB SYNC
          **************************************************************/
         function initSupabaseConnection() {
-            const url = localStorage.getItem("subha_sb_url") || DEFAULT_SUPABASE_URL;
-            const key = localStorage.getItem("subha_sb_key") || DEFAULT_SUPABASE_KEY;
+            const url = DEFAULT_SUPABASE_URL;
+            const key = DEFAULT_SUPABASE_KEY;
             const dot = document.getElementById("cloud-status-dot");
 
             if (url && key && window.supabase) {
                 try {
                     sbClient = window.supabase.createClient(url, key);
                     dot.classList.remove("offline");
-                    document.getElementById("cfg-sb-url").value = url;
-                    document.getElementById("cfg-sb-key").value = key;
-                    document.getElementById("live-sync-indicator").innerText = "☁️ Cloud Synced";
+                    document.getElementById("live-sync-indicator").innerText = "☁️ Supabase Synced";
                     syncAllData();
                     subscribeRealtimeChanges();
                 } catch (e) {
@@ -1121,7 +948,7 @@
         async function syncAllData() {
             if (!sbClient) return;
             try {
-                // 1. Fetch Cloud Store Settings (Logo, Promo Video, Name, Phone, Invoice Header)
+                // 1. Settings
                 const { data: sData } = await sbClient.from("subha_settings").select("*").eq("id", "main_config").maybeSingle();
                 if (sData) {
                     storeConfig = Object.assign({}, DEFAULT_STORE_CONFIG, sData);
@@ -1129,27 +956,29 @@
                     loadInvoiceConfigInputs();
                 }
 
-                // 2. Fetch Cloud Products
+                // 2. Brands
+                const { data: bData } = await sbClient.from("subha_brands").select("*");
+                if (bData && bData.length > 0) brands = bData;
+
+                // 3. Products
                 const { data: pData } = await sbClient.from("subha_products").select("*");
                 if (pData && pData.length > 0) products = pData;
 
-                // 3. Fetch Cloud Orders
+                // 4. Orders
                 const { data: oData } = await sbClient.from("subha_orders").select("*").order("created_timestamp", { ascending: false });
                 if (oData) orders = oData;
 
-                // 4. Fetch Cloud Medicine Requests
+                // 5. Requests
                 const { data: rData } = await sbClient.from("subha_requests").select("*").order("id", { ascending: false });
                 if (rData) medRequests = rData;
-
-                // 5. Fetch Cloud Customer Accounts
-                const { data: uData } = await sbClient.from("subha_users").select("*");
-                if (uData) users = uData;
 
                 saveAllLocal();
                 renderBrands();
                 renderStoreProducts();
                 renderCustomerOrders();
-                renderAdminDashboard();
+                if (document.getElementById("admin-screen").style.display === "block") {
+                    renderAdminDashboard();
+                }
             } catch (err) {
                 console.log("Cloud sync notice:", err.message);
             }
@@ -1159,25 +988,297 @@
             if (!sbClient) return;
             sbClient.channel("subha-realtime")
                 .on("postgres_changes", { event: "*", schema: "public", table: "subha_settings" }, () => syncAllData())
-                .on("postgres_changes", { event: "*", schema: "public", table: "subha_orders" }, () => syncAllData())
+                .on("postgres_changes", { event: "*", schema: "public", table: "subha_brands" }, () => syncAllData())
                 .on("postgres_changes", { event: "*", schema: "public", table: "subha_products" }, () => syncAllData())
+                .on("postgres_changes", { event: "*", schema: "public", table: "subha_orders" }, () => syncAllData())
                 .on("postgres_changes", { event: "*", schema: "public", table: "subha_requests" }, () => syncAllData())
                 .subscribe();
         }
 
-        function saveSupabaseCredentials() {
-            const url = document.getElementById("cfg-sb-url").value.trim();
-            const key = document.getElementById("cfg-sb-key").value.trim();
-            if (!url || !key) { showToast("Please enter both URL and Anon Key"); return; }
-            localStorage.setItem("subha_sb_url", url);
-            localStorage.setItem("subha_sb_key", key);
-            initSupabaseConnection();
-            showToast("Connected to Supabase Cloud!");
+        /**************************************************************
+         * 4. BRAND MANAGEMENT & CAROUSEL
+         **************************************************************/
+        function renderBrands() {
+            const activeBrands = brands.filter(b => b.active !== false);
+            const box = document.getElementById("brands-carousel");
+            box.innerHTML = `
+                <div class="brand-item ${activeBrand === 'ALL' ? 'active' : ''}" onclick="filterByBrand('ALL')">
+                    <div class="brand-circle">ALL</div>
+                    <div class="brand-label">All Brands</div>
+                </div>
+            ` + activeBrands.map(b => `
+                <div class="brand-item ${activeBrand === b.name ? 'active' : ''}" onclick="filterByBrand('${b.name}')">
+                    <div class="brand-circle">
+                        ${b.logo ? `<img src="${b.logo}" alt="${b.name}">` : `<span>${b.name.substring(0,6)}</span>`}
+                    </div>
+                    <div class="brand-label" title="${b.name}">${b.name}</div>
+                </div>
+            `).join("");
+
+            // Update Admin Brand Dropdown
+            const sel = document.getElementById("p-brand-select");
+            if (sel) {
+                sel.innerHTML = activeBrands.map(b => `<option value="${b.name}">${b.name}</option>`).join("");
+            }
         }
 
-        /**************************************************************
-         * 4. STOREFRONT RENDERING, VOICE SEARCH & SORTING
-         **************************************************************/
+        function filterByBrand(bName) {
+            activeBrand = bName;
+            renderBrands();
+            renderStoreProducts();
+        }
+
+        function handleBrandImageUpload(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            runHeartLoader("Uploading Brand Logo to Supabase Storage...", async () => {
+                try {
+                    const publicUrl = await uploadFileToSupabaseStorage(file, "brands");
+                    document.getElementById("b-logo-url").value = publicUrl;
+                    previewBrandLogoUrl(publicUrl);
+                    showToast("Brand logo uploaded successfully!");
+                } catch (err) {
+                    showToast("Upload failed: " + err.message);
+                }
+            });
+        }
+
+        function previewBrandLogoUrl(url) {
+            const prev = document.getElementById("b-logo-preview");
+            if (url && url.trim()) {
+                prev.src = url.trim();
+                prev.style.display = "block";
+            } else {
+                prev.style.display = "none";
+            }
+        }
+
+        function adminSaveBrand() {
+            const editId = document.getElementById("b-edit-id").value.trim();
+            const name = document.getElementById("b-name").value.trim();
+            const logo = document.getElementById("b-logo-url").value.trim();
+            const active = document.getElementById("b-active").checked;
+
+            if (!name) {
+                showToast("Enter Brand / Company Name");
+                return;
+            }
+
+            runHeartLoader("Saving brand to Supabase...", async () => {
+                let savedBrand;
+                if (editId) {
+                    const idx = brands.findIndex(b => b.id === editId);
+                    if (idx > -1) {
+                        brands[idx] = Object.assign({}, brands[idx], { name, logo, active });
+                        savedBrand = brands[idx];
+                    }
+                } else {
+                    savedBrand = {
+                        id: "B" + Date.now(),
+                        name,
+                        logo: logo || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200",
+                        active
+                    };
+                    brands.push(savedBrand);
+                }
+
+                saveAllLocal();
+                if (sbClient && savedBrand) {
+                    await sbClient.from("subha_brands").upsert([savedBrand]);
+                }
+                resetBrandForm();
+                renderBrands();
+                renderAdminBrandsList();
+                showToast("Brand saved successfully!");
+            });
+        }
+
+        function adminEditBrand(id) {
+            const b = brands.find(x => x.id === id);
+            if (!b) return;
+            document.getElementById("brand-form-title").innerText = "Editing Brand: " + b.name;
+            document.getElementById("b-edit-id").value = b.id;
+            document.getElementById("b-name").value = b.name;
+            document.getElementById("b-logo-url").value = b.logo || "";
+            document.getElementById("b-active").checked = b.active !== false;
+            previewBrandLogoUrl(b.logo || "");
+        }
+
+        async function adminDeleteBrand(id) {
+            if (!confirm("Are you sure you want to delete this brand?")) return;
+            brands = brands.filter(b => b.id !== id);
+            saveAllLocal();
+            if (sbClient) {
+                await sbClient.from("subha_brands").delete().eq("id", id);
+            }
+            renderBrands();
+            renderAdminBrandsList();
+            showToast("Brand removed");
+        }
+
+        function resetBrandForm() {
+            document.getElementById("brand-form-title").innerText = "Add / Edit Pharmaceutical Company Brand";
+            document.getElementById("b-edit-id").value = "";
+            document.getElementById("b-name").value = "";
+            document.getElementById("b-logo-url").value = "";
+            document.getElementById("b-active").checked = true;
+            document.getElementById("b-logo-preview").style.display = "none";
+        }
+
+        function renderAdminBrandsList() {
+            const q = (document.getElementById("brand-search-input").value || "").toLowerCase();
+            const list = document.getElementById("admin-brands-list");
+            const filtered = brands.filter(b => b.name.toLowerCase().includes(q));
+
+            list.innerHTML = filtered.map(b => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee; font-size:12px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <img src="${b.logo || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200'}" style="width:32px; height:32px; object-fit:contain; border-radius:4px; border:1px solid #eee;">
+                        <div>
+                            <strong>${b.name}</strong>
+                            <div style="font-size:10px; color:${b.active !== false ? 'green' : 'red'};">${b.active !== false ? 'Active' : 'Disabled'}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-secondary" style="width:auto; padding:4px 8px; margin:0;" onclick="adminEditBrand('${b.id}')">Edit</button>
+                        <button class="btn-danger" style="width:auto; padding:4px 8px; margin:0;" onclick="adminDeleteBrand('${b.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        /********************************-----------------
+         * 5. PRODUCT MANAGEMENT & SUPABASE STORAGE UPLOADS
+         ********************************----------------*/
+        function handleProductImageUpload(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            runHeartLoader("Uploading Product Image to Supabase Storage...", async () => {
+                try {
+                    const publicUrl = await uploadFileToSupabaseStorage(file, "products");
+                    document.getElementById("p-img").value = publicUrl;
+                    previewProductImageUrl(publicUrl);
+                    showToast("Product image uploaded successfully!");
+                } catch (err) {
+                    showToast("Upload failed: " + err.message);
+                }
+            });
+        }
+
+        function previewProductImageUrl(url) {
+            const prev = document.getElementById("p-img-preview");
+            if (url && url.trim()) {
+                prev.src = url.trim();
+                prev.style.display = "block";
+            } else {
+                prev.style.display = "none";
+            }
+        }
+
+        async function adminSaveProduct() {
+            const editId = document.getElementById("p-edit-id").value.trim();
+            const name = document.getElementById("p-name").value.trim();
+            const brand = document.getElementById("p-brand-select").value || "Subha Pharma";
+            const use = document.getElementById("p-use").value.trim() || "Healthcare Support";
+            const category = document.getElementById("p-cat").value;
+            const price = Number(document.getElementById("p-price").value);
+            const mrp = Number(document.getElementById("p-mrp").value) || price;
+            const batch = document.getElementById("p-batch").value.trim() || "SM26";
+            const exp = document.getElementById("p-exp").value.trim() || "12/2028";
+            const gst = Number(document.getElementById("p-gst").value);
+            const img = document.getElementById("p-img").value.trim() || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400";
+            const rx = document.getElementById("p-rx").checked;
+            const inStock = document.getElementById("p-stock").checked;
+
+            if (!name || !price) {
+                showToast("Enter Medicine Name & Selling Price");
+                return;
+            }
+
+            runHeartLoader("Saving product to Supabase...", async () => {
+                let savedProd;
+                if (editId) {
+                    const idx = products.findIndex(x => x.id === editId);
+                    if (idx > -1) {
+                        products[idx] = Object.assign({}, products[idx], {
+                            name, brand, use, category, price, mrp, batch, exp, gst, img, rx, inStock
+                        });
+                        savedProd = products[idx];
+                    }
+                } else {
+                    savedProd = {
+                        id: "P" + Date.now(),
+                        name, brand, use, category, price, mrp,
+                        batch, exp, hsn: "3004", gst,
+                        img, rx, inStock,
+                        rating: 4.9,
+                        reviews: []
+                    };
+                    products.unshift(savedProd);
+                }
+
+                saveAllLocal();
+                if (sbClient && savedProd) {
+                    await sbClient.from("subha_products").upsert([savedProd]);
+                }
+                resetProductForm();
+                renderStoreProducts();
+                renderAdminDashboard();
+                showToast(editId ? "Medicine updated!" : "New medicine added to Supabase!");
+            });
+        }
+
+        function adminEditProduct(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById("prod-form-title").innerText = "Editing: " + p.name;
+            document.getElementById("p-edit-id").value = p.id;
+            document.getElementById("p-name").value = p.name;
+            document.getElementById("p-brand-select").value = p.brand;
+            document.getElementById("p-use").value = p.use;
+            document.getElementById("p-cat").value = p.category;
+            document.getElementById("p-price").value = p.price;
+            document.getElementById("p-mrp").value = p.mrp;
+            document.getElementById("p-batch").value = p.batch || "SM26";
+            document.getElementById("p-exp").value = p.exp || "12/2028";
+            document.getElementById("p-gst").value = p.gst ?? 12;
+            document.getElementById("p-img").value = p.img || "";
+            document.getElementById("p-rx").checked = !!p.rx;
+            document.getElementById("p-stock").checked = p.inStock !== false;
+            previewProductImageUrl(p.img || "");
+            document.getElementById("adm-panel-products").scrollIntoView({ behavior: "smooth" });
+        }
+
+        async function adminDeleteProduct(id) {
+            if (!confirm("Delete this product?")) return;
+            products = products.filter(p => p.id !== id);
+            saveAllLocal();
+            if (sbClient) {
+                await sbClient.from("subha_products").delete().eq("id", id);
+            }
+            renderStoreProducts();
+            renderAdminDashboard();
+            showToast("Product removed");
+        }
+
+        function resetProductForm() {
+            document.getElementById("prod-form-title").innerText = "Add / Edit Medicine";
+            document.getElementById("p-edit-id").value = "";
+            document.getElementById("p-name").value = "";
+            document.getElementById("p-use").value = "";
+            document.getElementById("p-price").value = "";
+            document.getElementById("p-mrp").value = "";
+            document.getElementById("p-batch").value = "";
+            document.getElementById("p-exp").value = "";
+            document.getElementById("p-img").value = "";
+            document.getElementById("p-rx").checked = false;
+            document.getElementById("p-stock").checked = true;
+            document.getElementById("p-img-preview").style.display = "none";
+        }
+
+        /********************************-----------------
+         * 6. STOREFRONT RENDERING, SEARCH & SHOPPING CART
+         ********************************----------------*/
         function startVoiceSearch() {
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRec) {
@@ -1211,23 +1312,6 @@
             renderStoreProducts();
         }
 
-        function renderBrands() {
-            const uniqueBrands = ["ALL", ...new Set(products.map(p => p.brand))];
-            const box = document.getElementById("brands-carousel");
-            box.innerHTML = uniqueBrands.map(b => `
-                <div class="brand-item ${activeBrand === b ? 'active' : ''}" onclick="filterByBrand('${b}')">
-                    <div class="brand-circle">${b === 'ALL' ? 'ALL<br>BRANDS' : b.substring(0, 10)}</div>
-                    <div class="brand-label">${b}</div>
-                </div>
-            `).join("");
-        }
-
-        function filterByBrand(b) {
-            activeBrand = b;
-            renderBrands();
-            renderStoreProducts();
-        }
-
         function getAverageRating(p) {
             if (!p.reviews || p.reviews.length === 0) return p.rating || 4.8;
             const sum = p.reviews.reduce((acc, r) => acc + Number(r.stars || 5), 0);
@@ -1257,7 +1341,7 @@
             const wishedProducts = products.filter(p => wishlist.includes(p.id));
             document.getElementById("wishlist-product-grid").innerHTML = wishedProducts.length
                 ? wishedProducts.map(p => buildProductCardHTML(p)).join("")
-                : `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#888;">No items in your wishlist yet. Tap the heart icon on any medicine!</div>`;
+                : `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#888;">No items in your wishlist yet.</div>`;
 
             const wishBadge = document.getElementById("wish-badge");
             wishBadge.innerText = wishlist.length;
@@ -1317,9 +1401,6 @@
             renderStoreProducts();
         }
 
-        /**************************************************************
-         * 5. PRODUCT DETAIL & INTERACTIVE 1-TO-5 STAR RATING
-         **************************************************************/
         function openProductDetail(id) {
             const p = products.find(x => x.id === id);
             if (!p) return;
@@ -1329,19 +1410,19 @@
                 <div style="border-bottom:1px solid #eee; padding:6px 0; font-size:12px;">
                     <div style="display:flex; justify-content:space-between;">
                         <strong>${r.author}</strong>
-                        <span style="color:#f5a623; font-weight:800;">${"★".repeat(r.stars || 5)}${"☆".repeat(5 - (r.stars || 5))} (${r.stars || 5}/5)</span>
+                        <span style="color:#f5a623; font-weight:800;">${"★".repeat(r.stars || 5)}${"☆".repeat(5 - (r.stars || 5))}</span>
                     </div>
                     <div style="color:#555; margin-top:2px;">${r.text}</div>
                 </div>
-            `).join("") || `<div style="font-size:12px; color:#888;">No customer reviews yet. Be the first to rate this medicine!</div>`;
+            `).join("") || `<div style="font-size:12px; color:#888;">No reviews yet.</div>`;
 
             document.getElementById("pd-content").innerHTML = `
                 <img src="${p.img}" style="width:100%; height:150px; object-fit:contain; margin-bottom:10px;">
                 <span style="font-size:11px; color:var(--brand); font-weight:800;">${p.brand} • ${p.category}</span>
                 <h3 style="margin:4px 0 8px;">${p.name}</h3>
                 <div style="background:#eef7f6; padding:10px; border-radius:8px; font-size:12px; color:var(--brand-dark); margin-bottom:10px;">
-                    <strong>பயன்பாடு / Primary Use:</strong> ${p.use}<br>
-                    <span style="font-size:11px; color:#555;">Batch: ${p.batch || 'SM26'} | Exp: ${p.exp || '12/2028'} | GST: ${p.gst ?? 12}%</span>
+                    <strong>Primary Use:</strong> ${p.use}<br>
+                    <span style="font-size:11px; color:#555;">Batch: ${p.batch || 'SM26'} | Exp: ${p.exp || '12/2028'}</span>
                 </div>
                 <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px;">
                     <span style="font-size:22px; font-weight:900; color:var(--brand-navy);">₹${p.price}</span>
@@ -1349,14 +1430,13 @@
                 </div>
                 <button class="btn-primary" onclick="changeQty('${p.id}', 1); closeModal('pd-modal');">+ Add to Cart</button>
                 <hr style="border:none; border-top:1px solid #eee; margin:14px 0;">
-                <h4 style="margin:0 0 6px; font-size:13px;">Rate & Review this Medicine</h4>
+                <h4 style="margin:0 0 6px; font-size:13px;">Rate & Review</h4>
                 <div class="star-input-container" id="star-selector-box">
                     ${[1,2,3,4,5].map(num => `<i class='bx bxs-star selected' data-val="${num}" onclick="selectReviewStar(${num})"></i>`).join("")}
                 </div>
-                <input type="text" id="rev-text-${p.id}" class="auth-input" placeholder="Share your experience with this product...">
-                <button class="btn-secondary" onclick="addProductReview('${p.id}')">Submit Star Review</button>
-                <h4 style="margin:12px 0 6px; font-size:13px;">Customer Reviews (${(p.reviews || []).length})</h4>
-                <div style="max-height:130px; overflow-y:auto;">${reviewsHTML}</div>
+                <input type="text" id="rev-text-${p.id}" class="auth-input" placeholder="Write your review...">
+                <button class="btn-secondary" onclick="addProductReview('${p.id}')">Submit Review</button>
+                <div style="max-height:120px; overflow-y:auto; margin-top:10px;">${reviewsHTML}</div>
             `;
             document.getElementById("pd-modal").style.display = "flex";
         }
@@ -1366,53 +1446,27 @@
             const stars = document.querySelectorAll("#star-selector-box i");
             stars.forEach(st => {
                 const n = Number(st.getAttribute("data-val"));
-                if (n <= val) {
-                    st.className = "bx bxs-star selected";
-                } else {
-                    st.className = "bx bx-star";
-                }
+                st.className = n <= val ? "bx bxs-star selected" : "bx bx-star";
             });
         }
 
         async function addProductReview(id) {
             const p = products.find(x => x.id === id);
             const txt = document.getElementById(`rev-text-${id}`).value.trim();
-            if (!txt) {
-                showToast("Please write a short comment for your review");
-                return;
-            }
+            if (!txt) return;
             if (!p.reviews) p.reviews = [];
             p.reviews.unshift({
-                author: currentUser ? currentUser.name : "Verified Customer",
+                author: currentUser ? currentUser.name : "Customer",
                 stars: selectedReviewStars,
                 text: txt
             });
-            p.rating = Number(getAverageRating(p));
             saveAllLocal();
             if (sbClient) {
                 await sbClient.from("subha_products").upsert([p]);
             }
             renderStoreProducts();
             openProductDetail(id);
-            showToast(`Thank you for your ${selectedReviewStars}-Star review!`);
-        }
-
-        /**************************************************************
-         * 6. CART, COUPONS, CHECKOUT & HEART ANIMATION LOADER
-         **************************************************************/
-        function applyCartCoupon() {
-            const code = document.getElementById("coupon-input").value.trim().toUpperCase();
-            if (code === "SUBHA10") {
-                appliedCouponPct = 10;
-                showToast("🎉 Coupon SUBHA10 applied (Extra 10% OFF)!");
-            } else if (code === "FIRST5") {
-                appliedCouponPct = 5;
-                showToast("🎉 Coupon FIRST5 applied (Extra 5% OFF)!");
-            } else {
-                appliedCouponPct = 0;
-                showToast("Invalid Coupon. Try SUBHA10");
-            }
-            updateCartUI();
+            showToast("Review posted!");
         }
 
         function changeQty(id, delta) {
@@ -1455,7 +1509,7 @@
             const couponSave = Math.round(subTotal * (appliedCouponPct / 100));
             const netTotal = Math.max(0, subTotal - couponSave);
 
-            container.innerHTML = totalItems > 0 ? html : `<div class="data-card" style="text-align:center; color:#888;">Your medicine cart is empty.</div>`;
+            container.innerHTML = totalItems > 0 ? html : `<div class="data-card" style="text-align:center; color:#888;">Your cart is empty.</div>`;
             document.getElementById("cart-summary-card").style.display = totalItems > 0 ? "block" : "none";
             document.getElementById("sum-mrp").innerText = `₹${mrpTotal}`;
             document.getElementById("sum-disc").innerText = `-₹${mrpTotal - subTotal}`;
@@ -1469,11 +1523,23 @@
             const fBar = document.getElementById("floating-checkout-bar");
             if (totalItems > 0) {
                 fBar.style.display = "flex";
-                document.getElementById("fc-items").innerText = `${totalItems} Item(s) in Cart`;
+                document.getElementById("fc-items").innerText = `${totalItems} Items`;
                 document.getElementById("fc-total").innerText = `₹${netTotal}`;
             } else {
                 fBar.style.display = "none";
             }
+        }
+
+        function applyCartCoupon() {
+            const code = document.getElementById("coupon-input").value.trim().toUpperCase();
+            if (code === "SUBHA10") {
+                appliedCouponPct = 10;
+                showToast("Coupon applied: 10% OFF!");
+            } else {
+                appliedCouponPct = 0;
+                showToast("Invalid Coupon");
+            }
+            updateCartUI();
         }
 
         function openCheckoutModal() {
@@ -1495,7 +1561,7 @@
             setTimeout(() => {
                 loader.style.display = "none";
                 if (callback) callback();
-            }, 900);
+            }, 800);
         }
 
         async function placeFinalOrder() {
@@ -1505,7 +1571,7 @@
             const payment = document.getElementById("chk-payment").value;
 
             if (!name || !phone || !address) {
-                showToast("Please fill Name, Mobile Number and Address");
+                showToast("Please fill name, phone and address");
                 return;
             }
 
@@ -1515,22 +1581,14 @@
                 const p = products.find(x => x.id === id);
                 if (p) {
                     orderItems.push({
-                        id: p.id,
-                        name: p.name,
-                        qty: cart[id],
-                        price: p.price,
-                        mrp: p.mrp || p.price,
-                        batch: p.batch || "SM26",
-                        exp: p.exp || "12/2028",
-                        hsn: p.hsn || "3004",
-                        gst: p.gst ?? 12
+                        id: p.id, name: p.name, qty: cart[id], price: p.price, mrp: p.mrp,
+                        batch: p.batch || "SM26", exp: p.exp || "12/2028", hsn: "3004", gst: p.gst ?? 12
                     });
                     subTotal += p.price * cart[id];
                 }
             });
 
             const netTotal = Math.max(0, subTotal - Math.round(subTotal * (appliedCouponPct / 100)));
-
             const newOrder = {
                 id: "SM" + Math.floor(100000 + Math.random() * 900000),
                 customer_name: name,
@@ -1545,7 +1603,7 @@
             };
 
             closeModal("checkout-modal");
-            runHeartLoader(`Sending Order to ${storeConfig.storeName}...`, async () => {
+            runHeartLoader("Saving Order to Supabase...", async () => {
                 orders.unshift(newOrder);
                 cart = {};
                 appliedCouponPct = 0;
@@ -1556,13 +1614,13 @@
                 updateCartUI();
                 renderStoreProducts();
                 switchBottomNav("orders");
-                showToast(`Order #${newOrder.id} Confirmed!`);
+                showToast(`Order #${newOrder.id} Placed Successfully!`);
             });
         }
 
-        /**************************************************************
-         * 7. MULTI-SYSTEM CUSTOMER LOGIN & 5-STEP ORDER TRACKING
-         **************************************************************/
+        /********************************-----------------
+         * 7. CUSTOMER AUTH & 5-STEP ORDER TRACKING
+         ********************************----------------*/
         function openAccountModal() {
             document.getElementById("logged-out-box").style.display = currentUser ? "none" : "block";
             document.getElementById("logged-in-box").style.display = currentUser ? "block" : "none";
@@ -1581,26 +1639,19 @@
             const address = document.getElementById("login-addr").value.trim();
 
             if (phone.length < 10 || !pin) {
-                showToast("Enter valid 10-digit Mobile & 4-digit PIN");
+                showToast("Enter valid 10-digit mobile & 4-digit PIN");
                 return;
             }
 
             let existing = users.find(u => u.phone === phone);
             if (existing) {
                 if (existing.pin !== pin) {
-                    showToast("Incorrect PIN for this mobile number!");
+                    showToast("Incorrect PIN!");
                     return;
                 }
-                if (name) existing.name = name;
-                if (address) existing.address = address;
                 currentUser = existing;
             } else {
-                currentUser = {
-                    phone,
-                    pin,
-                    name: name || "Customer",
-                    address: address || "Tiruppur"
-                };
+                currentUser = { phone, pin, name: name || "Customer", address: address || "Tiruppur" };
                 users.push(currentUser);
             }
 
@@ -1626,7 +1677,7 @@
         function updateUserHeader() {
             document.getElementById("nav-user-label").innerText = currentUser ? currentUser.name.split(" ")[0] : "Login";
             document.getElementById("welcome-text").innerText = currentUser
-                ? `👋 வணக்கம் ${currentUser.name} (${currentUser.phone})`
+                ? `👋 வணக்கம் ${currentUser.name}`
                 : `👋 நல்வரவு! Welcome to ${storeConfig.storeName}`;
         }
 
@@ -1637,16 +1688,16 @@
                 : orders;
 
             if (visibleOrders.length === 0) {
-                box.innerHTML = `<div class="data-card" style="text-align:center; color:#888;">No orders found. Place your first order or sign in with your mobile number.</div>`;
+                box.innerHTML = `<div class="data-card" style="text-align:center; color:#888;">No orders found.</div>`;
                 return;
             }
 
-            const steps = ["Placed", "Confirmed", "Packed", "Out for Delivery", "Delivered"];
+            const steps = ["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered"];
 
             box.innerHTML = visibleOrders.map(o => {
                 const curIdx = steps.indexOf(o.status);
                 const progressHTML = o.status === "Cancelled"
-                    ? `<div style="color:var(--brand-red); font-weight:800; font-size:12px; padding:6px 0;">❌ Order Cancelled</div>`
+                    ? `<div style="color:red; font-weight:800; font-size:12px;">❌ Cancelled</div>`
                     : `<div class="subha-track-steps">
                         ${steps.map((s, idx) => `
                             <div class="subha-track-step ${idx < curIdx ? 'done' : (idx === curIdx ? 'current' : '')}">
@@ -1661,7 +1712,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:8px;">
                             <div>
                                 <strong style="color:var(--brand-navy);">Order #${o.id}</strong>
-                                <div style="font-size:10px; color:#888;">${o.created_at} • ${o.payment_mode || 'COD'}</div>
+                                <div style="font-size:10px; color:#888;">${o.created_at}</div>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
                                 <button class="nav-pill-btn" onclick="openGstInvoiceModal('${o.id}')"><i class='bx bx-receipt'></i> Bill</button>
@@ -1683,60 +1734,9 @@
             }).join("");
         }
 
-        /**************************************************************
-         * 8. REQUEST MEDICINE, DIRECT CALL & WHATSAPP ORDER
-         **************************************************************/
-        function openReqModal() {
-            if (currentUser) {
-                document.getElementById("req-cust-name").value = currentUser.name;
-                document.getElementById("req-cust-phone").value = currentUser.phone;
-            }
-            document.getElementById("req-rx-preview").style.display = "none";
-            document.getElementById("req-rx-link").value = "";
-            document.getElementById("req-modal").style.display = "flex";
-        }
-
-        async function submitMedicineRequest() {
-            const name = document.getElementById("req-cust-name").value.trim();
-            const phone = document.getElementById("req-cust-phone").value.trim();
-            const details = document.getElementById("req-med-details").value.trim();
-            const rxLink = document.getElementById("req-rx-link").value.trim();
-
-            if (!name || !phone || !details) {
-                showToast("Please fill Name, Mobile and Medicine details");
-                return;
-            }
-
-            const reqObj = {
-                id: "REQ" + Date.now(),
-                name, phone, details, rxLink,
-                status: "Pending Pharmacist Call",
-                time: new Date().toLocaleString()
-            };
-
-            medRequests.unshift(reqObj);
-            saveAllLocal();
-            if (sbClient) {
-                await sbClient.from("subha_requests").upsert([reqObj]);
-            }
-            closeModal("req-modal");
-            showToast("Request submitted! Our pharmacist will contact you.");
-        }
-
-        function orderViaWhatsApp() {
-            const cleanPhone = (storeConfig.adminPhone || "9487165045").replace(/\D/g, "");
-            const target = cleanPhone.length === 10 ? "91" + cleanPhone : cleanPhone;
-            const msg = encodeURIComponent(`வணக்கம் ${storeConfig.storeName}, எனக்கு மருந்துகள் ஆர்டர் செய்ய வேண்டும்.`);
-            window.open(`https://wa.me/${target}?text=${msg}`, "_blank");
-        }
-
-        function callStoreDirect() {
-            window.location.href = `tel:+91${(storeConfig.adminPhone || "9487165045").replace(/\D/g, "")}`;
-        }
-
-        /**************************************************************
-         * 9. ADMIN PANEL (ORDERS, POS BILLING, INVENTORY, SETTINGS)
-         **************************************************************/
+        /********************************-----------------
+         * 8. ADMIN DASHBOARD & SECURE ACTIONS
+         ********************************----------------*/
         function openAdminAuth() {
             document.getElementById("adm-user").value = "";
             document.getElementById("adm-pass").value = "";
@@ -1750,6 +1750,8 @@
                 closeModal("admin-auth-modal");
                 document.getElementById("admin-screen").style.display = "block";
                 loadAdminSettingsInputs();
+                renderBrands();
+                renderAdminBrandsList();
                 renderPosMedicineDropdown();
                 renderAdminDashboard();
             } else {
@@ -1762,82 +1764,14 @@
         }
 
         function switchAdminTab(tab) {
-            ["orders", "pos", "products", "settings", "requests", "cloud"].forEach(t => {
+            ["orders", "pos", "products", "brands", "settings", "requests"].forEach(t => {
                 document.getElementById(`adm-tab-${t}-btn`).classList.toggle("active", t === tab);
                 document.getElementById(`adm-panel-${t}`).classList.toggle("active", t === tab);
             });
+            if (tab === "brands") renderAdminBrandsList();
             if (tab === "settings") loadAdminSettingsInputs();
             if (tab === "pos") renderPosMedicineDropdown();
             renderAdminDashboard();
-        }
-
-        // WALK-IN POS COUNTER BILLING
-        function renderPosMedicineDropdown() {
-            const sel = document.getElementById("pos-med-select");
-            sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} -- ₹${p.price} (Batch: ${p.batch || 'SM26'})</option>`).join("");
-        }
-
-        function addPosItem() {
-            const id = document.getElementById("pos-med-select").value;
-            const qty = Math.max(1, Number(document.getElementById("pos-med-qty").value || 1));
-            const p = products.find(x => x.id === id);
-            if (!p) return;
-
-            const existing = posItems.find(i => i.id === p.id);
-            if (existing) existing.qty += qty;
-            else posItems.push({
-                id: p.id, name: p.name, qty, price: p.price, mrp: p.mrp,
-                batch: p.batch || "SM26", exp: p.exp || "12/2028", hsn: p.hsn || "3004", gst: p.gst ?? 12
-            });
-            renderPosItems();
-        }
-
-        function renderPosItems() {
-            const box = document.getElementById("pos-items-list");
-            let total = 0;
-            box.innerHTML = posItems.map((item, idx) => {
-                total += item.price * item.qty;
-                return `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; background:#f8fafc; border-radius:6px; margin-bottom:4px; font-size:12px;">
-                        <span><strong>${item.name}</strong> × ${item.qty} = ₹${item.price * item.qty}</span>
-                        <button class="btn-danger" style="width:auto; padding:3px 8px; margin:0;" onclick="posItems.splice(${idx},1); renderPosItems();">×</button>
-                    </div>
-                `;
-            }).join("");
-            document.getElementById("pos-total-lbl").innerText = `₹${total}`;
-        }
-
-        async function completePosBill() {
-            if (posItems.length === 0) {
-                showToast("Add at least 1 medicine to generate POS Bill");
-                return;
-            }
-            const name = document.getElementById("pos-cust-name").value.trim() || "Walk-In Customer";
-            const phone = document.getElementById("pos-cust-phone").value.trim() || storeConfig.adminPhone;
-            const total = posItems.reduce((acc, i) => acc + (i.price * i.qty), 0);
-
-            const posOrder = {
-                id: "POS" + Math.floor(100000 + Math.random() * 900000),
-                customer_name: name,
-                customer_phone: phone,
-                address: "Counter Sale -- " + storeConfig.storeName,
-                payment_mode: "Counter Cash / UPI",
-                items: [...posItems],
-                total: total,
-                status: "Delivered",
-                created_at: new Date().toLocaleString(),
-                created_timestamp: Date.now()
-            };
-
-            orders.unshift(posOrder);
-            posItems = [];
-            renderPosItems();
-            saveAllLocal();
-            if (sbClient) {
-                await sbClient.from("subha_orders").upsert([posOrder]);
-            }
-            renderAdminDashboard();
-            openGstInvoiceModal(posOrder.id);
         }
 
         function renderAdminDashboard() {
@@ -1845,31 +1779,27 @@
             document.getElementById("stat-orders").innerText = orders.length;
             document.getElementById("stat-rev").innerText = `₹${totalRev}`;
             document.getElementById("stat-prods").innerText = products.length;
-            document.getElementById("stat-reqs").innerText = medRequests.length;
+            document.getElementById("stat-brands").innerText = brands.length;
 
             const ordBox = document.getElementById("admin-orders-container");
             ordBox.innerHTML = orders.length ? orders.map(o => `
                 <div class="data-card">
                     <div style="display:flex; justify-content:space-between; font-weight:800; align-items:center; flex-wrap:wrap; gap:6px;">
-                        <span>#${o.id} -- ${o.customer_name} (${o.customer_phone})</span>
+                        <span>#${o.id} — ${o.customer_name} (${o.customer_phone})</span>
                         <span style="color:var(--brand); font-size:15px;">₹${o.total}</span>
                     </div>
-                    <div style="font-size:11px; color:#555; margin:4px 0;">📍 ${o.address} | 🕒 ${o.created_at} | 💳 ${o.payment_mode || 'COD'}</div>
+                    <div style="font-size:11px; color:#555; margin:4px 0;">📍 ${o.address} | 🕒 ${o.created_at}</div>
                     <div style="font-size:12px; background:#f8fafc; padding:8px; border-radius:6px; margin:6px 0;">
-                        ${(o.items || []).map(i => `${i.name} × ${i.qty} (₹${i.price * i.qty})`).join(", ")}
+                        ${(o.items || []).map(i => `${i.name} × ${i.qty}`).join(", ")}
                     </div>
                     <div style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;">
                         <select id="status-sel-${o.id}" class="auth-input" style="margin:0; flex:1; min-width:140px;">
-                            ${["Placed", "Confirmed", "Packed", "Out for Delivery", "Delivered", "Cancelled"].map(st =>
+                            ${["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"].map(st =>
                                 `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`
                             ).join("")}
                         </select>
-                        <button class="fk-offer-btn" style="background:var(--brand); color:#fff; padding:9px 12px;" onclick="adminUpdateOrderStatus('${o.id}')">
-                            <i class='bx bx-check'></i> Update
-                        </button>
-                        <button class="fk-offer-btn" style="background:var(--brand-navy); color:#fff; padding:9px 12px;" onclick="openGstInvoiceModal('${o.id}')">
-                            <i class='bx bx-printer'></i> Print GST Bill
-                        </button>
+                        <button class="fk-offer-btn" style="background:var(--brand); color:#fff; padding:9px 12px;" onclick="adminUpdateOrderStatus('${o.id}')">Update</button>
+                        <button class="fk-offer-btn" style="background:var(--brand-navy); color:#fff; padding:9px 12px;" onclick="openGstInvoiceModal('${o.id}')">Print Bill</button>
                     </div>
                 </div>
             `).join("") : `<div class="data-card">No orders yet.</div>`;
@@ -1880,7 +1810,7 @@
                     <img src="${p.img}" style="width:48px; height:48px; object-fit:contain; border-radius:6px; border:1px solid #eee; flex-shrink:0;">
                     <div style="flex:1; min-width:0;">
                         <strong style="font-size:13px;">${p.name}</strong>
-                        <div style="font-size:11px; color:#666;">${p.brand} • ₹${p.price} (MRP ₹${p.mrp}) • Batch: ${p.batch || 'SM26'} • ${p.inStock !== false ? '<span style="color:#087f5b;">In Stock</span>' : '<span style="color:red;">Out of Stock</span>'}</div>
+                        <div style="font-size:11px; color:#666;">${p.brand} • ₹${p.price} (MRP ₹${p.mrp})</div>
                     </div>
                     <div style="display:flex; gap:6px;">
                         <button class="btn-secondary" style="width:auto; padding:6px 10px; margin:0;" onclick="adminEditProduct('${p.id}')">Edit</button>
@@ -1888,16 +1818,6 @@
                     </div>
                 </div>
             `).join("");
-
-            const reqBox = document.getElementById("admin-requests-container");
-            reqBox.innerHTML = medRequests.length ? medRequests.map(r => `
-                <div class="data-card">
-                    <strong>${r.name} (${r.phone})</strong>
-                    <div style="font-size:12px; margin:6px 0;">📋 ${r.details}</div>
-                    ${r.rxLink ? (r.rxLink.startsWith("data:image") ? `<img src="${r.rxLink}" style="max-height:140px; border-radius:8px; border:1px solid #ddd; display:block; margin:6px 0;">` : `<div style="font-size:11px; color:var(--brand);">Rx Note: ${r.rxLink}</div>`) : ''}
-                    <div style="font-size:10px; color:#888;">${r.time}</div>
-                </div>
-            `).join("") : `<div class="data-card">No prescription requests yet.</div>`;
         }
 
         async function adminUpdateOrderStatus(orderId) {
@@ -1911,136 +1831,136 @@
             }
             renderCustomerOrders();
             renderAdminDashboard();
-            showToast(`Order #${orderId} updated to ${newStatus}`);
+            showToast(`Order status updated to ${newStatus}`);
         }
 
-        function adminEditProduct(id) {
+        // Store Settings
+        function loadAdminSettingsInputs() {
+            document.getElementById("set-store-name").value = storeConfig.storeName || "";
+            document.getElementById("set-store-tamil").value = storeConfig.storeTamil || "";
+            document.getElementById("set-store-addr").value = storeConfig.storeAddress || "";
+            document.getElementById("set-admin-phone").value = storeConfig.adminPhone || "";
+            document.getElementById("set-ticker").value = storeConfig.tickerText || "";
+            document.getElementById("set-logo-url").value = storeConfig.logoUrl || "";
+            document.getElementById("set-adm-user").value = storeConfig.adminUser || "";
+            document.getElementById("set-adm-pass").value = storeConfig.adminPass || "";
+        }
+
+        async function handleStoreLogoUpload(input) {
+            if (!input.files || !input.files[0]) return;
+            try {
+                const url = await uploadFileToSupabaseStorage(input.files[0], "logo");
+                document.getElementById("set-logo-url").value = url;
+                showToast("Logo uploaded to Supabase!");
+            } catch (err) {
+                showToast("Logo upload failed: " + err.message);
+            }
+        }
+
+        async function saveStoreBrandSettings() {
+            storeConfig.id = "main_config";
+            storeConfig.storeName = document.getElementById("set-store-name").value.trim() || "SUBHA MEDICAL";
+            storeConfig.storeTamil = document.getElementById("set-store-tamil").value.trim() || "சுபா மெடிக்கல்";
+            storeConfig.storeAddress = document.getElementById("set-store-addr").value.trim() || "";
+            storeConfig.adminPhone = document.getElementById("set-admin-phone").value.trim() || "9487165045";
+            storeConfig.tickerText = document.getElementById("set-ticker").value.trim() || "";
+            storeConfig.logoUrl = document.getElementById("set-logo-url").value.trim();
+            
+            const u = document.getElementById("set-adm-user").value.trim();
+            const p = document.getElementById("set-adm-pass").value.trim();
+            if (u) storeConfig.adminUser = u;
+            if (p) storeConfig.adminPass = p;
+
+            saveAllLocal();
+            applyStoreBrandingToDOM();
+
+            if (sbClient) {
+                await sbClient.from("subha_settings").upsert([storeConfig]);
+            }
+            showToast("Store settings saved to Supabase!");
+        }
+
+        function applyStoreBrandingToDOM() {
+            document.getElementById("page-title").innerText = `${storeConfig.storeName} | Online Pharmacy`;
+            document.getElementById("nav-store-title").innerText = storeConfig.storeName;
+            document.getElementById("nav-store-subtitle").innerText = storeConfig.storeTamil;
+            document.getElementById("hero-store-title").innerText = storeConfig.storeName;
+            document.getElementById("hero-store-address").innerHTML = `${storeConfig.storeAddress}<br>📞 +91 ${storeConfig.adminPhone} • Genuine Medicines`;
+            document.getElementById("top-marquee-ticker").innerText = `${storeConfig.tickerText} 📞 +91 ${storeConfig.adminPhone}`;
+
+            const navLogo = document.getElementById("nav-logo-box");
+            const heroLogo = document.getElementById("hero-logo-box");
+            if (storeConfig.logoUrl) {
+                navLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
+                heroLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
+            } else {
+                navLogo.innerHTML = `<i class='bx bx-plus-medical'></i>`;
+                heroLogo.innerHTML = `<i class='bx bx-plus-medical' style="font-size:28px; color:var(--brand);"></i>`;
+            }
+            updateUserHeader();
+        }
+
+        // POS Billing
+        function renderPosMedicineDropdown() {
+            const sel = document.getElementById("pos-med-select");
+            sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} — ₹${p.price}</option>`).join("");
+        }
+
+        function addPosItem() {
+            const id = document.getElementById("pos-med-select").value;
+            const qty = Math.max(1, Number(document.getElementById("pos-med-qty").value || 1));
             const p = products.find(x => x.id === id);
             if (!p) return;
-            document.getElementById("prod-form-title").innerText = "Editing: " + p.name;
-            document.getElementById("p-edit-id").value = p.id;
-            document.getElementById("p-name").value = p.name;
-            document.getElementById("p-brand").value = p.brand;
-            document.getElementById("p-use").value = p.use;
-            document.getElementById("p-cat").value = p.category;
-            document.getElementById("p-price").value = p.price;
-            document.getElementById("p-mrp").value = p.mrp;
-            document.getElementById("p-batch").value = p.batch || "SM26";
-            document.getElementById("p-exp").value = p.exp || "12/2028";
-            document.getElementById("p-gst").value = p.gst ?? 12;
-            document.getElementById("p-img").value = p.img || "";
-            document.getElementById("p-rx").checked = !!p.rx;
-            document.getElementById("p-stock").checked = p.inStock !== false;
-            previewProductImageUrl(p.img || "");
-            document.getElementById("adm-panel-products").scrollIntoView({ behavior: "smooth" });
+            posItems.push({ id: p.id, name: p.name, qty, price: p.price, mrp: p.mrp });
+            renderPosItems();
         }
 
-        function resetProductForm() {
-            document.getElementById("prod-form-title").innerText = "Add / Edit Medicine";
-            document.getElementById("p-edit-id").value = "";
-            document.getElementById("p-name").value = "";
-            document.getElementById("p-brand").value = "";
-            document.getElementById("p-use").value = "";
-            document.getElementById("p-price").value = "";
-            document.getElementById("p-mrp").value = "";
-            document.getElementById("p-batch").value = "";
-            document.getElementById("p-exp").value = "";
-            document.getElementById("p-img").value = "";
-            document.getElementById("p-rx").checked = false;
-            document.getElementById("p-stock").checked = true;
-            document.getElementById("p-img-preview").style.display = "none";
+        function renderPosItems() {
+            const box = document.getElementById("pos-items-list");
+            let total = 0;
+            box.innerHTML = posItems.map((item, idx) => {
+                total += item.price * item.qty;
+                return `<div style="display:flex; justify-content:space-between; padding:4px 0; font-size:12px;"><span>${item.name} x${item.qty} = ₹${item.price*item.qty}</span><button class="btn-danger" style="width:auto; padding:2px 6px;" onclick="posItems.splice(${idx},1); renderPosItems();">×</button></div>`;
+            }).join("");
+            document.getElementById("pos-total-lbl").innerText = `₹${total}`;
         }
 
-        async function adminSaveProduct() {
-            const editId = document.getElementById("p-edit-id").value.trim();
-            const name = document.getElementById("p-name").value.trim();
-            const brand = document.getElementById("p-brand").value.trim() || "Subha Pharma";
-            const use = document.getElementById("p-use").value.trim() || "Healthcare Support";
-            const category = document.getElementById("p-cat").value;
-            const price = Number(document.getElementById("p-price").value);
-            const mrp = Number(document.getElementById("p-mrp").value) || price;
-            const batch = document.getElementById("p-batch").value.trim() || "BT2601";
-            const exp = document.getElementById("p-exp").value.trim() || "12/2028";
-            const gst = Number(document.getElementById("p-gst").value);
-            const img = document.getElementById("p-img").value.trim() || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400";
-            const rx = document.getElementById("p-rx").checked;
-            const inStock = document.getElementById("p-stock").checked;
+        async function completePosBill() {
+            if (posItems.length === 0) return;
+            const name = document.getElementById("pos-cust-name").value.trim() || "Walk-In Customer";
+            const phone = document.getElementById("pos-cust-phone").value.trim() || storeConfig.adminPhone;
+            const total = posItems.reduce((acc, i) => acc + (i.price * i.qty), 0);
 
-            if (!name || !price) {
-                showToast("Enter Medicine Name & Selling Price");
-                return;
-            }
+            const posOrder = {
+                id: "POS" + Math.floor(100000 + Math.random() * 900000),
+                customer_name: name, customer_phone: phone, address: "Counter Sale", payment_mode: "Cash",
+                items: [...posItems], total, status: "Delivered", created_at: new Date().toLocaleString(), created_timestamp: Date.now()
+            };
 
-            let savedProd;
-            if (editId) {
-                const idx = products.findIndex(x => x.id === editId);
-                if (idx > -1) {
-                    products[idx] = Object.assign({}, products[idx], {
-                        name, brand, use, category, price, mrp, batch, exp, gst, img, rx, inStock
-                    });
-                    savedProd = products[idx];
-                }
-            } else {
-                savedProd = {
-                    id: "P" + Date.now(),
-                    name, brand, use, category, price, mrp,
-                    batch, exp, hsn: "3004", gst,
-                    img, rx, inStock,
-                    rating: 4.9,
-                    reviews: []
-                };
-                products.unshift(savedProd);
-            }
-
+            orders.unshift(posOrder);
+            posItems = [];
+            renderPosItems();
             saveAllLocal();
-            if (sbClient && savedProd) {
-                await sbClient.from("subha_products").upsert([savedProd]);
-            }
-            resetProductForm();
-            renderBrands();
-            renderStoreProducts();
+            if (sbClient) await sbClient.from("subha_orders").upsert([posOrder]);
             renderAdminDashboard();
-            showToast(editId ? "Medicine updated!" : "New medicine added to catalog!");
+            openGstInvoiceModal(posOrder.id);
         }
 
-        async function adminDeleteProduct(id) {
-            products = products.filter(p => p.id !== id);
-            saveAllLocal();
-            if (sbClient) {
-                await sbClient.from("subha_products").delete().eq("id", id);
-            }
-            renderStoreProducts();
-            renderAdminDashboard();
-            showToast("Product removed");
-        }
-
-        /**************************************************************
-         * 10. GST TAX INVOICE GENERATOR (SYNCED WITH CLOUD STORE CONFIG)
-         **************************************************************/
+        // Invoice Generator
         function loadInvoiceConfigInputs() {
             document.getElementById("inv-cfg-dl").value = storeConfig.dlNo || "TN-TPR-20B/21B-0452";
             document.getElementById("inv-cfg-gstin").value = storeConfig.gstin || "33AABCS1429B1Z5";
-            document.getElementById("inv-cfg-pharm").value = storeConfig.pharmacist || "A. SoundaraRajan, Reg. Pharmacist";
-            document.getElementById("inv-cfg-doc").value = storeConfig.doctor || "Dr. Self / General OPD";
+            document.getElementById("inv-cfg-pharm").value = storeConfig.pharmacist || "A. SoundaraRajan";
+            document.getElementById("inv-cfg-doc").value = storeConfig.doctor || "Dr. Self";
         }
 
-        let invoiceSyncTimer = null;
         function saveInvoiceConfigAndRefresh() {
-            storeConfig.dlNo = document.getElementById("inv-cfg-dl").value.trim() || "TN-TPR-20B/21B-0452";
-            storeConfig.gstin = document.getElementById("inv-cfg-gstin").value.trim() || "33AABCS1429B1Z5";
-            storeConfig.pharmacist = document.getElementById("inv-cfg-pharm").value.trim() || "A. SoundaraRajan, Reg. Pharmacist";
-            storeConfig.doctor = document.getElementById("inv-cfg-doc").value.trim() || "Dr. Self / General OPD";
-
+            storeConfig.dlNo = document.getElementById("inv-cfg-dl").value.trim();
+            storeConfig.gstin = document.getElementById("inv-cfg-gstin").value.trim();
+            storeConfig.pharmacist = document.getElementById("inv-cfg-pharm").value.trim();
+            storeConfig.doctor = document.getElementById("inv-cfg-doc").value.trim();
             saveAllLocal();
             if (activeInvoiceOrderId) renderPrintableInvoice(activeInvoiceOrderId);
-
-            if (sbClient) {
-                clearTimeout(invoiceSyncTimer);
-                invoiceSyncTimer = setTimeout(async () => {
-                    const payload = Object.assign({}, storeConfig, { id: "main_config", updated_at: Date.now() });
-                    await sbClient.from("subha_settings").upsert([payload]);
-                }, 600);
-            }
         }
 
         function openGstInvoiceModal(orderId) {
@@ -2051,155 +1971,59 @@
         }
 
         function toggleThermalMode() {
-            const area = document.getElementById("printable-invoice-area");
-            area.classList.toggle("thermal-mode");
+            document.getElementById("printable-invoice-area").classList.toggle("thermal-mode");
         }
 
         function renderPrintableInvoice(orderId) {
             const ord = orders.find(o => o.id === orderId);
             if (!ord) return;
-
-            let totalTaxable = 0, totalCgst = 0, totalSgst = 0, totalMrp = 0;
-
-            const rowsHTML = (ord.items || []).map((item, idx) => {
-                const catProd = products.find(p => p.id === item.id || p.name === item.name) || {};
-                const batch = item.batch || catProd.batch || "SM26";
-                const exp = item.exp || catProd.exp || "12/2028";
-                const hsn = item.hsn || catProd.hsn || "3004";
-                const gstPct = (item.gst !== undefined) ? Number(item.gst) : (catProd.gst !== undefined ? Number(catProd.gst) : 12);
-                const mrp = Number(item.mrp || catProd.mrp || item.price);
-                const rateIncl = Number(item.price);
-                const qty = Number(item.qty);
-                const lineTotal = rateIncl * qty;
-
-                const lineTaxable = lineTotal / (1 + (gstPct / 100));
-                const lineGstAmt = lineTotal - lineTaxable;
-                const cgstAmt = lineGstAmt / 2;
-                const sgstAmt = lineGstAmt / 2;
-
-                totalTaxable += lineTaxable;
-                totalCgst += cgstAmt;
-                totalSgst += sgstAmt;
-                totalMrp += mrp * qty;
-
-                return `
-                    <tr>
-                        <td class="hide-thermal">${idx + 1}</td>
-                        <td>
-                            <strong>${item.name}</strong>
-                            <div style="font-size:9px; color:#555;">B:${batch} Exp:${exp}</div>
-                        </td>
-                        <td class="hide-thermal">${hsn}</td>
-                        <td class="hide-thermal">${batch}</td>
-                        <td class="hide-thermal">${exp}</td>
-                        <td style="text-align:center;">${qty}</td>
-                        <td class="hide-thermal" style="text-align:right;">₹${mrp.toFixed(2)}</td>
-                        <td style="text-align:right;">₹${(lineTaxable / qty).toFixed(2)}</td>
-                        <td class="hide-thermal" style="text-align:center;">${gstPct}%</td>
-                        <td style="text-align:right; font-weight:700;">₹${lineTotal.toFixed(2)}</td>
-                    </tr>
-                `;
-            }).join("");
-
-            const totalSavings = Math.max(0, totalMrp - ord.total);
-            const logoHTML = storeConfig.logoUrl
-                ? `<img src="${storeConfig.logoUrl}" style="max-height:46px; max-width:120px; object-fit:contain; margin-bottom:4px; display:block;">`
-                : "";
+            const rowsHTML = (ord.items || []).map((i, idx) => `
+                <tr><td>${idx+1}</td><td>${i.name}</td><td>${i.qty}</td><td>₹${i.price}</td><td>₹${i.price * i.qty}</td></tr>
+            `).join("");
 
             document.getElementById("printable-invoice-area").innerHTML = `
                 <div class="inv-header">
                     <div>
-                        ${logoHTML}
                         <div class="inv-store-title">${storeConfig.storeName} (${storeConfig.storeTamil})</div>
-                        <div style="font-size:11px; font-weight:700; margin-top:2px;">${storeConfig.storeAddress}</div>
-                        <div style="font-size:11px; margin-top:2px;">Phone: <strong>+91 ${storeConfig.adminPhone}</strong> | Reg. Pharmacist: <strong>${storeConfig.pharmacist}</strong></div>
-                        <div style="font-size:11px; margin-top:2px;"><strong>D.L. No:</strong> ${storeConfig.dlNo} &nbsp;|&nbsp; <strong>GSTIN:</strong> ${storeConfig.gstin}</div>
+                        <div style="font-size:11px;">${storeConfig.storeAddress}</div>
+                        <div style="font-size:11px;">Phone: +91 ${storeConfig.adminPhone}</div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="background:#12243a; color:#fff; padding:4px 10px; font-size:12px; font-weight:900; border-radius:4px; display:inline-block;">GST TAX INVOICE</div>
-                        <div style="font-size:11px; margin-top:5px;"><strong>Invoice No:</strong> INV-${ord.id}</div>
-                        <div style="font-size:11px;"><strong>Date:</strong> ${ord.created_at}</div>
-                        <div style="font-size:11px;"><strong>Payment:</strong> ${ord.payment_mode || 'Cash / UPI'}</div>
+                        <div style="background:#12243a; color:#fff; padding:4px 8px; font-weight:900;">TAX INVOICE</div>
+                        <div style="font-size:11px;">#INV-${ord.id}</div>
                     </div>
                 </div>
-
-                <div class="inv-meta-grid">
-                    <div>
-                        <strong>Patient / Customer Name:</strong> ${ord.customer_name}<br>
-                        <strong>Mobile:</strong> ${ord.customer_phone}
-                    </div>
-                    <div>
-                        <strong>Address:</strong> ${ord.address}<br>
-                        <strong>Prescribed By:</strong> ${storeConfig.doctor}
-                    </div>
-                </div>
-
-                <table class="inv-table">
-                    <thead>
-                        <tr>
-                            <th class="hide-thermal">#</th>
-                            <th>Medicine / Particulars</th>
-                            <th class="hide-thermal">HSN</th>
-                            <th class="hide-thermal">Batch</th>
-                            <th class="hide-thermal">Exp</th>
-                            <th style="text-align:center;">Qty</th>
-                            <th class="hide-thermal" style="text-align:right;">MRP</th>
-                            <th style="text-align:right;">Taxable</th>
-                            <th class="hide-thermal" style="text-align:center;">GST%</th>
-                            <th style="text-align:right;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHTML}
-                    </tbody>
+                <div><strong>Customer:</strong> ${ord.customer_name} (${ord.customer_phone})</div>
+                <table class="inv-table" style="margin-top:10px;">
+                    <thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+                    <tbody>${rowsHTML}</tbody>
                 </table>
-
-                <div class="inv-totals-row">
-                    <div class="inv-tax-box">
-                        <strong>GST Tax Breakdown Summary:</strong><br>
-                        Taxable Amount: ₹${totalTaxable.toFixed(2)}<br>
-                        CGST Amount: ₹${totalCgst.toFixed(2)}<br>
-                        SGST Amount: ₹${totalSgst.toFixed(2)}<br>
-                        <strong>Total GST: ₹${(totalCgst + totalSgst).toFixed(2)}</strong>
-                    </div>
-                    <div class="inv-grand-box">
-                        <div>Total MRP Value: ₹${totalMrp.toFixed(2)}</div>
-                        <div style="color:#087f5b; font-weight:700;">Total Savings: -₹${totalSavings.toFixed(2)}</div>
-                        <div style="font-size:16px; font-weight:900; color:#12243a; margin-top:4px; border-top:2px solid #12243a; padding-top:4px;">
-                            NET AMOUNT: ₹${Number(ord.total).toFixed(2)}
-                        </div>
-                        <div style="font-size:10px; color:#555;">(Inclusive of all CGST & SGST taxes)</div>
-                    </div>
-                </div>
-
-                <div class="inv-footer">
-                    <div>
-                        <strong>விரைவில் குணமடைய வாழ்த்துக்கள்! • Get Well Soon!</strong><br>
-                        • Goods once sold will not be taken back without this bill.<br>
-                        • Keep medicines out of reach of children.
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="margin-bottom:22px; font-weight:700;">For ${storeConfig.storeName}</div>
-                        <div><strong>${storeConfig.pharmacist}</strong></div>
-                        <div style="font-size:10px; color:#555;">Registered Pharmacist Sign</div>
-                    </div>
-                </div>
+                <div style="text-align:right; font-weight:900; font-size:15px; margin-top:10px;">GRAND TOTAL: ₹${ord.total}</div>
             `;
         }
 
         function sendWhatsAppInvoice() {
             const ord = orders.find(o => o.id === activeInvoiceOrderId);
             if (!ord) return;
-            const itemsTxt = (ord.items || []).map(i => `• ${i.name} x${i.qty} = ₹${i.price * i.qty}`).join("\n");
-            const message = `*${storeConfig.storeName} (${storeConfig.storeTamil})*\n${storeConfig.storeAddress}\n📞 +91 ${storeConfig.adminPhone}\n*GST TAX INVOICE: #INV-${ord.id}*\nDate: ${ord.created_at}\nCustomer: ${ord.customer_name}\n----------------\n${itemsTxt}\n----------------\n*Net Payable (Incl. GST): ₹${ord.total}*\nThank you! Get Well Soon! 🙏`;
-            const cleanPhone = ord.customer_phone.replace(/\D/g, "");
-            const targetPhone = cleanPhone.length === 10 ? "91" + cleanPhone : cleanPhone;
-            window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`, "_blank");
+            const msg = encodeURIComponent(`*${storeConfig.storeName} Invoice #${ord.id}*\nTotal: ₹${ord.total}\nThank you!`);
+            window.open(`https://wa.me/91${ord.customer_phone.replace(/\D/g,"") || storeConfig.adminPhone}?text=${msg}`, "_blank");
         }
 
-        /**************************************************************
-         * 11. NAVIGATION & UTILITIES
-         **************************************************************/
+        function orderViaWhatsApp() {
+            const msg = encodeURIComponent(`வணக்கம் ${storeConfig.storeName}, எனக்கு மருந்துகள் ஆர்டர் செய்ய வேண்டும்.`);
+            window.open(`https://wa.me/91${storeConfig.adminPhone}?text=${msg}`, "_blank");
+        }
+
+        function callStoreDirect() {
+            window.location.href = `tel:+91${storeConfig.adminPhone}`;
+        }
+
+        function openReqModal() { document.getElementById("req-modal").style.display = "flex"; }
+        function submitMedicineRequest() {
+            showToast("Prescription submitted!");
+            closeModal("req-modal");
+        }
+
         function switchBottomNav(tab) {
             ["home", "wishlist", "cart", "orders"].forEach(t => {
                 document.getElementById(`tab-${t}`).style.display = (t === tab) ? "block" : "none";
@@ -2209,10 +2033,7 @@
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
-        function closeModal(id) {
-            document.getElementById(id).style.display = "none";
-        }
-
+        function closeModal(id) { document.getElementById(id).style.display = "none"; }
         function showToast(msg) {
             const t = document.getElementById("toast");
             t.innerText = msg;
@@ -2222,4 +2043,3 @@
     </script>
 </body>
 </html>
-
