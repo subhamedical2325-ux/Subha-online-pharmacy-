@@ -811,7 +811,7 @@
          **************************************************************/
         const DEFAULT_SUPABASE_URL = "https://ktqztbpmfxbbczojfdlr.supabase.co"; 
         const DEFAULT_SUPABASE_KEY = "sb_publishable_C0bpzdEEotuWH3UpLyB5Fw_dCb3IrJf";
-        const STORAGE_BUCKET = "subha-storage"; // Make sure this bucket is created in Supabase Storage as Public
+        const STORAGE_BUCKET = "subha-storage";
 
         let sbClient = null;
 
@@ -877,27 +877,35 @@
         let activeBrand = "ALL";
 
         window.addEventListener("DOMContentLoaded", () => {
-            applyStoreBrandingToDOM();
-            initSupabaseConnection();
-            loadInvoiceConfigInputs();
-            renderCategories();
-            renderBrands();
-            renderStoreProducts();
-            updateCartUI();
-            updateUserHeader();
-            renderCustomerOrders();
+            try {
+                applyStoreBrandingToDOM();
+                initSupabaseConnection();
+                loadInvoiceConfigInputs();
+                renderCategories();
+                renderBrands();
+                renderStoreProducts();
+                updateCartUI();
+                updateUserHeader();
+                renderCustomerOrders();
+            } catch (err) {
+                console.error("Initialization error:", err);
+            }
         });
 
         function saveAllLocal() {
-            localStorage.setItem("subha_store_cfg", JSON.stringify(storeConfig));
-            localStorage.setItem("subha_products", JSON.stringify(products));
-            localStorage.setItem("subha_brands", JSON.stringify(brands));
-            localStorage.setItem("subha_orders", JSON.stringify(orders));
-            localStorage.setItem("subha_requests", JSON.stringify(medRequests));
-            localStorage.setItem("subha_users", JSON.stringify(users));
-            localStorage.setItem("subha_cart", JSON.stringify(cart));
-            localStorage.setItem("subha_wishlist", JSON.stringify(wishlist));
-            if (currentUser) localStorage.setItem("subha_current_user", JSON.stringify(currentUser));
+            try {
+                localStorage.setItem("subha_store_cfg", JSON.stringify(storeConfig));
+                localStorage.setItem("subha_products", JSON.stringify(products));
+                localStorage.setItem("subha_brands", JSON.stringify(brands));
+                localStorage.setItem("subha_orders", JSON.stringify(orders));
+                localStorage.setItem("subha_requests", JSON.stringify(medRequests));
+                localStorage.setItem("subha_users", JSON.stringify(users));
+                localStorage.setItem("subha_cart", JSON.stringify(cart));
+                localStorage.setItem("subha_wishlist", JSON.stringify(wishlist));
+                if (currentUser) localStorage.setItem("subha_current_user", JSON.stringify(currentUser));
+            } catch (e) {
+                console.error("Storage error:", e);
+            }
         }
 
         /**************************************************************
@@ -906,7 +914,7 @@
         async function uploadFileToSupabaseStorage(file, folder = "uploads") {
             if (!sbClient) throw new Error("Supabase client not initialized");
             const fileExt = file.name.split('.').pop();
-            const fileName = `${folder}/${Date.now()}_${Math.random().toString(36.substring(2, 8))}.${fileExt}`;
+            const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
             
             const { data, error } = await sbClient.storage.from(STORAGE_BUCKET).upload(fileName, file, {
                 cacheControl: '3600',
@@ -933,22 +941,22 @@
             if (url && key && window.supabase) {
                 try {
                     sbClient = window.supabase.createClient(url, key);
-                    dot.classList.remove("offline");
-                    document.getElementById("live-sync-indicator").innerText = "☁️ Supabase Synced";
+                    if (dot) dot.classList.remove("offline");
+                    const indicator = document.getElementById("live-sync-indicator");
+                    if (indicator) indicator.innerText = "☁️ Supabase Synced";
                     syncAllData();
                     subscribeRealtimeChanges();
                 } catch (e) {
-                    dot.classList.add("offline");
+                    if (dot) dot.classList.add("offline");
                 }
             } else {
-                dot.classList.add("offline");
+                if (dot) dot.classList.add("offline");
             }
         }
 
         async function syncAllData() {
             if (!sbClient) return;
             try {
-                // 1. Settings
                 const { data: sData } = await sbClient.from("subha_settings").select("*").eq("id", "main_config").maybeSingle();
                 if (sData) {
                     storeConfig = Object.assign({}, DEFAULT_STORE_CONFIG, sData);
@@ -956,19 +964,15 @@
                     loadInvoiceConfigInputs();
                 }
 
-                // 2. Brands
                 const { data: bData } = await sbClient.from("subha_brands").select("*");
                 if (bData && bData.length > 0) brands = bData;
 
-                // 3. Products
                 const { data: pData } = await sbClient.from("subha_products").select("*");
                 if (pData && pData.length > 0) products = pData;
 
-                // 4. Orders
                 const { data: oData } = await sbClient.from("subha_orders").select("*").order("created_timestamp", { ascending: false });
                 if (oData) orders = oData;
 
-                // 5. Requests
                 const { data: rData } = await sbClient.from("subha_requests").select("*").order("id", { ascending: false });
                 if (rData) medRequests = rData;
 
@@ -1001,6 +1005,8 @@
         function renderBrands() {
             const activeBrands = brands.filter(b => b.active !== false);
             const box = document.getElementById("brands-carousel");
+            if (!box) return;
+
             box.innerHTML = `
                 <div class="brand-item ${activeBrand === 'ALL' ? 'active' : ''}" onclick="filterByBrand('ALL')">
                     <div class="brand-circle">ALL</div>
@@ -1015,7 +1021,6 @@
                 </div>
             `).join("");
 
-            // Update Admin Brand Dropdown
             const sel = document.getElementById("p-brand-select");
             if (sel) {
                 sel.innerHTML = activeBrands.map(b => `<option value="${b.name}">${b.name}</option>`).join("");
@@ -1045,6 +1050,7 @@
 
         function previewBrandLogoUrl(url) {
             const prev = document.getElementById("b-logo-preview");
+            if (!prev) return;
             if (url && url.trim()) {
                 prev.src = url.trim();
                 prev.style.display = "block";
@@ -1122,14 +1128,17 @@
             document.getElementById("b-name").value = "";
             document.getElementById("b-logo-url").value = "";
             document.getElementById("b-active").checked = true;
-            document.getElementById("b-logo-preview").style.display = "none";
+            const prev = document.getElementById("b-logo-preview");
+            if (prev) prev.style.display = "none";
         }
 
         function renderAdminBrandsList() {
-            const q = (document.getElementById("brand-search-input").value || "").toLowerCase();
+            const searchInput = document.getElementById("brand-search-input");
+            const q = searchInput ? searchInput.value.toLowerCase() : "";
             const list = document.getElementById("admin-brands-list");
-            const filtered = brands.filter(b => b.name.toLowerCase().includes(q));
+            if (!list) return;
 
+            const filtered = brands.filter(b => b.name.toLowerCase().includes(q));
             list.innerHTML = filtered.map(b => `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee; font-size:12px;">
                     <div style="display:flex; align-items:center; gap:8px;">
@@ -1148,7 +1157,7 @@
         }
 
         /********************************-----------------
-         * 5. PRODUCT MANAGEMENT & SUPABASE STORAGE UPLOADS
+         * 5. PRODUCT MANAGEMENT & STORAGE UPLOADS
          ********************************----------------*/
         function handleProductImageUpload(input) {
             if (!input.files || !input.files[0]) return;
@@ -1167,6 +1176,7 @@
 
         function previewProductImageUrl(url) {
             const prev = document.getElementById("p-img-preview");
+            if (!prev) return;
             if (url && url.trim()) {
                 prev.src = url.trim();
                 prev.style.display = "block";
@@ -1178,7 +1188,8 @@
         async function adminSaveProduct() {
             const editId = document.getElementById("p-edit-id").value.trim();
             const name = document.getElementById("p-name").value.trim();
-            const brand = document.getElementById("p-brand-select").value || "Subha Pharma";
+            const brandSelect = document.getElementById("p-brand-select");
+            const brand = brandSelect ? brandSelect.value : "Subha Pharma";
             const use = document.getElementById("p-use").value.trim() || "Healthcare Support";
             const category = document.getElementById("p-cat").value;
             const price = Number(document.getElementById("p-price").value);
@@ -1234,7 +1245,8 @@
             document.getElementById("prod-form-title").innerText = "Editing: " + p.name;
             document.getElementById("p-edit-id").value = p.id;
             document.getElementById("p-name").value = p.name;
-            document.getElementById("p-brand-select").value = p.brand;
+            const sel = document.getElementById("p-brand-select");
+            if (sel) sel.value = p.brand;
             document.getElementById("p-use").value = p.use;
             document.getElementById("p-cat").value = p.category;
             document.getElementById("p-price").value = p.price;
@@ -1246,7 +1258,8 @@
             document.getElementById("p-rx").checked = !!p.rx;
             document.getElementById("p-stock").checked = p.inStock !== false;
             previewProductImageUrl(p.img || "");
-            document.getElementById("adm-panel-products").scrollIntoView({ behavior: "smooth" });
+            const adminPanel = document.getElementById("adm-panel-products");
+            if (adminPanel) adminPanel.scrollIntoView({ behavior: "smooth" });
         }
 
         async function adminDeleteProduct(id) {
@@ -1273,7 +1286,8 @@
             document.getElementById("p-img").value = "";
             document.getElementById("p-rx").checked = false;
             document.getElementById("p-stock").checked = true;
-            document.getElementById("p-img-preview").style.display = "none";
+            const prev = document.getElementById("p-img-preview");
+            if (prev) prev.style.display = "none";
         }
 
         /********************************-----------------
@@ -1290,7 +1304,8 @@
             showToast("🎤 Listening... Speak medicine name");
             rec.onresult = (e) => {
                 const spoken = e.results[0][0].transcript;
-                document.getElementById("search-input").value = spoken;
+                const searchInput = document.getElementById("search-input");
+                if (searchInput) searchInput.value = spoken;
                 renderStoreProducts();
             };
             rec.start();
@@ -1298,6 +1313,7 @@
 
         function renderCategories() {
             const grid = document.getElementById("categories-grid");
+            if (!grid) return;
             grid.innerHTML = CATEGORIES.map(c => `
                 <div class="tc-card ${activeCategory === c.name ? 'active' : ''}" onclick="filterByCategory('${c.name}')">
                     <i class='bx ${c.icon} tc-icon'></i>
@@ -1319,8 +1335,10 @@
         }
 
         function renderStoreProducts() {
-            const query = (document.getElementById("search-input").value || "").toLowerCase();
-            const sortBy = document.getElementById("sort-select").value;
+            const searchInput = document.getElementById("search-input");
+            const query = searchInput ? searchInput.value.toLowerCase() : "";
+            const sortSelect = document.getElementById("sort-select");
+            const sortBy = sortSelect ? sortSelect.value : "popular";
 
             let filtered = products.filter(p => {
                 const matchCat = activeCategory === "All" || p.category === activeCategory;
@@ -1335,17 +1353,25 @@
             else if (sortBy === "price-high") filtered.sort((a, b) => b.price - a.price);
             else if (sortBy === "discount") filtered.sort((a, b) => ((b.mrp - b.price) / b.mrp) - ((a.mrp - a.price) / a.mrp));
 
-            document.getElementById("product-count-lbl").innerText = `${filtered.length} Items`;
-            document.getElementById("main-product-grid").innerHTML = filtered.map(p => buildProductCardHTML(p)).join("");
+            const countLbl = document.getElementById("product-count-lbl");
+            if (countLbl) countLbl.innerText = `${filtered.length} Items`;
+
+            const mainGrid = document.getElementById("main-product-grid");
+            if (mainGrid) mainGrid.innerHTML = filtered.map(p => buildProductCardHTML(p)).join("");
 
             const wishedProducts = products.filter(p => wishlist.includes(p.id));
-            document.getElementById("wishlist-product-grid").innerHTML = wishedProducts.length
-                ? wishedProducts.map(p => buildProductCardHTML(p)).join("")
-                : `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#888;">No items in your wishlist yet.</div>`;
+            const wishGrid = document.getElementById("wishlist-product-grid");
+            if (wishGrid) {
+                wishGrid.innerHTML = wishedProducts.length
+                    ? wishedProducts.map(p => buildProductCardHTML(p)).join("")
+                    : `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#888;">No items in your wishlist yet.</div>`;
+            }
 
             const wishBadge = document.getElementById("wish-badge");
-            wishBadge.innerText = wishlist.length;
-            wishBadge.style.display = wishlist.length > 0 ? "block" : "none";
+            if (wishBadge) {
+                wishBadge.innerText = wishlist.length;
+                wishBadge.style.display = wishlist.length > 0 ? "block" : "none";
+            }
         }
 
         function buildProductCardHTML(p) {
@@ -1416,29 +1442,33 @@
                 </div>
             `).join("") || `<div style="font-size:12px; color:#888;">No reviews yet.</div>`;
 
-            document.getElementById("pd-content").innerHTML = `
-                <img src="${p.img}" style="width:100%; height:150px; object-fit:contain; margin-bottom:10px;">
-                <span style="font-size:11px; color:var(--brand); font-weight:800;">${p.brand} • ${p.category}</span>
-                <h3 style="margin:4px 0 8px;">${p.name}</h3>
-                <div style="background:#eef7f6; padding:10px; border-radius:8px; font-size:12px; color:var(--brand-dark); margin-bottom:10px;">
-                    <strong>Primary Use:</strong> ${p.use}<br>
-                    <span style="font-size:11px; color:#555;">Batch: ${p.batch || 'SM26'} | Exp: ${p.exp || '12/2028'}</span>
-                </div>
-                <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px;">
-                    <span style="font-size:22px; font-weight:900; color:var(--brand-navy);">₹${p.price}</span>
-                    <span style="text-decoration:line-through; color:#888; font-size:13px;">MRP ₹${p.mrp}</span>
-                </div>
-                <button class="btn-primary" onclick="changeQty('${p.id}', 1); closeModal('pd-modal');">+ Add to Cart</button>
-                <hr style="border:none; border-top:1px solid #eee; margin:14px 0;">
-                <h4 style="margin:0 0 6px; font-size:13px;">Rate & Review</h4>
-                <div class="star-input-container" id="star-selector-box">
-                    ${[1,2,3,4,5].map(num => `<i class='bx bxs-star selected' data-val="${num}" onclick="selectReviewStar(${num})"></i>`).join("")}
-                </div>
-                <input type="text" id="rev-text-${p.id}" class="auth-input" placeholder="Write your review...">
-                <button class="btn-secondary" onclick="addProductReview('${p.id}')">Submit Review</button>
-                <div style="max-height:120px; overflow-y:auto; margin-top:10px;">${reviewsHTML}</div>
-            `;
-            document.getElementById("pd-modal").style.display = "flex";
+            const pdContent = document.getElementById("pd-content");
+            if (pdContent) {
+                pdContent.innerHTML = `
+                    <img src="${p.img}" style="width:100%; height:150px; object-fit:contain; margin-bottom:10px;">
+                    <span style="font-size:11px; color:var(--brand); font-weight:800;">${p.brand} • ${p.category}</span>
+                    <h3 style="margin:4px 0 8px;">${p.name}</h3>
+                    <div style="background:#eef7f6; padding:10px; border-radius:8px; font-size:12px; color:var(--brand-dark); margin-bottom:10px;">
+                        <strong>Primary Use:</strong> ${p.use}<br>
+                        <span style="font-size:11px; color:#555;">Batch: ${p.batch || 'SM26'} | Exp: ${p.exp || '12/2028'}</span>
+                    </div>
+                    <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px;">
+                        <span style="font-size:22px; font-weight:900; color:var(--brand-navy);">₹${p.price}</span>
+                        <span style="text-decoration:line-through; color:#888; font-size:13px;">MRP ₹${p.mrp}</span>
+                    </div>
+                    <button class="btn-primary" onclick="changeQty('${p.id}', 1); closeModal('pd-modal');">+ Add to Cart</button>
+                    <hr style="border:none; border-top:1px solid #eee; margin:14px 0;">
+                    <h4 style="margin:0 0 6px; font-size:13px;">Rate & Review</h4>
+                    <div class="star-input-container" id="star-selector-box">
+                        ${[1,2,3,4,5].map(num => `<i class='bx bxs-star selected' data-val="${num}" onclick="selectReviewStar(${num})"></i>`).join("")}
+                    </div>
+                    <input type="text" id="rev-text-${p.id}" class="auth-input" placeholder="Write your review...">
+                    <button class="btn-secondary" onclick="addProductReview('${p.id}')">Submit Review</button>
+                    <div style="max-height:120px; overflow-y:auto; margin-top:10px;">${reviewsHTML}</div>
+                `;
+            }
+            const pdModal = document.getElementById("pd-modal");
+            if (pdModal) pdModal.style.display = "flex";
         }
 
         function selectReviewStar(val) {
@@ -1452,7 +1482,8 @@
 
         async function addProductReview(id) {
             const p = products.find(x => x.id === id);
-            const txt = document.getElementById(`rev-text-${id}`).value.trim();
+            const revInput = document.getElementById(`rev-text-${id}`);
+            const txt = revInput ? revInput.value.trim() : "";
             if (!txt) return;
             if (!p.reviews) p.reviews = [];
             p.reviews.unshift({
@@ -1480,6 +1511,7 @@
 
         function updateCartUI() {
             const container = document.getElementById("cart-items-container");
+            if (!container) return;
             let totalItems = 0, mrpTotal = 0, subTotal = 0;
             let html = "";
 
@@ -1510,28 +1542,41 @@
             const netTotal = Math.max(0, subTotal - couponSave);
 
             container.innerHTML = totalItems > 0 ? html : `<div class="data-card" style="text-align:center; color:#888;">Your cart is empty.</div>`;
-            document.getElementById("cart-summary-card").style.display = totalItems > 0 ? "block" : "none";
-            document.getElementById("sum-mrp").innerText = `₹${mrpTotal}`;
-            document.getElementById("sum-disc").innerText = `-₹${mrpTotal - subTotal}`;
-            document.getElementById("sum-coupon").innerText = `-₹${couponSave}`;
-            document.getElementById("sum-net").innerText = `₹${netTotal}`;
+            const summaryCard = document.getElementById("cart-summary-card");
+            if (summaryCard) summaryCard.style.display = totalItems > 0 ? "block" : "none";
+            
+            const sumMrp = document.getElementById("sum-mrp");
+            if (sumMrp) sumMrp.innerText = `₹${mrpTotal}`;
+            const sumDisc = document.getElementById("sum-disc");
+            if (sumDisc) sumDisc.innerText = `-₹${mrpTotal - subTotal}`;
+            const sumCoupon = document.getElementById("sum-coupon");
+            if (sumCoupon) sumCoupon.innerText = `-₹${couponSave}`;
+            const sumNet = document.getElementById("sum-net");
+            if (sumNet) sumNet.innerText = `₹${netTotal}`;
 
             const badge = document.getElementById("cart-badge");
-            badge.innerText = totalItems;
-            badge.style.display = totalItems > 0 ? "block" : "none";
+            if (badge) {
+                badge.innerText = totalItems;
+                badge.style.display = totalItems > 0 ? "block" : "none";
+            }
 
             const fBar = document.getElementById("floating-checkout-bar");
-            if (totalItems > 0) {
-                fBar.style.display = "flex";
-                document.getElementById("fc-items").innerText = `${totalItems} Items`;
-                document.getElementById("fc-total").innerText = `₹${netTotal}`;
-            } else {
-                fBar.style.display = "none";
+            if (fBar) {
+                if (totalItems > 0) {
+                    fBar.style.display = "flex";
+                    const fcItems = document.getElementById("fc-items");
+                    if (fcItems) fcItems.innerText = `${totalItems} Items`;
+                    const fcTotal = document.getElementById("fc-total");
+                    if (fcTotal) fcTotal.innerText = `₹${netTotal}`;
+                } else {
+                    fBar.style.display = "none";
+                }
             }
         }
 
         function applyCartCoupon() {
-            const code = document.getElementById("coupon-input").value.trim().toUpperCase();
+            const couponInput = document.getElementById("coupon-input");
+            const code = couponInput ? couponInput.value.trim().toUpperCase() : "";
             if (code === "SUBHA10") {
                 appliedCouponPct = 10;
                 showToast("Coupon applied: 10% OFF!");
@@ -1544,31 +1589,41 @@
 
         function openCheckoutModal() {
             if (currentUser) {
-                document.getElementById("chk-name").value = currentUser.name || "";
-                document.getElementById("chk-phone").value = currentUser.phone || "";
-                document.getElementById("chk-address").value = currentUser.address || "";
+                const chkName = document.getElementById("chk-name");
+                if (chkName) chkName.value = currentUser.name || "";
+                const chkPhone = document.getElementById("chk-phone");
+                if (chkPhone) chkPhone.value = currentUser.phone || "";
+                const chkAddress = document.getElementById("chk-address");
+                if (chkAddress) chkAddress.value = currentUser.address || "";
             }
-            document.getElementById("checkout-modal").style.display = "flex";
+            const modal = document.getElementById("checkout-modal");
+            if (modal) modal.style.display = "flex";
         }
 
         function runHeartLoader(msg, callback) {
             const loader = document.getElementById("loader-overlay");
             const fill = document.getElementById("fill-box");
-            document.getElementById("loader-text").innerText = msg;
-            loader.style.display = "flex";
-            fill.style.height = "0%";
-            setTimeout(() => { fill.style.height = "100%"; }, 50);
+            const loaderText = document.getElementById("loader-text");
+            if (loaderText) loaderText.innerText = msg;
+            if (loader) loader.style.display = "flex";
+            if (fill) fill.style.height = "0%";
+            setTimeout(() => { if (fill) fill.style.height = "100%"; }, 50);
             setTimeout(() => {
-                loader.style.display = "none";
+                if (loader) loader.style.display = "none";
                 if (callback) callback();
             }, 800);
         }
 
         async function placeFinalOrder() {
-            const name = document.getElementById("chk-name").value.trim();
-            const phone = document.getElementById("chk-phone").value.trim();
-            const address = document.getElementById("chk-address").value.trim();
-            const payment = document.getElementById("chk-payment").value;
+            const chkName = document.getElementById("chk-name");
+            const chkPhone = document.getElementById("chk-phone");
+            const chkAddress = document.getElementById("chk-address");
+            const chkPayment = document.getElementById("chk-payment");
+
+            const name = chkName ? chkName.value.trim() : "";
+            const phone = chkPhone ? chkPhone.value.trim() : "";
+            const address = chkAddress ? chkAddress.value.trim() : "";
+            const payment = chkPayment ? chkPayment.value : "COD";
 
             if (!name || !phone || !address) {
                 showToast("Please fill name, phone and address");
@@ -1619,24 +1674,35 @@
         }
 
         /********************************-----------------
-         * 7. CUSTOMER AUTH & 5-STEP ORDER TRACKING
+         * 7. CUSTOMER AUTH & ORDER TRACKING
          ********************************----------------*/
         function openAccountModal() {
-            document.getElementById("logged-out-box").style.display = currentUser ? "none" : "block";
-            document.getElementById("logged-in-box").style.display = currentUser ? "block" : "none";
+            const outBox = document.getElementById("logged-out-box");
+            const inBox = document.getElementById("logged-in-box");
+            if (outBox) outBox.style.display = currentUser ? "none" : "block";
+            if (inBox) inBox.style.display = currentUser ? "block" : "none";
             if (currentUser) {
-                document.getElementById("prof-name").innerText = currentUser.name;
-                document.getElementById("prof-phone").innerText = currentUser.phone;
-                document.getElementById("prof-addr").innerText = currentUser.address;
+                const pName = document.getElementById("prof-name");
+                if (pName) pName.innerText = currentUser.name;
+                const pPhone = document.getElementById("prof-phone");
+                if (pPhone) pPhone.innerText = currentUser.phone;
+                const pAddr = document.getElementById("prof-addr");
+                if (pAddr) pAddr.innerText = currentUser.address;
             }
-            document.getElementById("account-modal").style.display = "flex";
+            const modal = document.getElementById("account-modal");
+            if (modal) modal.style.display = "flex";
         }
 
         async function handleCustomerAuth() {
-            const phone = document.getElementById("login-phone").value.trim();
-            const pin = document.getElementById("login-pin").value.trim();
-            const name = document.getElementById("login-name").value.trim();
-            const address = document.getElementById("login-addr").value.trim();
+            const lPhone = document.getElementById("login-phone");
+            const lPin = document.getElementById("login-pin");
+            const lName = document.getElementById("login-name");
+            const lAddr = document.getElementById("login-addr");
+
+            const phone = lPhone ? lPhone.value.trim() : "";
+            const pin = lPin ? lPin.value.trim() : "";
+            const name = lName ? lName.value.trim() : "";
+            const address = lAddr ? lAddr.value.trim() : "";
 
             if (phone.length < 10 || !pin) {
                 showToast("Enter valid 10-digit mobile & 4-digit PIN");
@@ -1675,14 +1741,19 @@
         }
 
         function updateUserHeader() {
-            document.getElementById("nav-user-label").innerText = currentUser ? currentUser.name.split(" ")[0] : "Login";
-            document.getElementById("welcome-text").innerText = currentUser
-                ? `👋 வணக்கம் ${currentUser.name}`
-                : `👋 நல்வரவு! Welcome to ${storeConfig.storeName}`;
+            const userLabel = document.getElementById("nav-user-label");
+            if (userLabel) userLabel.innerText = currentUser ? currentUser.name.split(" ")[0] : "Login";
+            const welcomeText = document.getElementById("welcome-text");
+            if (welcomeText) {
+                welcomeText.innerText = currentUser
+                    ? `👋 வணக்கம் ${currentUser.name}`
+                    : `👋 நல்வரவு! Welcome to ${storeConfig.storeName}`;
+            }
         }
 
         function renderCustomerOrders() {
             const box = document.getElementById("customer-orders-list");
+            if (!box) return;
             const visibleOrders = currentUser
                 ? orders.filter(o => o.customer_phone === currentUser.phone)
                 : orders;
@@ -1734,21 +1805,28 @@
             }).join("");
         }
 
-        /********************************-----------------
-         * 8. ADMIN DASHBOARD & SECURE ACTIONS
-         ********************************----------------*/
+        /****************-----------------
+         * 8. ADMIN DASHBOARD & ACTIONS
+         ****************----------------*/
         function openAdminAuth() {
-            document.getElementById("adm-user").value = "";
-            document.getElementById("adm-pass").value = "";
-            document.getElementById("admin-auth-modal").style.display = "flex";
+            const u = document.getElementById("adm-user");
+            if (u) u.value = "";
+            const p = document.getElementById("adm-pass");
+            if (p) p.value = "";
+            const modal = document.getElementById("admin-auth-modal");
+            if (modal) modal.style.display = "flex";
         }
 
         function verifyAdminLogin() {
-            const u = document.getElementById("adm-user").value.trim();
-            const p = document.getElementById("adm-pass").value.trim();
+            const uInput = document.getElementById("adm-user");
+            const pInput = document.getElementById("adm-pass");
+            const u = uInput ? uInput.value.trim() : "";
+            const p = pInput ? pInput.value.trim() : "";
+
             if (u === storeConfig.adminUser && p === storeConfig.adminPass) {
                 closeModal("admin-auth-modal");
-                document.getElementById("admin-screen").style.display = "block";
+                const adminScreen = document.getElementById("admin-screen");
+                if (adminScreen) adminScreen.style.display = "block";
                 loadAdminSettingsInputs();
                 renderBrands();
                 renderAdminBrandsList();
@@ -1760,13 +1838,16 @@
         }
 
         function closeAdminScreen() {
-            document.getElementById("admin-screen").style.display = "none";
+            const adminScreen = document.getElementById("admin-screen");
+            if (adminScreen) adminScreen.style.display = "none";
         }
 
         function switchAdminTab(tab) {
             ["orders", "pos", "products", "brands", "settings", "requests"].forEach(t => {
-                document.getElementById(`adm-tab-${t}-btn`).classList.toggle("active", t === tab);
-                document.getElementById(`adm-panel-${t}`).classList.toggle("active", t === tab);
+                const btn = document.getElementById(`adm-tab-${t}-btn`);
+                if (btn) btn.classList.toggle("active", t === tab);
+                const panel = document.getElementById(`adm-panel-${t}`);
+                if (panel) panel.classList.toggle("active", t === tab);
             });
             if (tab === "brands") renderAdminBrandsList();
             if (tab === "settings") loadAdminSettingsInputs();
@@ -1776,52 +1857,61 @@
 
         function renderAdminDashboard() {
             const totalRev = orders.filter(o => o.status !== "Cancelled").reduce((acc, o) => acc + Number(o.total || 0), 0);
-            document.getElementById("stat-orders").innerText = orders.length;
-            document.getElementById("stat-rev").innerText = `₹${totalRev}`;
-            document.getElementById("stat-prods").innerText = products.length;
-            document.getElementById("stat-brands").innerText = brands.length;
+            const statOrders = document.getElementById("stat-orders");
+            if (statOrders) statOrders.innerText = orders.length;
+            const statRev = document.getElementById("stat-rev");
+            if (statRev) statRev.innerText = `₹${totalRev}`;
+            const statProds = document.getElementById("stat-prods");
+            if (statProds) statProds.innerText = products.length;
+            const statBrands = document.getElementById("stat-brands");
+            if (statBrands) statBrands.innerText = brands.length;
 
             const ordBox = document.getElementById("admin-orders-container");
-            ordBox.innerHTML = orders.length ? orders.map(o => `
-                <div class="data-card">
-                    <div style="display:flex; justify-content:space-between; font-weight:800; align-items:center; flex-wrap:wrap; gap:6px;">
-                        <span>#${o.id} — ${o.customer_name} (${o.customer_phone})</span>
-                        <span style="color:var(--brand); font-size:15px;">₹${o.total}</span>
+            if (ordBox) {
+                ordBox.innerHTML = orders.length ? orders.map(o => `
+                    <div class="data-card">
+                        <div style="display:flex; justify-content:space-between; font-weight:800; align-items:center; flex-wrap:wrap; gap:6px;">
+                            <span>#${o.id} — ${o.customer_name} (${o.customer_phone})</span>
+                            <span style="color:var(--brand); font-size:15px;">₹${o.total}</span>
+                        </div>
+                        <div style="font-size:11px; color:#555; margin:4px 0;">📍 ${o.address} | 🕒 ${o.created_at}</div>
+                        <div style="font-size:12px; background:#f8fafc; padding:8px; border-radius:6px; margin:6px 0;">
+                            ${(o.items || []).map(i => `${i.name} × ${i.qty}`).join(", ")}
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;">
+                            <select id="status-sel-${o.id}" class="auth-input" style="margin:0; flex:1; min-width:140px;">
+                                ${["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"].map(st =>
+                                    `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`
+                                ).join("")}
+                            </select>
+                            <button class="fk-offer-btn" style="background:var(--brand); color:#fff; padding:9px 12px;" onclick="adminUpdateOrderStatus('${o.id}')">Update</button>
+                            <button class="fk-offer-btn" style="background:var(--brand-navy); color:#fff; padding:9px 12px;" onclick="openGstInvoiceModal('${o.id}')">Print Bill</button>
+                        </div>
                     </div>
-                    <div style="font-size:11px; color:#555; margin:4px 0;">📍 ${o.address} | 🕒 ${o.created_at}</div>
-                    <div style="font-size:12px; background:#f8fafc; padding:8px; border-radius:6px; margin:6px 0;">
-                        ${(o.items || []).map(i => `${i.name} × ${i.qty}`).join(", ")}
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;">
-                        <select id="status-sel-${o.id}" class="auth-input" style="margin:0; flex:1; min-width:140px;">
-                            ${["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"].map(st =>
-                                `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`
-                            ).join("")}
-                        </select>
-                        <button class="fk-offer-btn" style="background:var(--brand); color:#fff; padding:9px 12px;" onclick="adminUpdateOrderStatus('${o.id}')">Update</button>
-                        <button class="fk-offer-btn" style="background:var(--brand-navy); color:#fff; padding:9px 12px;" onclick="openGstInvoiceModal('${o.id}')">Print Bill</button>
-                    </div>
-                </div>
-            `).join("") : `<div class="data-card">No orders yet.</div>`;
+                `).join("") : `<div class="data-card">No orders yet.</div>`;
+            }
 
             const prodBox = document.getElementById("admin-products-list");
-            prodBox.innerHTML = products.map(p => `
-                <div class="data-card" style="display:flex; justify-content:space-between; align-items:center; padding:10px; gap:10px;">
-                    <img src="${p.img}" style="width:48px; height:48px; object-fit:contain; border-radius:6px; border:1px solid #eee; flex-shrink:0;">
-                    <div style="flex:1; min-width:0;">
-                        <strong style="font-size:13px;">${p.name}</strong>
-                        <div style="font-size:11px; color:#666;">${p.brand} • ₹${p.price} (MRP ₹${p.mrp})</div>
+            if (prodBox) {
+                prodBox.innerHTML = products.map(p => `
+                    <div class="data-card" style="display:flex; justify-content:space-between; align-items:center; padding:10px; gap:10px;">
+                        <img src="${p.img}" style="width:48px; height:48px; object-fit:contain; border-radius:6px; border:1px solid #eee; flex-shrink:0;">
+                        <div style="flex:1; min-width:0;">
+                            <strong style="font-size:13px;">${p.name}</strong>
+                            <div style="font-size:11px; color:#666;">${p.brand} • ₹${p.price} (MRP ₹${p.mrp})</div>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn-secondary" style="width:auto; padding:6px 10px; margin:0;" onclick="adminEditProduct('${p.id}')">Edit</button>
+                            <button class="btn-danger" style="width:auto; padding:6px 10px; margin:0;" onclick="adminDeleteProduct('${p.id}')">Delete</button>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:6px;">
-                        <button class="btn-secondary" style="width:auto; padding:6px 10px; margin:0;" onclick="adminEditProduct('${p.id}')">Edit</button>
-                        <button class="btn-danger" style="width:auto; padding:6px 10px; margin:0;" onclick="adminDeleteProduct('${p.id}')">Delete</button>
-                    </div>
-                </div>
-            `).join("");
+                `).join("");
+            }
         }
 
         async function adminUpdateOrderStatus(orderId) {
-            const newStatus = document.getElementById(`status-sel-${orderId}`).value;
+            const sel = document.getElementById(`status-sel-${orderId}`);
+            const newStatus = sel ? sel.value : "Confirmed";
             const ord = orders.find(o => o.id === orderId);
             if (!ord) return;
             ord.status = newStatus;
@@ -1836,21 +1926,30 @@
 
         // Store Settings
         function loadAdminSettingsInputs() {
-            document.getElementById("set-store-name").value = storeConfig.storeName || "";
-            document.getElementById("set-store-tamil").value = storeConfig.storeTamil || "";
-            document.getElementById("set-store-addr").value = storeConfig.storeAddress || "";
-            document.getElementById("set-admin-phone").value = storeConfig.adminPhone || "";
-            document.getElementById("set-ticker").value = storeConfig.tickerText || "";
-            document.getElementById("set-logo-url").value = storeConfig.logoUrl || "";
-            document.getElementById("set-adm-user").value = storeConfig.adminUser || "";
-            document.getElementById("set-adm-pass").value = storeConfig.adminPass || "";
+            const setStoreName = document.getElementById("set-store-name");
+            if (setStoreName) setStoreName.value = storeConfig.storeName || "";
+            const setStoreTamil = document.getElementById("set-store-tamil");
+            if (setStoreTamil) setStoreTamil.value = storeConfig.storeTamil || "";
+            const setStoreAddr = document.getElementById("set-store-addr");
+            if (setStoreAddr) setStoreAddr.value = storeConfig.storeAddress || "";
+            const setAdminPhone = document.getElementById("set-admin-phone");
+            if (setAdminPhone) setAdminPhone.value = storeConfig.adminPhone || "";
+            const setTicker = document.getElementById("set-ticker");
+            if (setTicker) setTicker.value = storeConfig.tickerText || "";
+            const setLogoUrl = document.getElementById("set-logo-url");
+            if (setLogoUrl) setLogoUrl.value = storeConfig.logoUrl || "";
+            const setAdmUser = document.getElementById("set-adm-user");
+            if (setAdmUser) setAdmUser.value = storeConfig.adminUser || "";
+            const setAdmPass = document.getElementById("set-adm-pass");
+            if (setAdmPass) setAdmPass.value = storeConfig.adminPass || "";
         }
 
         async function handleStoreLogoUpload(input) {
             if (!input.files || !input.files[0]) return;
             try {
                 const url = await uploadFileToSupabaseStorage(input.files[0], "logo");
-                document.getElementById("set-logo-url").value = url;
+                const logoUrlInput = document.getElementById("set-logo-url");
+                if (logoUrlInput) logoUrlInput.value = url;
                 showToast("Logo uploaded to Supabase!");
             } catch (err) {
                 showToast("Logo upload failed: " + err.message);
@@ -1859,15 +1958,23 @@
 
         async function saveStoreBrandSettings() {
             storeConfig.id = "main_config";
-            storeConfig.storeName = document.getElementById("set-store-name").value.trim() || "SUBHA MEDICAL";
-            storeConfig.storeTamil = document.getElementById("set-store-tamil").value.trim() || "சுபா மெடிக்கல்";
-            storeConfig.storeAddress = document.getElementById("set-store-addr").value.trim() || "";
-            storeConfig.adminPhone = document.getElementById("set-admin-phone").value.trim() || "9487165045";
-            storeConfig.tickerText = document.getElementById("set-ticker").value.trim() || "";
-            storeConfig.logoUrl = document.getElementById("set-logo-url").value.trim();
+            const setStoreName = document.getElementById("set-store-name");
+            storeConfig.storeName = setStoreName ? setStoreName.value.trim() || "SUBHA MEDICAL" : "SUBHA MEDICAL";
+            const setStoreTamil = document.getElementById("set-store-tamil");
+            storeConfig.storeTamil = setStoreTamil ? setStoreTamil.value.trim() || "சுபா மெடிக்கல்" : "சுபா மெடிக்கல்";
+            const setStoreAddr = document.getElementById("set-store-addr");
+            storeConfig.storeAddress = setStoreAddr ? setStoreAddr.value.trim() || "" : "";
+            const setAdminPhone = document.getElementById("set-admin-phone");
+            storeConfig.adminPhone = setAdminPhone ? setAdminPhone.value.trim() || "9487165045" : "9487165045";
+            const setTicker = document.getElementById("set-ticker");
+            storeConfig.tickerText = setTicker ? setTicker.value.trim() || "" : "";
+            const setLogoUrl = document.getElementById("set-logo-url");
+            storeConfig.logoUrl = setLogoUrl ? setLogoUrl.value.trim() : "";
             
-            const u = document.getElementById("set-adm-user").value.trim();
-            const p = document.getElementById("set-adm-pass").value.trim();
+            const setAdmUser = document.getElementById("set-adm-user");
+            const setAdmPass = document.getElementById("set-adm-pass");
+            const u = setAdmUser ? setAdmUser.value.trim() : "";
+            const p = setAdmPass ? setAdmPass.value.trim() : "";
             if (u) storeConfig.adminUser = u;
             if (p) storeConfig.adminPass = p;
 
@@ -1881,21 +1988,27 @@
         }
 
         function applyStoreBrandingToDOM() {
-            document.getElementById("page-title").innerText = `${storeConfig.storeName} | Online Pharmacy`;
-            document.getElementById("nav-store-title").innerText = storeConfig.storeName;
-            document.getElementById("nav-store-subtitle").innerText = storeConfig.storeTamil;
-            document.getElementById("hero-store-title").innerText = storeConfig.storeName;
-            document.getElementById("hero-store-address").innerHTML = `${storeConfig.storeAddress}<br>📞 +91 ${storeConfig.adminPhone} • Genuine Medicines`;
-            document.getElementById("top-marquee-ticker").innerText = `${storeConfig.tickerText} 📞 +91 ${storeConfig.adminPhone}`;
+            const pageTitle = document.getElementById("page-title");
+            if (pageTitle) pageTitle.innerText = `${storeConfig.storeName} | Online Pharmacy`;
+            const navStoreTitle = document.getElementById("nav-store-title");
+            if (navStoreTitle) navStoreTitle.innerText = storeConfig.storeName;
+            const navStoreSubtitle = document.getElementById("nav-store-subtitle");
+            if (navStoreSubtitle) navStoreSubtitle.innerText = storeConfig.storeTamil;
+            const heroStoreTitle = document.getElementById("hero-store-title");
+            if (heroStoreTitle) heroStoreTitle.innerText = storeConfig.storeName;
+            const heroStoreAddr = document.getElementById("hero-store-address");
+            if (heroStoreAddr) heroStoreAddr.innerHTML = `${storeConfig.storeAddress}<br>📞 +91 ${storeConfig.adminPhone} • Genuine Medicines`;
+            const topMarquee = document.getElementById("top-marquee-ticker");
+            if (topMarquee) topMarquee.innerText = `${storeConfig.tickerText} 📞 +91 ${storeConfig.adminPhone}`;
 
             const navLogo = document.getElementById("nav-logo-box");
             const heroLogo = document.getElementById("hero-logo-box");
             if (storeConfig.logoUrl) {
-                navLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
-                heroLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
+                if (navLogo) navLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
+                if (heroLogo) heroLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
             } else {
-                navLogo.innerHTML = `<i class='bx bx-plus-medical'></i>`;
-                heroLogo.innerHTML = `<i class='bx bx-plus-medical' style="font-size:28px; color:var(--brand);"></i>`;
+                if (navLogo) navLogo.innerHTML = `<i class='bx bx-plus-medical'></i>`;
+                if (heroLogo) heroLogo.innerHTML = `<i class='bx bx-plus-medical' style="font-size:28px; color:var(--brand);"></i>`;
             }
             updateUserHeader();
         }
@@ -1903,12 +2016,15 @@
         // POS Billing
         function renderPosMedicineDropdown() {
             const sel = document.getElementById("pos-med-select");
+            if (!sel) return;
             sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} — ₹${p.price}</option>`).join("");
         }
 
         function addPosItem() {
-            const id = document.getElementById("pos-med-select").value;
-            const qty = Math.max(1, Number(document.getElementById("pos-med-qty").value || 1));
+            const sel = document.getElementById("pos-med-select");
+            const id = sel ? sel.value : "";
+            const qtyInput = document.getElementById("pos-med-qty");
+            const qty = Math.max(1, Number(qtyInput ? qtyInput.value || 1 : 1));
             const p = products.find(x => x.id === id);
             if (!p) return;
             posItems.push({ id: p.id, name: p.name, qty, price: p.price, mrp: p.mrp });
@@ -1917,18 +2033,22 @@
 
         function renderPosItems() {
             const box = document.getElementById("pos-items-list");
+            if (!box) return;
             let total = 0;
             box.innerHTML = posItems.map((item, idx) => {
                 total += item.price * item.qty;
                 return `<div style="display:flex; justify-content:space-between; padding:4px 0; font-size:12px;"><span>${item.name} x${item.qty} = ₹${item.price*item.qty}</span><button class="btn-danger" style="width:auto; padding:2px 6px;" onclick="posItems.splice(${idx},1); renderPosItems();">×</button></div>`;
             }).join("");
-            document.getElementById("pos-total-lbl").innerText = `₹${total}`;
+            const totalLbl = document.getElementById("pos-total-lbl");
+            if (totalLbl) totalLbl.innerText = `₹${total}`;
         }
 
         async function completePosBill() {
             if (posItems.length === 0) return;
-            const name = document.getElementById("pos-cust-name").value.trim() || "Walk-In Customer";
-            const phone = document.getElementById("pos-cust-phone").value.trim() || storeConfig.adminPhone;
+            const cName = document.getElementById("pos-cust-name");
+            const cPhone = document.getElementById("pos-cust-phone");
+            const name = cName ? cName.value.trim() || "Walk-In Customer" : "Walk-In Customer";
+            const phone = cPhone ? cPhone.value.trim() || storeConfig.adminPhone : storeConfig.adminPhone;
             const total = posItems.reduce((acc, i) => acc + (i.price * i.qty), 0);
 
             const posOrder = {
@@ -1948,17 +2068,27 @@
 
         // Invoice Generator
         function loadInvoiceConfigInputs() {
-            document.getElementById("inv-cfg-dl").value = storeConfig.dlNo || "TN-TPR-20B/21B-0452";
-            document.getElementById("inv-cfg-gstin").value = storeConfig.gstin || "33AABCS1429B1Z5";
-            document.getElementById("inv-cfg-pharm").value = storeConfig.pharmacist || "A. SoundaraRajan";
-            document.getElementById("inv-cfg-doc").value = storeConfig.doctor || "Dr. Self";
+            const invDl = document.getElementById("inv-cfg-dl");
+            if (invDl) invDl.value = storeConfig.dlNo || "TN-TPR-20B/21B-0452";
+            const invGstin = document.getElementById("inv-cfg-gstin");
+            if (invGstin) invGstin.value = storeConfig.gstin || "33AABCS1429B1Z5";
+            const invPharm = document.getElementById("inv-cfg-pharm");
+            if (invPharm) invPharm.value = storeConfig.pharmacist || "A. SoundaraRajan";
+            const invDoc = document.getElementById("inv-cfg-doc");
+            if (invDoc) invDoc.value = storeConfig.doctor || "Dr. Self";
         }
 
         function saveInvoiceConfigAndRefresh() {
-            storeConfig.dlNo = document.getElementById("inv-cfg-dl").value.trim();
-            storeConfig.gstin = document.getElementById("inv-cfg-gstin").value.trim();
-            storeConfig.pharmacist = document.getElementById("inv-cfg-pharm").value.trim();
-            storeConfig.doctor = document.getElementById("inv-cfg-doc").value.trim();
+            const invDl = document.getElementById("inv-cfg-dl");
+            const invGstin = document.getElementById("inv-cfg-gstin");
+            const invPharm = document.getElementById("inv-cfg-pharm");
+            const invDoc = document.getElementById("inv-cfg-doc");
+
+            storeConfig.dlNo = invDl ? invDl.value.trim() : "TN-TPR-20B/21B-0452";
+            storeConfig.gstin = invGstin ? invGstin.value.trim() : "33AABCS1429B1Z5";
+            storeConfig.pharmacist = invPharm ? invPharm.value.trim() : "A. SoundaraRajan";
+            storeConfig.doctor = invDoc ? invDoc.value.trim() : "Dr. Self";
+
             saveAllLocal();
             if (activeInvoiceOrderId) renderPrintableInvoice(activeInvoiceOrderId);
         }
@@ -1967,11 +2097,13 @@
             activeInvoiceOrderId = orderId;
             loadInvoiceConfigInputs();
             renderPrintableInvoice(orderId);
-            document.getElementById("gst-invoice-modal").style.display = "flex";
+            const modal = document.getElementById("gst-invoice-modal");
+            if (modal) modal.style.display = "flex";
         }
 
         function toggleThermalMode() {
-            document.getElementById("printable-invoice-area").classList.toggle("thermal-mode");
+            const area = document.getElementById("printable-invoice-area");
+            if (area) area.classList.toggle("thermal-mode");
         }
 
         function renderPrintableInvoice(orderId) {
@@ -1981,25 +2113,28 @@
                 <tr><td>${idx+1}</td><td>${i.name}</td><td>${i.qty}</td><td>₹${i.price}</td><td>₹${i.price * i.qty}</td></tr>
             `).join("");
 
-            document.getElementById("printable-invoice-area").innerHTML = `
-                <div class="inv-header">
-                    <div>
-                        <div class="inv-store-title">${storeConfig.storeName} (${storeConfig.storeTamil})</div>
-                        <div style="font-size:11px;">${storeConfig.storeAddress}</div>
-                        <div style="font-size:11px;">Phone: +91 ${storeConfig.adminPhone}</div>
+            const area = document.getElementById("printable-invoice-area");
+            if (area) {
+                area.innerHTML = `
+                    <div class="inv-header">
+                        <div>
+                            <div class="inv-store-title">${storeConfig.storeName} (${storeConfig.storeTamil})</div>
+                            <div style="font-size:11px;">${storeConfig.storeAddress}</div>
+                            <div style="font-size:11px;">Phone: +91 ${storeConfig.adminPhone}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="background:#12243a; color:#fff; padding:4px 8px; font-weight:900;">TAX INVOICE</div>
+                            <div style="font-size:11px;">#INV-${ord.id}</div>
+                        </div>
                     </div>
-                    <div style="text-align:right;">
-                        <div style="background:#12243a; color:#fff; padding:4px 8px; font-weight:900;">TAX INVOICE</div>
-                        <div style="font-size:11px;">#INV-${ord.id}</div>
-                    </div>
-                </div>
-                <div><strong>Customer:</strong> ${ord.customer_name} (${ord.customer_phone})</div>
-                <table class="inv-table" style="margin-top:10px;">
-                    <thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-                    <tbody>${rowsHTML}</tbody>
-                </table>
-                <div style="text-align:right; font-weight:900; font-size:15px; margin-top:10px;">GRAND TOTAL: ₹${ord.total}</div>
-            `;
+                    <div><strong>Customer:</strong> ${ord.customer_name} (${ord.customer_phone})</div>
+                    <table class="inv-table" style="margin-top:10px;">
+                        <thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+                        <tbody>${rowsHTML}</tbody>
+                    </table>
+                    <div style="text-align:right; font-weight:900; font-size:15px; margin-top:10px;">GRAND TOTAL: ₹${ord.total}</div>
+                `;
+            }
         }
 
         function sendWhatsAppInvoice() {
@@ -2018,7 +2153,10 @@
             window.location.href = `tel:+91${storeConfig.adminPhone}`;
         }
 
-        function openReqModal() { document.getElementById("req-modal").style.display = "flex"; }
+        function openReqModal() {
+            const modal = document.getElementById("req-modal");
+            if (modal) modal.style.display = "flex";
+        }
         function submitMedicineRequest() {
             showToast("Prescription submitted!");
             closeModal("req-modal");
@@ -2026,16 +2164,22 @@
 
         function switchBottomNav(tab) {
             ["home", "wishlist", "cart", "orders"].forEach(t => {
-                document.getElementById(`tab-${t}`).style.display = (t === tab) ? "block" : "none";
+                const tabEl = document.getElementById(`tab-${t}`);
+                if (tabEl) tabEl.style.display = (t === tab) ? "block" : "none";
                 const navEl = document.getElementById(`bnav-${t}`);
                 if (navEl) navEl.classList.toggle("active", t === tab);
             });
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
-        function closeModal(id) { document.getElementById(id).style.display = "none"; }
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = "none";
+        }
+        
         function showToast(msg) {
             const t = document.getElementById("toast");
+            if (!t) return;
             t.innerText = msg;
             t.className = "show";
             setTimeout(() => { t.className = ""; }, 2600);
@@ -2043,3 +2187,4 @@
     </script>
 </body>
 </html>
+
