@@ -645,6 +645,7 @@
             <button id="adm-tab-pos-btn" onclick="switchAdminTab('pos')">🧾 Walk-In POS Billing</button>
             <button id="adm-tab-products-btn" onclick="switchAdminTab('products')">💊 Manage Medicines</button>
             <button id="adm-tab-brands-btn" onclick="switchAdminTab('brands')">🏷️ Brand Management</button>
+            <button id="adm-tab-categories-btn" onclick="switchAdminTab('categories')">📁 Category Management</button>
             <button id="adm-tab-settings-btn" onclick="switchAdminTab('settings')">⚙️ Store & Logo</button>
             <button id="adm-tab-requests-btn" onclick="switchAdminTab('requests')">📋 Rx Requests</button>
         </div>
@@ -686,14 +687,11 @@
                 <select id="p-brand-select" class="auth-input" style="margin-top:2px;"></select>
 
                 <input type="text" id="p-use" class="auth-input" placeholder="Usage / Generic Name (e.g. Fever & Pain)">
-                <select id="p-cat" class="auth-input">
-                    <option value="Fever & Pain">Fever & Pain</option>
-                    <option value="Diabetes & BP">Diabetes & BP</option>
-                    <option value="Veterinary">Veterinary (கால்நடை)</option>
-                    <option value="Vitamins & Care">Vitamins & Care</option>
-                    <option value="First Aid">First Aid & Surgical</option>
-                </select>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                
+                <label style="font-size:11px; font-weight:700; color:#555; margin-top:4px; display:block;">Category:</label>
+                <select id="p-cat" class="auth-input" style="margin-top:2px;"></select>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;">
                     <input type="number" id="p-price" class="auth-input" placeholder="Selling Price (₹)">
                     <input type="number" id="p-mrp" class="auth-input" placeholder="MRP (₹)">
                 </div>
@@ -759,7 +757,20 @@
             </div>
         </div>
 
-        <!-- Admin Panel 5: Store Settings -->
+        <!-- Admin Panel 5: Category Management (Editable First-Aid, etc.) -->
+        <div class="fk-admin-panel" id="adm-panel-categories">
+            <div class="data-card">
+                <h4 style="margin-top:0;">Manage Product Categories (Add First Aid, etc.)</h4>
+                <div style="display:flex; gap:6px; margin-bottom:10px;">
+                    <input type="text" id="cat-name-input" class="auth-input" style="margin:0; flex:1;" placeholder="Category Name (e.g. First Aid)">
+                    <input type="text" id="cat-icon-input" class="auth-input" style="margin:0; width:130px;" placeholder="Boxicon (e.g. bx-band-aid)" value="bx-plus-medical">
+                    <button class="btn-primary" style="width:auto; padding:10px 16px; margin:0;" onclick="adminAddCategory()">Add Category</button>
+                </div>
+                <div id="admin-categories-list"></div>
+            </div>
+        </div>
+
+        <!-- Admin Panel 6: Store Settings -->
         <div class="fk-admin-panel" id="adm-panel-settings">
             <div class="data-card">
                 <h4 style="margin-top:0;">🏥 Pharmacy Name, Logo & Contact Settings (Cloud Synced)</h4>
@@ -789,15 +800,15 @@
                 <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
                 <h4 style="margin:0 0 6px;">🔐 Change Admin Login Credentials</h4>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                    <input type="text" id="set-adm-user" class="auth-input" placeholder="New Staff Username">
-                    <input type="password" id="set-adm-pass" class="auth-input" placeholder="New Staff Password">
+                    <input type="text" id="adm-user-change" class="auth-input" placeholder="New Staff Username">
+                    <input type="password" id="adm-pass-change" class="auth-input" placeholder="New Staff Password">
                 </div>
 
                 <button class="btn-primary" onclick="saveStoreBrandSettings()">Save & Sync Store Settings to Supabase</button>
             </div>
         </div>
 
-        <!-- Admin Panel 6: Medicine Requests -->
+        <!-- Admin Panel 7: Medicine Requests -->
         <div class="fk-admin-panel" id="adm-panel-requests">
             <div id="admin-requests-container"></div>
         </div>
@@ -836,7 +847,7 @@
 
         let storeConfig = Object.assign({}, DEFAULT_STORE_CONFIG, JSON.parse(localStorage.getItem("subha_store_cfg") || "{}"));
 
-        const CATEGORIES = [
+        let categoriesList = JSON.parse(localStorage.getItem("subha_categories")) || [
             { name: "All", label: "அனைத்தும் / All", icon: "bx-grid-alt" },
             { name: "Fever & Pain", label: "காய்ச்சல் / Fever", icon: "bx-plus-medical" },
             { name: "Diabetes & BP", label: "சர்க்கரை & BP", icon: "bx-pulse" },
@@ -855,9 +866,7 @@
 
         const SEED_PRODUCTS = [
             { id: "P101", name: "Dolo 650mg Tablet (15 Tabs)", brand: "Micro Labs", category: "Fever & Pain", use: "காய்ச்சல் & உடல் வலி / Fever & Pain", price: 30, mrp: 35, batch: "DL6526", exp: "08/2028", hsn: "3004", gst: 12, rx: false, inStock: true, rating: 4.9, img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400", reviews: [{ author: "Ramesh K", stars: 5, text: "Genuine medicine, fast delivery in Vallipuram." }] },
-            { id: "P102", name: "Telma 40mg Strip (15 Tabs)", brand: "Glenmark", category: "Diabetes & BP", use: "ரத்த அழுத்தம் / Blood Pressure", price: 195, mrp: 230, batch: "TM4012", exp: "11/2028", hsn: "3004", gst: 12, rx: true, inStock: true, rating: 4.8, img: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400", reviews: [] },
-            { id: "P103", name: "Himalaya HimCal Veterinary Calcium (1L)", brand: "Himalaya Vet", category: "Veterinary", use: "கறவை மாடுகளுக்கான கால்சியம் / Cattle Calcium", price: 215, mrp: 250, batch: "HC904", exp: "06/2028", hsn: "2309", gst: 12, rx: false, inStock: true, rating: 4.9, img: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400", reviews: [] },
-            { id: "P104", name: "Albendazole Vet Bolus 3000mg", brand: "Intas Pharma", category: "Veterinary", use: "கால்நடை குடற்புழு நீக்கம் / Cattle Dewormer", price: 55, mrp: 70, batch: "AB302", exp: "09/2028", hsn: "3004", gst: 12, rx: false, inStock: true, rating: 4.7, img: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400", reviews: [] }
+            { id: "P102", name: "Telma 40mg Strip (15 Tabs)", brand: "Glenmark", category: "Diabetes & BP", use: "ரத்த அழுத்தம் / Blood Pressure", price: 195, mrp: 230, batch: "TM4012", exp: "11/2028", hsn: "3004", gst: 12, rx: true, inStock: true, rating: 4.8, img: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400", reviews: [] }
         ];
 
         let products = JSON.parse(localStorage.getItem("subha_products")) || SEED_PRODUCTS;
@@ -897,6 +906,7 @@
                 localStorage.setItem("subha_store_cfg", JSON.stringify(storeConfig));
                 localStorage.setItem("subha_products", JSON.stringify(products));
                 localStorage.setItem("subha_brands", JSON.stringify(brands));
+                localStorage.setItem("subha_categories", JSON.stringify(categoriesList));
                 localStorage.setItem("subha_orders", JSON.stringify(orders));
                 localStorage.setItem("subha_requests", JSON.stringify(medRequests));
                 localStorage.setItem("subha_users", JSON.stringify(users));
@@ -908,9 +918,9 @@
             }
         }
 
-        /**************************************************************
+        /********************************-----------------
          * 2. SUPABASE STORAGE FILE UPLOAD HELPER
-         **************************************************************/
+         ********************************----------------*/
         async function uploadFileToSupabaseStorage(file, folder = "uploads") {
             if (!sbClient) throw new Error("Supabase client not initialized");
             const fileExt = file.name.split('.').pop();
@@ -930,9 +940,9 @@
             return publicUrlData.publicUrl;
         }
 
-        /**************************************************************
+        /********************************-----------------
          * 3. SUPABASE REALTIME CONNECTION & CENTRAL DB SYNC
-         **************************************************************/
+         ********************************----------------*/
         function initSupabaseConnection() {
             const url = DEFAULT_SUPABASE_URL;
             const key = DEFAULT_SUPABASE_KEY;
@@ -978,6 +988,7 @@
 
                 saveAllLocal();
                 renderBrands();
+                renderCategories();
                 renderStoreProducts();
                 renderCustomerOrders();
                 if (document.getElementById("admin-screen").style.display === "block") {
@@ -999,9 +1010,9 @@
                 .subscribe();
         }
 
-        /**************************************************************
-         * 4. BRAND MANAGEMENT & CAROUSEL
-         **************************************************************/
+        /********************************-----------------
+         * 4. BRAND & CATEGORY MANAGEMENT
+         ********************************----------------*/
         function renderBrands() {
             const activeBrands = brands.filter(b => b.active !== false);
             const box = document.getElementById("brands-carousel");
@@ -1156,9 +1167,55 @@
             `).join("");
         }
 
-        /********************************-----------------
+        // Category Management
+        function adminAddCategory() {
+            const name = document.getElementById("cat-name-input").value.trim();
+            const icon = document.getElementById("cat-icon-input").value.trim() || "bx-plus-medical";
+            if (!name) {
+                showToast("Enter category name");
+                return;
+            }
+            if (categoriesList.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                showToast("Category already exists");
+                return;
+            }
+            categoriesList.push({ name, label: name, icon });
+            saveAllLocal();
+            renderCategories();
+            renderAdminCategoriesList();
+            document.getElementById("cat-name-input").value = "";
+            showToast("Category added!");
+        }
+
+        function adminDeleteCategory(catName) {
+            if (catName === "All") return;
+            categoriesList = categoriesList.filter(c => c.name !== catName);
+            saveAllLocal();
+            renderCategories();
+            renderAdminCategoriesList();
+            showToast("Category removed");
+        }
+
+        function renderAdminCategoriesList() {
+            const box = document.getElementById("admin-categories-list");
+            if (!box) return;
+            box.innerHTML = categoriesList.map(c => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #eee; font-size:12px;">
+                    <span><i class='bx ${c.icon}'></i> <strong>${c.name}</strong></span>
+                    ${c.name !== 'All' ? `<button class="btn-danger" style="width:auto; padding:3px 8px; margin:0;" onclick="adminDeleteCategory('${c.name}')">Delete</button>` : '<span style="font-size:10px; color:#888;">Default</span>'}
+                </div>
+            `).join("");
+
+            // Update Product Form Category Dropdown
+            const pCatSel = document.getElementById("p-cat");
+            if (pCatSel) {
+                pCatSel.innerHTML = categoriesList.filter(c => c.name !== 'All').map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+            }
+        }
+
+        /****************-----------------
          * 5. PRODUCT MANAGEMENT & STORAGE UPLOADS
-         ********************************----------------*/
+         ****************----------------*/
         function handleProductImageUpload(input) {
             if (!input.files || !input.files[0]) return;
             const file = input.files[0];
@@ -1314,7 +1371,7 @@
         function renderCategories() {
             const grid = document.getElementById("categories-grid");
             if (!grid) return;
-            grid.innerHTML = CATEGORIES.map(c => `
+            grid.innerHTML = categoriesList.map(c => `
                 <div class="tc-card ${activeCategory === c.name ? 'active' : ''}" onclick="filterByCategory('${c.name}')">
                     <i class='bx ${c.icon} tc-icon'></i>
                     <span>${c.label}</span>
@@ -1670,12 +1727,18 @@
                 renderStoreProducts();
                 switchBottomNav("orders");
                 showToast(`Order #${newOrder.id} Placed Successfully!`);
+
+                // Automated WhatsApp Notification to Admin upon Order Placement
+                const itemsListText = orderItems.map(i => `• ${i.name} (x${i.qty})`).join("\n");
+                const waMessage = encodeURIComponent(`📦 *New Order Received! (#${newOrder.id})*\n\n*Customer:* ${name}\n*Phone:* ${phone}\n*Address:* ${address}\n\n*Items:*\n${itemsListText}\n\n*Total Amount:* ₹${netTotal}\n*Payment:* ${payment}`);
+                const adminPhoneClean = (storeConfig.adminPhone || "9487165045").replace(/\D/g, "");
+                window.open(`https://wa.me/91${adminPhoneClean}?text=${waMessage}`, "_blank");
             });
         }
 
-        /********************************-----------------
+        /****************-----------------
          * 7. CUSTOMER AUTH & ORDER TRACKING
-         ********************************----------------*/
+         ****************----------------*/
         function openAccountModal() {
             const outBox = document.getElementById("logged-out-box");
             const inBox = document.getElementById("logged-in-box");
@@ -1767,6 +1830,7 @@
 
             box.innerHTML = visibleOrders.map(o => {
                 const curIdx = steps.indexOf(o.status);
+                const isDelivered = (o.status === "Delivered");
                 const progressHTML = o.status === "Cancelled"
                     ? `<div style="color:red; font-weight:800; font-size:12px;">❌ Cancelled</div>`
                     : `<div class="subha-track-steps">
@@ -1786,7 +1850,7 @@
                                 <div style="font-size:10px; color:#888;">${o.created_at}</div>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
-                                <button class="nav-pill-btn" onclick="openGstInvoiceModal('${o.id}')"><i class='bx bx-receipt'></i> Bill</button>
+                                ${isDelivered ? `<button class="nav-pill-btn" style="background:#d4edda; color:#155724; border-color:#c3e6cb;" onclick="openGstInvoiceModal('${o.id}')"><i class='bx bx-receipt'></i> Print Bill</button>` : `<span style="font-size:10px; color:#888; font-style:italic;">Bill available after delivery</span>`}
                                 <span style="background:var(--brand-light); color:var(--brand-dark); font-weight:800; font-size:11px; padding:4px 8px; border-radius:6px;">${o.status}</span>
                             </div>
                         </div>
@@ -1830,6 +1894,7 @@
                 loadAdminSettingsInputs();
                 renderBrands();
                 renderAdminBrandsList();
+                renderAdminCategoriesList();
                 renderPosMedicineDropdown();
                 renderAdminDashboard();
             } else {
@@ -1843,13 +1908,14 @@
         }
 
         function switchAdminTab(tab) {
-            ["orders", "pos", "products", "brands", "settings", "requests"].forEach(t => {
+            ["orders", "pos", "products", "brands", "categories", "settings", "requests"].forEach(t => {
                 const btn = document.getElementById(`adm-tab-${t}-btn`);
                 if (btn) btn.classList.toggle("active", t === tab);
                 const panel = document.getElementById(`adm-panel-${t}`);
                 if (panel) panel.classList.toggle("active", t === tab);
             });
             if (tab === "brands") renderAdminBrandsList();
+            if (tab === "categories") renderAdminCategoriesList();
             if (tab === "settings") loadAdminSettingsInputs();
             if (tab === "pos") renderPosMedicineDropdown();
             renderAdminDashboard();
@@ -1938,9 +2004,9 @@
             if (setTicker) setTicker.value = storeConfig.tickerText || "";
             const setLogoUrl = document.getElementById("set-logo-url");
             if (setLogoUrl) setLogoUrl.value = storeConfig.logoUrl || "";
-            const setAdmUser = document.getElementById("set-adm-user");
+            const setAdmUser = document.getElementById("adm-user-change");
             if (setAdmUser) setAdmUser.value = storeConfig.adminUser || "";
-            const setAdmPass = document.getElementById("set-adm-pass");
+            const setAdmPass = document.getElementById("adm-pass-change");
             if (setAdmPass) setAdmPass.value = storeConfig.adminPass || "";
         }
 
@@ -1971,8 +2037,8 @@
             const setLogoUrl = document.getElementById("set-logo-url");
             storeConfig.logoUrl = setLogoUrl ? setLogoUrl.value.trim() : "";
             
-            const setAdmUser = document.getElementById("set-adm-user");
-            const setAdmPass = document.getElementById("set-adm-pass");
+            const setAdmUser = document.getElementById("adm-user-change");
+            const setAdmPass = document.getElementById("adm-pass-change");
             const u = setAdmUser ? setAdmUser.value.trim() : "";
             const p = setAdmPass ? setAdmPass.value.trim() : "";
             if (u) storeConfig.adminUser = u;
