@@ -4,43 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title id="page-title">Subha Medical | சுபா மெடிக்கல் - Online Pharmacy & Healthcare</title>
-    <!-- Boxicons & Supabase JS SDK v2 -->
+    <title id="page-title">Subha Medical | Online Pharmacy</title>
+    <!-- Boxicons, Supabase JS, and HTML2PDF JS -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
-            --brand: #008b87;
-            --brand-dark: #006c6a;
-            --brand-light: #e7f7f6;
-            --brand-border: #b8dfdd;
-            --brand-navy: #12243a;
-            --brand-red: #ed2424;
-            --brand-yellow: #ffc928;
-            --bg-color: #f4f7f9;
-            --text-dark: #12243a;
-            --text-light: #667085;
-            --card-bg: #ffffff;
-            --danger: #ed2424;
-            --star-color: #f5a623;
-            --yellow-bg: #f7fbfb;
+            --brand: #008b87; --brand-dark: #006c6a; --brand-light: #e7f7f6; --brand-border: #b8dfdd;
+            --brand-navy: #12243a; --brand-red: #ed2424; --brand-yellow: #ffc928; --bg-color: #f4f7f9;
+            --text-dark: #12243a; --text-light: #667085; --card-bg: #ffffff;
+            --danger: #ed2424; --star-color: #f5a623; --yellow-bg: #f7fbfb;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg-color); margin: 0; padding-bottom: 135px; color: var(--text-dark); }
 
-        /* Moving Ticker */
         .moving-ticker { background: #fff3cd; color: #856404; padding: 7px 10px; font-size: 12px; font-weight: bold; border-bottom: 1px solid #ffeeba; display: block; width: 100%; }
 
-        /* Heart Loader Overlay */
         .full-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.96); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .heart-container { position: relative; width: 90px; height: 90px; }
         .heart-bg { font-size: 90px; color: #e0e0e0; position: absolute; left: 0; top: 0; }
-        .heart-fill { position: absolute; bottom: 0; left: 0; height: 0%; width: 100%; overflow: hidden; color: var(--brand); transition: height 0.6s ease-in-out; display: flex; align-items: flex-end; }
+        .heart-fill { position: absolute; bottom: 0; left: 0; height: 0%; width: 100%; overflow: hidden; color: var(--brand); transition: height 0.4s ease; display: flex; align-items: flex-end; }
         .heart-fill i { font-size: 90px; line-height: 90px; }
 
-        /* Navbar */
         .navbar { background: #fff; padding: 10px 14px 12px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #e7ecef; box-shadow: 0 2px 12px rgba(18,36,58,0.07); }
         .nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
         .brand-name { font-weight: 900; font-size: 17px; color: var(--brand-navy); display: flex; align-items: center; gap: 8px; cursor: pointer; min-width: 0; }
@@ -51,244 +39,105 @@
         .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; }
         .sync-dot.offline { background: #f59e0b; }
 
-        .welcome-msg { font-size: 12px; color: var(--brand-dark); font-weight: 700; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* Search Bar + Voice + Sort */
         .search-row { display: flex; gap: 6px; align-items: center; }
         .search-bar { flex: 1; display: flex; background: #f3f6f8; border-radius: 8px; border: 1px solid #dce4e8; align-items: center; padding: 0 10px; }
-        .search-bar:focus-within { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(0,139,135,0.12); background: #fff; }
-        .search-bar i { color: var(--brand); font-size: 20px; cursor: pointer; }
         .search-bar input { flex: 1; padding: 10px 8px; border: none; outline: none; background: transparent; font-size: 13px; }
-        .sort-select { padding: 9px 8px; border-radius: 8px; border: 1px solid #dce4e8; background: #f3f6f8; font-size: 11px; font-weight: 700; color: var(--brand-navy); outline: none; }
+        .search-bar i { color: var(--brand); font-size: 20px; }
 
-        .action-bar-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .req-med-btn { background: var(--brand-light); color: var(--brand-dark); border: 1px dashed var(--brand); padding: 9px; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 12px; }
-        .wa-order-btn { background: #e8fdf0; color: #0f7638; border: 1px solid #a7f3d0; padding: 9px; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; font-size: 12px; }
-
-        /* Hero Brand Banner */
-        .subha-brand-hero { margin: 10px 14px 6px; background: #fff; border-radius: 12px; border: 1px solid #e3eaee; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; box-shadow: 0 3px 12px rgba(18,36,58,0.05); }
+        .subha-brand-hero { margin: 10px 14px 6px; background: #fff; border-radius: 12px; border: 1px solid #e3eaee; display: flex; align-items: center; gap: 12px; padding: 12px 14px; box-shadow: 0 3px 12px rgba(18,36,58,0.05); }
         .subha-brand-hero-logo { width: 64px; height: 52px; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--brand-light); flex-shrink: 0; border: 1px solid var(--brand-border); }
         .subha-brand-hero-logo img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
         .subha-brand-hero-title { font-size: 15px; font-weight: 900; color: var(--brand-navy); }
-        .subha-brand-hero-sub { font-size: 11px; color: var(--text-light); margin-top: 3px; line-height: 1.35; }
 
-        /* Pharmacy Promotional Video Container */
         .promo-container { margin: 10px 14px; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 12px rgba(18,36,58,0.08); background: #0f172a; position: relative; border: 1px solid #e2e8f0; }
         .promo-container video, .promo-container img { width: 100%; max-height: 230px; display: block; object-fit: cover; }
         .promo-overlay-bar { padding: 9px 12px; background: linear-gradient(90deg, var(--brand-navy), var(--brand-dark)); color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 800; }
-        .promo-live-tag { background: var(--brand-red); color: #fff; font-size: 9px; padding: 3px 7px; border-radius: 4px; font-weight: 900; letter-spacing: 0.4px; }
 
-        /* Flipkart Feature Strip */
-        .fk-feature-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px 14px; background: #fff; border-bottom: 1px solid #eee; margin-top: 6px; }
-        .fk-feature { background: #f7fbfb; border: 1px solid #d8eeec; border-radius: 9px; padding: 8px 4px; text-align: center; font-size: 10px; font-weight: 700; color: var(--text-dark); }
-        .fk-feature i { display: block; font-size: 22px; color: var(--brand); margin-bottom: 3px; }
-
-        /* Flipkart Offer Bar */
-        .fk-offer-bar { margin: 10px 14px; background: linear-gradient(100deg, var(--brand), var(--brand-dark)); color: #fff; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .fk-offer-bar strong { font-size: 13px; display: block; }
-        .fk-offer-bar span { font-size: 11px; opacity: 0.95; }
-        .fk-offer-btn { background: var(--brand-yellow); color: #111; border: 0; border-radius: 6px; padding: 7px 11px; font-weight: 800; font-size: 11px; cursor: pointer; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; }
-
-        /* Section Header */
         .section-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 14px 8px; }
         .section-header h3 { margin: 0; font-size: 15px; color: var(--brand-navy); font-weight: 800; }
-        .section-header .view-more { font-size: 12px; color: var(--brand); font-weight: bold; cursor: pointer; }
 
-        /* Brands Carousel */
         .brands-carousel { display: flex; overflow-x: auto; gap: 12px; padding: 10px 14px; background: var(--yellow-bg); scrollbar-width: none; border-bottom: 1px solid #edf2f4; }
         .brands-carousel::-webkit-scrollbar { display: none; }
-        .brand-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; flex-shrink: 0; }
-        .brand-circle { width: 56px; height: 56px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid #9bc8c6; font-weight: 900; font-size: 11px; color: var(--brand-navy); text-align: center; padding: 4px; transition: 0.2s; overflow: hidden; }
+        .brand-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; flex-shrink: 0; width: 60px;}
+        .brand-circle { width: 56px; height: 56px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid #9bc8c6; font-weight: 900; font-size: 11px; color: var(--brand-navy); text-align: center; padding: 4px; overflow: hidden; }
         .brand-circle img { width: 100%; height: 100%; object-fit: contain; }
         .brand-item.active .brand-circle { background: var(--brand); color: #fff; border-color: var(--brand-dark); }
-        .brand-label { font-size: 10px; margin-top: 5px; font-weight: 700; color: var(--text-dark); max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .brand-label { font-size: 10px; margin-top: 5px; font-weight: 700; color: var(--text-dark); max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;}
 
-        /* Top Categories Grid */
-        .top-categories-bg { background: var(--yellow-bg); padding-bottom: 12px; }
         .top-categories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 14px; }
         .tc-card { background: #fff; border-radius: 8px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid #e6eef0; transition: 0.2s; }
-        .tc-card.active { border-color: var(--brand); background: var(--brand-light); transform: translateY(-2px); }
+        .tc-card.active { border-color: var(--brand); background: var(--brand-light); }
         .tc-icon { font-size: 26px; margin-bottom: 5px; color: var(--brand); }
-        .tc-card span { font-size: 11px; color: var(--text-dark); text-align: center; font-weight: 700; }
 
-        /* Product Grid */
         .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 14px 15px; }
-        @media (min-width: 650px) {
-            .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-            .top-categories-grid { grid-template-columns: repeat(6, 1fr); }
-        }
-        @media (min-width: 960px) {
-            .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding: 0 20px 20px; }
-        }
-
         .p-card { background: #fff; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(18,36,58,0.05); border: 1px solid #e5eaee; position: relative; }
-        .badge-top-left { position: absolute; top: 0; left: 0; display: flex; flex-direction: column; gap: 2px; z-index: 2; }
-        .discount-badge { background: var(--brand-red); color: #fff; font-size: 9px; padding: 3px 7px; border-top-left-radius: 9px; border-bottom-right-radius: 8px; font-weight: 800; }
-        .rx-badge { background: #12243a; color: #fff; font-size: 9px; padding: 2px 6px; border-bottom-right-radius: 6px; font-weight: 800; width: fit-content; }
-        .wish-icon { position: absolute; top: 8px; right: 8px; font-size: 20px; cursor: pointer; z-index: 2; color: #cbd5e1; transition: 0.2s; }
-        .wish-icon.active { color: var(--brand-red); transform: scale(1.1); }
-
-        .p-img-box { height: 125px; width: 100%; display: flex; justify-content: center; align-items: center; margin: 14px 0 8px; cursor: pointer; background: #fff; border-radius: 8px; overflow: hidden; }
+        .p-img-box { height: 120px; width: 100%; display: flex; justify-content: center; align-items: center; margin: 14px 0 8px; cursor: pointer; background: #fff; border-radius: 8px; overflow: hidden; }
         .p-img-box img { max-height: 100%; max-width: 100%; object-fit: contain; }
-
-        .p-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; color: var(--brand-navy); line-height: 1.3; height: 34px; overflow: hidden; cursor: pointer; }
-        .p-brand-text { font-size: 10px; color: var(--text-light); margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .p-use { font-size: 10px; color: var(--brand-dark); background: var(--brand-light); padding: 3px 6px; border-radius: 4px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-        .p-rating { font-size: 10px; color: var(--star-color); font-weight: bold; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; gap: 3px; background: #fffcf5; padding: 3px 6px; border-radius: 4px; width: fit-content; border: 1px solid #fdf0d5; }
-
+        .p-brand-text { font-size: 10px; color: var(--text-light); margin-bottom: 4px; font-weight: bold; }
+        .p-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--brand-navy); line-height: 1.3; height: 34px; overflow: hidden; cursor: pointer; }
         .p-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; margin-top: auto; }
         .our-price { font-size: 16px; font-weight: 900; color: var(--brand-navy); }
         .mrp-price { font-size: 11px; color: var(--text-light); text-decoration: line-through; }
-
-        .btn-add { background: #fff; color: var(--brand); border: 1.5px solid var(--brand); padding: 7px; border-radius: 6px; font-weight: 800; cursor: pointer; text-align: center; font-size: 12px; width: 100%; transition: 0.15s; }
-        .btn-add:active { background: var(--brand-light); }
-        .btn-add:disabled { border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; background: #f8fafc; }
+        
+        .btn-add { background: #fff; color: var(--brand); border: 1.5px solid var(--brand); padding: 7px; border-radius: 6px; font-weight: 800; cursor: pointer; text-align: center; font-size: 12px; width: 100%; }
         .qty-controls { display: flex; align-items: center; justify-content: space-between; background: var(--brand-light); border-radius: 6px; border: 1.5px solid var(--brand-border); width: 100%; }
         .qty-btn { background: transparent; border: none; width: 32px; height: 30px; font-weight: 900; cursor: pointer; color: var(--brand); font-size: 16px; }
-        .qty-val { font-size: 12px; font-weight: 800; color: var(--brand-navy); }
+        
+        .image-gallery-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; }
+        .image-gallery-row img { width: 50px; height: 50px; border-radius: 6px; border: 1px solid #ddd; object-fit: contain; cursor: pointer; }
 
-        /* Interactive Star Selector in Review Box */
-        .star-input-container { display: flex; gap: 6px; font-size: 26px; color: #cbd5e1; margin: 6px 0 10px; justify-content: center; }
-        .star-input-container i { cursor: pointer; transition: transform 0.15s, color 0.15s; }
-        .star-input-container i.selected { color: var(--star-color); transform: scale(1.1); }
-
-        /* Health Video / Reels Section */
-        .fk-video-section { background: #fff; margin: 10px 0; padding-bottom: 12px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
-        .fk-video-row { display: flex; gap: 10px; overflow-x: auto; padding: 0 14px; scrollbar-width: none; }
-        .fk-video-row::-webkit-scrollbar { display: none; }
-        .fk-video-card { min-width: 150px; height: 195px; border-radius: 12px; overflow: hidden; position: relative; background: #12243a; flex-shrink: 0; cursor: pointer; box-shadow: 0 2px 7px rgba(0,0,0,0.12); }
-        .fk-video-card img, .fk-video-card video { width: 100%; height: 100%; object-fit: cover; opacity: 0.88; }
-        .fk-video-badge { position: absolute; top: 8px; left: 8px; background: var(--brand-red); color: #fff; border-radius: 5px; padding: 3px 6px; font-size: 9px; font-weight: 800; }
-        .fk-video-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px 8px 8px; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: #fff; font-size: 11px; font-weight: 700; }
-
-        /* Floating Checkout Bar */
         .checkout-bar { position: fixed; bottom: 58px; left: 0; width: 100%; background: var(--brand-navy); color: #fff; padding: 10px 15px; box-shadow: 0 -4px 15px rgba(0,0,0,0.12); display: none; justify-content: space-between; align-items: center; z-index: 950; border-top-left-radius: 12px; border-top-right-radius: 12px; }
-        .checkout-bar-btn { background: var(--brand-yellow); color: #111; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 900; font-size: 12px; cursor: pointer; }
-
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 7px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.06); z-index: 1000; border-top: 1px solid #e1e7eb; }
         .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-light); cursor: pointer; font-weight: 700; position: relative; width: 20%; }
         .nav-item i { font-size: 21px; margin-bottom: 2px; }
         .nav-item.active { color: var(--brand); }
-        .cart-badge { position: absolute; top: -4px; right: 18%; background: var(--brand-red); color: #fff; font-size: 9px; font-weight: 800; border-radius: 10px; padding: 1px 5px; border: 1.5px solid #fff; display: none; }
+        .cart-badge { position: absolute; top: -4px; right: 18%; background: var(--brand-red); color: #fff; font-size: 9px; font-weight: 800; border-radius: 10px; padding: 1px 5px; display: none; }
 
-        /* Order Tracking Progress */
         .subha-track { margin: 12px 0 8px; padding: 12px; background: #f7fbf8; border: 1px solid #e2eee6; border-radius: 10px; }
-        .subha-track-title { font-size: 11px; font-weight: 800; color: #476258; margin-bottom: 10px; display: flex; justify-content: space-between; }
-        .subha-track-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
-        .subha-track-step { text-align: center; font-size: 9px; color: #8a9690; line-height: 1.25; }
-        .subha-track-dot { width: 20px; height: 20px; margin: 0 auto 5px; border-radius: 50%; display: grid; place-items: center; background: #e1e9e4; color: #718178; font-size: 10px; font-weight: 900; border: 2px solid #e1e9e4; }
+        .subha-track-steps { display: flex; justify-content: space-between; margin-top: 8px; }
+        .subha-track-step { text-align: center; font-size: 9px; color: #8a9690; width: 20%; }
+        .subha-track-dot { width: 18px; height: 18px; margin: 0 auto 4px; border-radius: 50%; display: grid; place-items: center; background: #e1e9e4; color: #718178; font-size: 10px; font-weight: 900; }
         .subha-track-step.done { color: #087f5b; font-weight: 800; }
-        .subha-track-step.done .subha-track-dot { background: #087f5b; border-color: #087f5b; color: #fff; }
-        .subha-track-step.current { color: #b76a00; font-weight: 900; }
-        .subha-track-step.current .subha-track-dot { background: #fff1d6; border-color: #f2b84b; color: #9b5a00; }
+        .subha-track-step.done .subha-track-dot { background: #087f5b; color: #fff; }
 
-        /* Modals */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18,36,58,0.65); z-index: 3500; justify-content: center; align-items: center; padding: 16px; }
-        .modal-card { background: #fff; padding: 20px; border-radius: 14px; width: 100%; max-width: 390px; position: relative; max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; }
+        .modal-card { background: #fff; padding: 20px; border-radius: 14px; width: 100%; max-width: 400px; position: relative; max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; }
         .close-btn { position: absolute; top: 12px; right: 14px; font-size: 24px; color: #888; cursor: pointer; }
         .auth-input { width: 100%; padding: 10px 12px; margin: 6px 0; border: 1px solid #d0d7de; border-radius: 8px; outline: none; font-size: 13px; background: #fafafa; }
-        .auth-input:focus { border-color: var(--brand); background: #fff; }
         .file-upload-box { border: 1.5px dashed var(--brand); background: var(--brand-light); padding: 10px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: 700; color: var(--brand-dark); margin: 6px 0; cursor: pointer; display: block; }
-        .btn-primary { background: var(--brand); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; margin-top: 8px; }
-        .btn-secondary { background: #e2e8f0; color: #1e293b; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 6px; }
-        .btn-danger { background: var(--brand-red); color: #fff; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 8px; }
+        .btn-primary { background: var(--brand); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; margin-top: 8px; }
+        .btn-danger { background: var(--brand-red); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; }
 
-        /* Admin Screen */
+        /* Admin UI */
         .admin-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 3000; overflow-y: auto; padding-bottom: 60px; }
         .admin-header { background: var(--brand-navy); color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .fk-admin-dashboard { padding: 12px 14px; }
-        .fk-admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        @media (min-width: 700px) { .fk-admin-grid { grid-template-columns: repeat(4, 1fr); } }
-        .fk-stat { background: #fff; border: 1px solid #e2e8ee; border-radius: 10px; padding: 12px; }
-        .fk-stat .num { font-size: 20px; font-weight: 900; margin-top: 4px; color: var(--brand-navy); }
-        .fk-stat .lbl { font-size: 10px; color: var(--text-light); font-weight: 700; }
-        .fk-admin-nav { display: flex; gap: 8px; overflow-x: auto; padding: 4px 14px 12px; scrollbar-width: none; }
-        .fk-admin-nav button { white-space: nowrap; border: 1px solid #cbd5e1; background: #fff; border-radius: 20px; padding: 8px 14px; font-size: 12px; font-weight: 800; cursor: pointer; color: var(--text-dark); }
+        .fk-admin-nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px 14px; background: #fff; border-bottom: 1px solid #ddd; }
+        .fk-admin-nav button { white-space: nowrap; border: 1px solid #cbd5e1; background: #fff; border-radius: 20px; padding: 8px 14px; font-size: 12px; font-weight: 800; cursor: pointer; }
         .fk-admin-nav button.active { background: var(--brand); color: #fff; border-color: var(--brand); }
-        .fk-admin-panel { display: none; padding: 0 14px; }
+        .fk-admin-panel { display: none; padding: 14px; }
         .fk-admin-panel.active { display: block; }
         .data-card { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 14px; border: 1px solid #e2e8ee; }
 
-        /* GST TAX INVOICE & THERMAL RECEIPT PRINTER STYLES */
-        .gst-modal-card { background: #fff; padding: 18px; border-radius: 14px; width: 100%; max-width: 780px; position: relative; max-height: 92vh; display: flex; flex-direction: column; overflow-y: auto; }
-        .gst-Config-bar { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; margin-bottom: 12px; }
-        .gst-config-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
-        @media (min-width: 600px) { .gst-config-grid { grid-template-columns: repeat(4, 1fr); } }
-        .gst-config-grid input { padding: 7px 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; width: 100%; background: #fff; }
-
-        #printable-invoice-area { background: #fff; color: #000; border: 2px solid #12243a; padding: 16px; border-radius: 6px; font-family: Arial, sans-serif; }
-        #printable-invoice-area.thermal-mode { max-width: 310px; margin: 0 auto; padding: 10px; border: 1px dashed #000; font-family: 'Courier New', monospace; font-size: 11px; }
-
-        .inv-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #12243a; padding-bottom: 10px; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-        .thermal-mode .inv-header { flex-direction: column; align-items: center; text-align: center; border-bottom: 1px dashed #000; }
-        .inv-store-title { font-size: 20px; font-weight: 900; color: #008b87; letter-spacing: 0.4px; }
-        .thermal-mode .inv-store-title { font-size: 15px; color: #000; }
-
-        .inv-meta-grid { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 10px; background: #f8fafc; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 4px; flex-wrap: wrap; gap: 8px; }
-        .thermal-mode .inv-meta-grid { flex-direction: column; background: transparent; border: none; padding: 2px 0; font-size: 11px; border-bottom: 1px dashed #000; }
-
-        .inv-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
-        .inv-table th { background: #12243a; color: #fff; padding: 6px; text-align: left; border: 1px solid #12243a; }
-        .inv-table td { padding: 6px; border: 1px solid #cbd5e1; }
-        .thermal-mode .inv-table th { background: transparent; color: #000; border: none; border-bottom: 1px dashed #000; padding: 4px 2px; font-size: 10px; }
-        .thermal-mode .inv-table td { border: none; border-bottom: 1px dotted #ccc; padding: 4px 2px; font-size: 10px; }
-        .thermal-mode .hide-thermal { display: none; }
-
-        .inv-totals-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-        .thermal-mode .inv-totals-row { flex-direction: column; }
-        .inv-tax-box { font-size: 11px; background: #f8fafc; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; flex: 1; min-width: 220px; }
-        .thermal-mode .inv-tax-box { background: transparent; border: none; padding: 2px 0; min-width: 100%; border-bottom: 1px dashed #000; }
-        .inv-grand-box { text-align: right; min-width: 200px; font-size: 12px; }
-        .thermal-mode .inv-grand-box { text-align: left; width: 100%; }
-
-        .inv-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 18px; padding-top: 10px; border-top: 1px solid #cbd5e1; font-size: 11px; }
-        .thermal-mode .inv-footer { flex-direction: column; align-items: center; text-align: center; gap: 8px; border-top: 1px dashed #000; }
-
-        @media print {
-            body * { visibility: hidden !important; }
-            #gst-invoice-modal,
-            #gst-invoice-modal .gst-modal-card,
-            #printable-invoice-area,
-            #printable-invoice-area * {
-                visibility: visible !important;
-            }
-            #gst-invoice-modal {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                background: #fff !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .gst-modal-card {
-                box-shadow: none !important;
-                max-width: 100% !important;
-                max-height: none !important;
-                padding: 0 !important;
-                overflow: visible !important;
-            }
-            .no-print { display: none !important; }
-        }
-
-        /* Toast Notification */
-        #toast { visibility: hidden; min-width: 240px; background-color: #12243a; color: #fff; text-align: center; border-radius: 8px; padding: 12px 16px; position: fixed; z-index: 6000; left: 50%; bottom: 75px; transform: translateX(-50%); font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        /* Printable Bill Area (Hidden from normal UI, generated by HTML2PDF) */
+        #pdf-render-container { position: absolute; left: -9999px; top: 0; width: 700px; background: #fff; padding: 20px; color: #000; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        .inv-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 15px; }
+        .inv-table th, .inv-table td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+        .inv-table th { background: #f0f0f0; }
+        
+        #toast { visibility: hidden; min-width: 240px; background-color: #12243a; color: #fff; text-align: center; border-radius: 8px; padding: 12px 16px; position: fixed; z-index: 6000; left: 50%; bottom: 75px; transform: translateX(-50%); font-size: 13px; font-weight: 700; }
         #toast.show { visibility: visible; }
     </style>
 </head>
 <body>
 
-    <!-- Top Bilingual Announcement Ticker -->
-    <marquee class="moving-ticker" id="top-marquee-ticker" scrollamount="5"></marquee>
+    <marquee class="moving-ticker" id="top-marquee-ticker" scrollamount="5">Welcome to Online Pharmacy</marquee>
 
-    <!-- Heart Loader Overlay -->
     <div id="loader-overlay" class="full-overlay">
         <div class="heart-container">
             <i class='bx bxs-heart heart-bg'></i>
             <div class="heart-fill" id="fill-box"><i class='bx bxs-heart'></i></div>
         </div>
-        <div style="margin-top: 12px; font-weight: 800; color: var(--brand);" id="loader-text">Processing...</div>
+        <div style="margin-top: 12px; font-weight: 800; color: var(--brand);" id="loader-text">Loading...</div>
     </div>
 
     <!-- MAIN STOREFRONT -->
@@ -299,176 +148,72 @@
                     <div class="brand-logo-badge" id="nav-logo-box"><i class='bx bx-plus-medical'></i></div>
                     <div style="min-width:0;">
                         <div style="line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="nav-store-title">SUBHA MEDICAL</div>
-                        <div style="font-size:10px; color:var(--brand); font-weight:700;" id="nav-store-subtitle">சுபா மெடிக்கல் • திருப்பூர்</div>
+                        <div style="font-size:10px; color:var(--brand); font-weight:700;" id="nav-store-subtitle">Pharmacy</div>
                     </div>
                 </div>
                 <div class="nav-right">
-                    <button class="nav-pill-btn" onclick="callStoreDirect()" title="Call Pharmacy">
-                        <i class='bx bxs-phone-call'></i> Call
-                    </button>
-                    <button class="nav-pill-btn" onclick="openAccountModal()">
-                        <span class="sync-dot" id="cloud-status-dot"></span>
-                        <span id="nav-user-label">Login</span>
-                    </button>
-                    <button class="nav-pill-btn" onclick="openAdminAuth()" title="Staff Portal">
-                        <i class='bx bx-shield-quarter'></i>
-                    </button>
+                    <button class="nav-pill-btn" onclick="openAccountModal()"><span class="sync-dot" id="cloud-status-dot"></span><span id="nav-user-label">Login</span></button>
+                    <button class="nav-pill-btn" onclick="openAdminAuth()"><i class='bx bx-shield-quarter'></i></button>
                 </div>
-            </div>
-
-            <div class="welcome-msg" id="welcome-bar">
-                <span id="welcome-text">👋 நல்வரவு! Welcome to Online Pharmacy</span>
-                <span style="font-size:11px; color:var(--text-light);" id="live-sync-indicator">Live Store</span>
             </div>
 
             <div class="search-row">
                 <div class="search-bar">
                     <i class='bx bx-search'></i>
-                    <input type="text" id="search-input" placeholder="Search medicines, symptoms (காய்ச்சல், சர்க்கரை, கால்நடை)..." oninput="renderStoreProducts()">
-                    <i class='bx bx-microphone' onclick="startVoiceSearch()" title="Voice Search"></i>
+                    <input type="text" id="search-input" placeholder="Search medicines, categories..." oninput="renderStoreProducts()">
                 </div>
-                <select class="sort-select" id="sort-select" onchange="renderStoreProducts()">
-                    <option value="popular">Popular</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="discount">High Discount</option>
-                </select>
-            </div>
-
-            <div class="action-bar-row">
-                <button class="req-med-btn" onclick="openReqModal()">
-                    <i class='bx bx-file-find'></i> Request Medicine / Rx
-                </button>
-                <button class="wa-order-btn" onclick="orderViaWhatsApp()">
-                    <i class='bx bxl-whatsapp'></i> WhatsApp Order
-                </button>
             </div>
         </div>
 
         <!-- TAB 1: HOME -->
         <div id="tab-home">
             <div class="subha-brand-hero">
-                <div class="subha-brand-hero-logo" id="hero-logo-box">
-                    <i class='bx bx-plus-medical' style="font-size:28px; color:var(--brand);"></i>
-                </div>
+                <div class="subha-brand-hero-logo" id="hero-logo-box"><i class='bx bx-plus-medical' style="font-size:28px; color:var(--brand);"></i></div>
                 <div style="flex:1; min-width:0;">
-                    <div class="subha-brand-hero-title" id="hero-store-title">SUBHA MEDICAL & HEALTHCARE</div>
-                    <div class="subha-brand-hero-sub" id="hero-store-address">Perumanallur–Kunnathur Road, Vallipuram, Tiruppur<br>Genuine Medicines • Veterinary Care • GST Tax Invoice</div>
+                    <div class="subha-brand-hero-title" id="hero-store-title">SUBHA MEDICAL</div>
+                    <div class="subha-brand-hero-sub" id="hero-store-address">Genuine Medicines</div>
                 </div>
             </div>
 
-            <!-- Editable Pharmacy Promotion Video / Banner -->
-            <div class="promo-container" id="store-promo-container">
+            <div class="promo-container" id="store-promo-container" style="display:none;">
                 <div id="store-promo-media-box"></div>
                 <div class="promo-overlay-bar">
-                    <span id="store-promo-caption">🎥 Subha Medical — 100% Genuine Healthcare & Doorstep Delivery</span>
+                    <span id="store-promo-caption">Featured Promotion</span>
                     <span class="promo-live-tag">PROMO</span>
                 </div>
             </div>
 
-            <!-- Flipkart Feature Strip -->
-            <div class="fk-feature-strip">
-                <div class="fk-feature"><i class='bx bx-check-shield'></i>100% Genuine</div>
-                <div class="fk-feature"><i class='bx bx-receipt'></i>GST Bill</div>
-                <div class="fk-feature"><i class='bx bxs-dog'></i>Vet Medicines</div>
-                <div class="fk-feature"><i class='bx bx-pulse'></i>BP / Sugar Test</div>
-            </div>
-
-            <!-- Special Offer Banner -->
-            <div class="fk-offer-bar">
-                <div>
-                    <strong>FLAT 10% - 20% OFF on Monthly Medicines!</strong>
-                    <span>Use Coupon <b>SUBHA10</b> in Cart or Upload Prescription</span>
-                </div>
-                <button class="fk-offer-btn" onclick="openReqModal()">Upload Rx</button>
-            </div>
-
-            <!-- Shop By Brands / Pharmaceutical Companies -->
-            <div class="section-header">
-                <h3>Pharmaceutical Companies / Brands</h3>
-                <span class="view-more" onclick="filterByBrand('ALL')">Reset</span>
-            </div>
+            <div class="section-header"><h3>Shop by Brands</h3><span class="view-more" onclick="filterByBrand('ALL')">Reset</span></div>
             <div class="brands-carousel" id="brands-carousel"></div>
 
-            <!-- Top Categories -->
             <div class="top-categories-bg">
-                <div class="section-header">
-                    <h3>Top Categories / பிரிவுகள்</h3>
-                </div>
+                <div class="section-header"><h3>Top Categories</h3></div>
                 <div class="top-categories-grid" id="categories-grid"></div>
             </div>
 
-            <!-- Health Care Reels / Tips -->
-            <div class="fk-video-section">
-                <div class="section-header">
-                    <h3>Health Tips & Store Services</h3>
-                </div>
-                <div class="fk-video-row">
-                    <div class="fk-video-card" onclick="showToast('Free BP & Sugar check available at our pharmacy counter!')">
-                        <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=400" alt="BP Check">
-                        <span class="fk-video-badge">STORE SERVICE</span>
-                        <div class="fk-video-caption">ரத்த அழுத்தம் & சர்க்கரை பரிசோதனை</div>
-                    </div>
-                    <div class="fk-video-card" onclick="filterByCategory('Veterinary')">
-                        <img src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400" alt="Veterinary">
-                        <span class="fk-video-badge">VETERINARY</span>
-                        <div class="fk-video-caption">கால்நடை மருந்துகள் & கால்சியம் டானிக்</div>
-                    </div>
-                    <div class="fk-video-card" onclick="filterByCategory('Diabetes & BP')">
-                        <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400" alt="Chronic Care">
-                        <span class="fk-video-badge">UP TO 20% OFF</span>
-                        <div class="fk-video-caption">மாதாந்திர சர்க்கரை & BP மாத்திரைகள்</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- All Products Grid -->
             <div class="section-header">
-                <h3 id="products-heading">All Medicines & Healthcare</h3>
+                <h3 id="products-heading">All Medicines</h3>
                 <span class="view-more" id="product-count-lbl">0 Items</span>
             </div>
             <div class="product-grid" id="main-product-grid"></div>
         </div>
 
-        <!-- TAB 2: WISHLIST -->
-        <div id="tab-wishlist" style="display:none; padding-top:10px;">
-            <div class="section-header"><h3>My Wishlist / விருப்பப் பட்டியல்</h3></div>
-            <div class="product-grid" id="wishlist-product-grid"></div>
-        </div>
-
-        <!-- TAB 3: CART -->
+        <!-- TAB 2: CART -->
         <div id="tab-cart" style="display:none; padding: 14px;">
-            <h3 style="margin-top:0;">Shopping Cart / மருந்து கூடை</h3>
+            <h3 style="margin-top:0;">Shopping Cart</h3>
             <div id="cart-items-container"></div>
             <div id="cart-summary-card" class="data-card" style="display:none; margin-top:12px;">
-                <div style="display:flex; gap:6px; margin-bottom:10px;">
-                    <input type="text" id="coupon-input" class="auth-input" style="margin:0; text-transform:uppercase;" placeholder="Promo Code (e.g. SUBHA10)">
-                    <button class="fk-offer-btn" style="background:var(--brand); color:#fff; padding:0 14px;" onclick="applyCartCoupon()">Apply</button>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-                    <span>MRP Total:</span><span id="sum-mrp">₹0</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#087f5b;">
-                    <span>Product Discount:</span><span id="sum-disc">-₹0</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#087f5b;" id="coupon-row">
-                    <span>Coupon Savings:</span><span id="sum-coupon">-₹0</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:10px;">
-                    <span>Delivery Fee:</span><strong style="color:var(--brand);">FREE</strong>
-                </div>
-                <hr style="border:none; border-top:1px solid #eee; margin:8px 0;">
                 <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:900;">
-                    <span>To Pay (Incl. GST):</span><span id="sum-net" style="color:var(--brand-navy);">₹0</span>
+                    <span>Net Total:</span><span id="sum-net" style="color:var(--brand-navy);">₹0</span>
                 </div>
-                <button class="btn-primary" onclick="openCheckoutModal()">Proceed to Checkout / ஆர்டர் செய்</button>
+                <button class="btn-primary" onclick="openCheckoutModal()">Proceed to Checkout</button>
             </div>
         </div>
 
-        <!-- TAB 4: ORDERS & LIVE TRACKING -->
+        <!-- TAB 3: ORDERS -->
         <div id="tab-orders" style="display:none; padding: 14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h3 style="margin:0;">My Orders & Live Tracking</h3>
+                <h3 style="margin:0;">My Orders</h3>
                 <button class="nav-pill-btn" onclick="syncAllData()"><i class='bx bx-refresh'></i> Refresh</button>
             </div>
             <div id="customer-orders-list"></div>
@@ -477,490 +222,244 @@
 
     <!-- Floating Checkout Bar -->
     <div class="checkout-bar" id="floating-checkout-bar">
-        <div>
-            <div style="font-size:11px; opacity:0.85;" id="fc-items">0 Items in Cart</div>
-            <div style="font-size:15px; font-weight:900;" id="fc-total">₹0</div>
-        </div>
-        <button class="checkout-bar-btn" onclick="switchBottomNav('cart')">View Cart &rarr;</button>
+        <div><div style="font-size:11px;" id="fc-items">0 Items</div><div style="font-size:15px; font-weight:900;" id="fc-total">₹0</div></div>
+        <button class="btn-primary" style="margin:0; width:auto; padding:8px 16px;" onclick="switchBottomNav('cart')">View Cart</button>
     </div>
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
-        <div class="nav-item active" id="bnav-home" onclick="switchBottomNav('home')">
-            <i class='bx bx-store-alt'></i><span>Store</span>
-        </div>
-        <div class="nav-item" id="bnav-wishlist" onclick="switchBottomNav('wishlist')">
-            <i class='bx bx-heart'></i><span>Wishlist</span>
-            <span class="cart-badge" id="wish-badge">0</span>
-        </div>
+        <div class="nav-item active" id="bnav-home" onclick="switchBottomNav('home')"><i class='bx bx-store-alt'></i><span>Store</span></div>
         <div class="nav-item" id="bnav-cart" onclick="switchBottomNav('cart')">
             <i class='bx bx-cart-alt'></i><span>Cart</span>
             <span class="cart-badge" id="cart-badge">0</span>
         </div>
-        <div class="nav-item" id="bnav-orders" onclick="switchBottomNav('orders')">
-            <i class='bx bx-package'></i><span>Orders</span>
-        </div>
-        <div class="nav-item" id="bnav-account" onclick="openAccountModal()">
-            <i class='bx bx-user-circle'></i><span>Account</span>
-        </div>
+        <div class="nav-item" id="bnav-orders" onclick="switchBottomNav('orders')"><i class='bx bx-package'></i><span>Orders</span></div>
+        <div class="nav-item" id="bnav-account" onclick="openAccountModal()"><i class='bx bx-user-circle'></i><span>Account</span></div>
     </div>
 
-    <!-- MODAL 1: CUSTOMER LOGIN / ACCOUNT -->
+    <!-- MODALS -->
     <div class="overlay" id="account-modal">
         <div class="modal-card">
             <span class="close-btn" onclick="closeModal('account-modal')">&times;</span>
-            <h3 style="margin-top:0; color:var(--brand-navy);">Customer Account</h3>
-            <p style="font-size:11px; color:var(--text-light); margin-top:0;">Sign in with your mobile number and secret PIN to sync orders and delivery details across your devices.</p>
-            
+            <h3 style="margin-top:0;">Customer Login</h3>
             <div id="logged-out-box">
                 <input type="tel" id="login-phone" class="auth-input" placeholder="10-Digit Mobile Number">
-                <input type="password" id="login-pin" class="auth-input" placeholder="Enter Your 4-Digit PIN">
-                <input type="text" id="login-name" class="auth-input" placeholder="Full Name (New Customers)">
+                <input type="password" id="login-pin" class="auth-input" placeholder="4-Digit PIN">
+                <input type="text" id="login-name" class="auth-input" placeholder="Full Name (For New User)">
                 <input type="text" id="login-addr" class="auth-input" placeholder="Delivery Address">
-                <button class="btn-primary" onclick="handleCustomerAuth()">Continue</button>
+                <button class="btn-primary" onclick="handleCustomerAuth()">Login / Sync Account</button>
             </div>
-
-            <div id="logged-in-box" style="display:none; text-align:left; font-size:13px;">
+            <div id="logged-in-box" style="display:none;">
                 <div style="background:var(--brand-light); padding:12px; border-radius:8px; margin-bottom:10px;">
                     <div><strong>Name:</strong> <span id="prof-name"></span></div>
                     <div><strong>Mobile:</strong> <span id="prof-phone"></span></div>
-                    <div><strong>Address:</strong> <span id="prof-addr"></span></div>
                 </div>
-                <button class="btn-danger" onclick="logoutCustomer()">Sign Out</button>
+                <button class="btn-danger" style="width:100%" onclick="logoutCustomer()">Sign Out</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 2: PRODUCT DETAILS & 5-STAR REVIEWS -->
     <div class="overlay" id="pd-modal">
-        <div class="modal-card">
+        <div class="modal-card" style="padding-top:30px;">
             <span class="close-btn" onclick="closeModal('pd-modal')">&times;</span>
             <div id="pd-content"></div>
         </div>
     </div>
 
-    <!-- MODAL 3: REQUEST MEDICINE / UPLOAD PRESCRIPTION -->
-    <div class="overlay" id="req-modal">
-        <div class="modal-card">
-            <span class="close-btn" onclick="closeModal('req-modal')">&times;</span>
-            <h3 style="margin-top:0;">Request Medicine / Upload Rx</h3>
-            <input type="text" id="req-cust-name" class="auth-input" placeholder="Your Name / பெயர்">
-            <input type="tel" id="req-cust-phone" class="auth-input" placeholder="Mobile Number / அலைபேசி எண்">
-            <textarea id="req-med-details" class="auth-input" style="height:70px;" placeholder="Type medicine names or symptoms..."></textarea>
-            <label class="file-upload-box">
-                <i class='bx bx-camera'></i> Upload Prescription Photo
-                <input type="file" id="req-rx-file" accept="image/*" style="display:none;" onchange="handleRxImageUpload(this)">
-            </label>
-            <img id="req-rx-preview" style="display:none; width:100%; max-height:120px; object-fit:contain; margin:6px 0; border-radius:6px; border:1px solid #ddd;">
-            <input type="hidden" id="req-rx-link">
-            <button class="btn-primary" onclick="submitMedicineRequest()">Submit to Pharmacist</button>
-        </div>
-    </div>
-
-    <!-- MODAL 4: CHECKOUT -->
     <div class="overlay" id="checkout-modal">
         <div class="modal-card">
             <span class="close-btn" onclick="closeModal('checkout-modal')">&times;</span>
-            <h3 style="margin-top:0;">Confirm Delivery Details</h3>
-            <input type="text" id="chk-name" class="auth-input" placeholder="Receiver Full Name">
-            <input type="tel" id="chk-phone" class="auth-input" placeholder="10-Digit Mobile Number">
-            <textarea id="chk-address" class="auth-input" style="height:65px;" placeholder="Full Door Delivery Address with Landmark"></textarea>
+            <h3 style="margin-top:0;">Delivery Details</h3>
+            <input type="text" id="chk-name" class="auth-input" placeholder="Full Name">
+            <input type="tel" id="chk-phone" class="auth-input" placeholder="Mobile Number">
+            <textarea id="chk-address" class="auth-input" style="height:65px;" placeholder="Full Address"></textarea>
             <select id="chk-payment" class="auth-input">
                 <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
-                <option value="UPI / GPay on Delivery">UPI / GPay on Delivery</option>
-                <option value="Store Pickup">Self Pickup at Pharmacy</option>
+                <option value="Store Pickup">Store Pickup</option>
             </select>
-            <button class="btn-primary" onclick="placeFinalOrder()">Confirm & Place Order</button>
+            <button class="btn-primary" onclick="placeFinalOrder()">Confirm Order</button>
         </div>
     </div>
 
-    <!-- MODAL 5: STAFF / ADMIN LOGIN -->
     <div class="overlay" id="admin-auth-modal">
         <div class="modal-card">
             <span class="close-btn" onclick="closeModal('admin-auth-modal')">&times;</span>
-            <h3 style="margin-top:0; color:var(--brand-navy);"><i class='bx bx-lock-alt'></i> Authorized Staff Access</h3>
-            <input type="text" id="adm-user" class="auth-input" placeholder="Enter Username" autocomplete="off">
-            <input type="password" id="adm-pass" class="auth-input" placeholder="Enter Password" autocomplete="off">
+            <h3 style="margin-top:0;">Admin Access</h3>
+            <input type="text" id="adm-user" class="auth-input" placeholder="Username">
+            <input type="password" id="adm-pass" class="auth-input" placeholder="Password">
             <button class="btn-primary" onclick="verifyAdminLogin()">Sign In</button>
         </div>
     </div>
 
-    <!-- MODAL 6: PRINTABLE GST BILL / TAX INVOICE GENERATOR -->
-    <div class="overlay" id="gst-invoice-modal">
-        <div class="gst-modal-card">
-            <div class="no-print">
-                <span class="close-btn" onclick="closeModal('gst-invoice-modal')">&times;</span>
-                <h3 style="margin:0 0 8px; color:var(--brand-navy); display:flex; align-items:center; gap:6px;">
-                    <i class='bx bx-printer' style="color:var(--brand);"></i> Pharmacy GST Tax Invoice Printer
-                </h3>
-
-                <div class="gst-Config-bar">
-                    <div style="font-size:11px; font-weight:800; color:var(--brand-navy);">Invoice License & Doctor Header (Auto-Synced to Cloud):</div>
-                    <div class="gst-config-grid">
-                        <input type="text" id="inv-cfg-dl" placeholder="Drug License No." oninput="saveInvoiceConfigAndRefresh()">
-                        <input type="text" id="inv-cfg-gstin" placeholder="GSTIN" oninput="saveInvoiceConfigAndRefresh()">
-                        <input type="text" id="inv-cfg-pharm" placeholder="Pharmacist Name" oninput="saveInvoiceConfigAndRefresh()">
-                        <input type="text" id="inv-cfg-doc" placeholder="Ref. Doctor" oninput="saveInvoiceConfigAndRefresh()">
-                    </div>
-                    <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                        <button class="fk-offer-btn" style="background:var(--brand); color:#fff; padding:9px 14px; font-size:12px;" onclick="window.print()">
-                            <i class='bx bx-printer'></i> Print Bill Now
-                        </button>
-                        <button class="fk-offer-btn" style="background:#12243a; color:#fff; padding:9px 14px; font-size:12px;" onclick="toggleThermalMode()">
-                            <i class='bx bx-receipt'></i> Switch A4 / 80mm Thermal
-                        </button>
-                        <button class="fk-offer-btn" style="background:#25d366; color:#fff; padding:9px 14px; font-size:12px;" onclick="sendWhatsAppInvoice()">
-                            <i class='bx bxl-whatsapp'></i> Send Bill on WhatsApp
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ACTUAL PRINTABLE BILL AREA -->
-            <div id="printable-invoice-area"></div>
-        </div>
-    </div>
-
-    <!-- FULL ADMIN DASHBOARD SCREEN -->
+    <!-- ADMIN ERP SCREEN -->
     <div class="admin-screen" id="admin-screen">
         <div class="admin-header">
-            <div>
-                <strong style="font-size:16px;" id="adm-header-title">SUBHA MEDICAL — ADMIN ERP</strong>
-                <div style="font-size:10px; opacity:0.8;">Store Management, Brand Management & Cloud Sync</div>
-            </div>
-            <button class="fk-offer-btn" onclick="closeAdminScreen()">Exit to Store</button>
+            <div><strong style="font-size:16px;">ADMIN ERP</strong><div style="font-size:10px;">Store Management & Cloud Sync</div></div>
+            <button class="btn-danger" style="padding:6px 12px; margin:0;" onclick="closeAdminScreen()">Exit</button>
         </div>
-
-        <div class="fk-admin-dashboard">
-            <div class="fk-admin-grid">
-                <div class="fk-stat"><div class="lbl">TOTAL ORDERS</div><div class="num" id="stat-orders">0</div></div>
-                <div class="fk-stat"><div class="lbl">REVENUE (₹)</div><div class="num" id="stat-rev">₹0</div></div>
-                <div class="fk-stat"><div class="lbl">MEDICINES</div><div class="num" id="stat-prods">0</div></div>
-                <div class="fk-stat"><div class="lbl">BRANDS</div><div class="num" id="stat-brands">0</div></div>
-            </div>
-        </div>
-
+        
         <div class="fk-admin-nav">
-            <button class="active" id="adm-tab-orders-btn" onclick="switchAdminTab('orders')">📦 Live Orders & GST Bill</button>
-            <button id="adm-tab-pos-btn" onclick="switchAdminTab('pos')">🧾 Walk-In POS Billing</button>
-            <button id="adm-tab-products-btn" onclick="switchAdminTab('products')">💊 Manage Medicines</button>
-            <button id="adm-tab-brands-btn" onclick="switchAdminTab('brands')">🏷️ Brand Management</button>
-            <button id="adm-tab-categories-btn" onclick="switchAdminTab('categories')">📁 Category Management</button>
-            <button id="adm-tab-settings-btn" onclick="switchAdminTab('settings')">⚙️ Store & Logo</button>
-            <button id="adm-tab-requests-btn" onclick="switchAdminTab('requests')">📋 Rx Requests</button>
+            <button class="active" id="adm-tab-orders-btn" onclick="switchAdminTab('orders')">📦 Orders & PDF Bills</button>
+            <button id="adm-tab-products-btn" onclick="switchAdminTab('products')">💊 Products</button>
+            <button id="adm-tab-brands-btn" onclick="switchAdminTab('brands')">🏷️ Brands</button>
+            <button id="adm-tab-categories-btn" onclick="switchAdminTab('categories')">📁 Categories</button>
+            <button id="adm-tab-settings-btn" onclick="switchAdminTab('settings')">⚙️ Settings</button>
         </div>
 
-        <!-- Admin Panel 1: Orders -->
-        <div class="fk-admin-panel active" id="adm-panel-orders">
-            <div id="admin-orders-container"></div>
-        </div>
-
-        <!-- Admin Panel 2: POS Billing -->
-        <div class="fk-admin-panel" id="adm-panel-pos">
-            <div class="data-card">
-                <h4 style="margin-top:0;">Instant Walk-In Counter Billing (POS)</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                    <input type="text" id="pos-cust-name" class="auth-input" placeholder="Patient / Customer Name">
-                    <input type="tel" id="pos-cust-phone" class="auth-input" placeholder="Customer Mobile No.">
-                </div>
-                <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
-                    <select id="pos-med-select" class="auth-input" style="flex:1; margin:0;"></select>
-                    <input type="number" id="pos-med-qty" class="auth-input" value="1" min="1" style="width:70px; margin:0;">
-                    <button class="fk-offer-btn" style="background:var(--brand); color:#fff; padding:10px 14px;" onclick="addPosItem()">+ Add</button>
-                </div>
-                <div id="pos-items-list" style="margin:10px 0;"></div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:10px;">
-                    <strong style="font-size:16px;">POS Total: <span id="pos-total-lbl">₹0</span></strong>
-                    <button class="btn-primary" style="width:auto; padding:10px 18px; margin:0;" onclick="completePosBill()">Generate & Print GST Bill</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Admin Panel 3: Products Management -->
+        <div class="fk-admin-panel active" id="adm-panel-orders"><div id="admin-orders-container"></div></div>
+        
         <div class="fk-admin-panel" id="adm-panel-products">
             <div class="data-card">
                 <h4 style="margin-top:0;" id="prod-form-title">Add / Edit Medicine</h4>
                 <input type="hidden" id="p-edit-id">
-                <input type="text" id="p-name" class="auth-input" placeholder="Medicine Name (e.g. Dolo 650mg Strip)">
-                
-                <label style="font-size:11px; font-weight:700; color:#555;">Pharmaceutical Company / Brand:</label>
-                <select id="p-brand-select" class="auth-input" style="margin-top:2px;"></select>
-
-                <input type="text" id="p-use" class="auth-input" placeholder="Usage / Generic Name (e.g. Fever & Pain)">
-                
-                <label style="font-size:11px; font-weight:700; color:#555; margin-top:4px; display:block;">Category:</label>
-                <select id="p-cat" class="auth-input" style="margin-top:2px;"></select>
-
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;">
-                    <input type="number" id="p-price" class="auth-input" placeholder="Selling Price (₹)">
+                <input type="text" id="p-name" class="auth-input" placeholder="Medicine Name">
+                <select id="p-brand-select" class="auth-input"></select>
+                <select id="p-cat" class="auth-input"></select>
+                <input type="text" id="p-use" class="auth-input" placeholder="Usage / Generic">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <input type="number" id="p-price" class="auth-input" placeholder="Price (₹)">
                     <input type="number" id="p-mrp" class="auth-input" placeholder="MRP (₹)">
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                    <input type="text" id="p-batch" class="auth-input" placeholder="Batch No">
-                    <input type="text" id="p-exp" class="auth-input" placeholder="Expiry (MM/YYYY)">
-                    <select id="p-gst" class="auth-input">
-                        <option value="12">GST 12%</option>
-                        <option value="5">GST 5%</option>
-                        <option value="18">GST 18%</option>
-                        <option value="0">GST 0%</option>
-                    </select>
-                </div>
-
-                <label class="file-upload-box">
-                    <i class='bx bx-image-add'></i> Upload Product Image to Supabase Storage
-                    <input type="file" id="p-img-file" accept="image/*" style="display:none;" onchange="handleProductImageUpload(this)">
+                
+                <!-- Multiple Image Upload -->
+                <label class="file-upload-box" style="margin-top:10px;">
+                    <i class='bx bx-images'></i> Upload Multiple Images
+                    <input type="file" id="p-img-files" accept="image/*" multiple style="display:none;" onchange="handleProductMultiUpload(this)">
                 </label>
-                <input type="text" id="p-img" class="auth-input" placeholder="Or Paste Image URL" oninput="previewProductImageUrl(this.value)">
-                <img id="p-img-preview" style="display:none; width:90px; height:90px; object-fit:contain; border:1px solid #ddd; border-radius:8px; margin:4px 0;">
-
+                <div class="image-gallery-row" id="p-multi-preview" style="margin-top:8px;"></div>
+                
                 <div style="display:flex; gap:16px; margin:8px 0; font-size:12px;">
-                    <label style="display:flex; align-items:center; gap:5px;">
-                        <input type="checkbox" id="p-rx"> Rx Required
-                    </label>
-                    <label style="display:flex; align-items:center; gap:5px;">
-                        <input type="checkbox" id="p-stock" checked> In Stock
-                    </label>
+                    <label><input type="checkbox" id="p-stock" checked> In Stock</label>
                 </div>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-primary" onclick="adminSaveProduct()">Save Medicine to Supabase</button>
-                    <button class="btn-secondary" style="width:120px; margin-top:8px;" onclick="resetProductForm()">Clear</button>
-                </div>
+                <button class="btn-primary" onclick="adminSaveProduct()">Save Product</button>
+                <button class="btn-secondary" onclick="resetProductForm()">Clear</button>
             </div>
             <div id="admin-products-list"></div>
         </div>
 
-        <!-- Admin Panel 4: Brand Management -->
         <div class="fk-admin-panel" id="adm-panel-brands">
             <div class="data-card">
-                <h4 style="margin-top:0;" id="brand-form-title">Add / Edit Pharmaceutical Company Brand</h4>
+                <h4 style="margin-top:0;" id="brand-form-title">Add Brand</h4>
                 <input type="hidden" id="b-edit-id">
-                <input type="text" id="b-name" class="auth-input" placeholder="Brand / Company Name (e.g. Micro Labs, Glenmark)">
-                
+                <input type="text" id="b-name" class="auth-input" placeholder="Brand Name">
                 <label class="file-upload-box">
-                    <i class='bx bx-cloud-upload'></i> Upload Brand Logo to Supabase Storage
-                    <input type="file" id="b-logo-file" accept="image/*" style="display:none;" onchange="handleBrandImageUpload(this)">
+                    <i class='bx bx-upload'></i> Upload Logo
+                    <input type="file" accept="image/*" style="display:none;" onchange="handleBrandImageUpload(this)">
                 </label>
-                <input type="text" id="b-logo-url" class="auth-input" placeholder="Or Paste Brand Image URL" oninput="previewBrandLogoUrl(this.value)">
-                <img id="b-logo-preview" style="display:none; width:65px; height:65px; object-fit:contain; border:1px solid #ddd; border-radius:8px; margin:4px 0;">
-
-                <label style="font-size:12px; display:flex; align-items:center; gap:6px; margin:8px 0;">
-                    <input type="checkbox" id="b-active" checked> Active / Enabled in Carousel
-                </label>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-primary" onclick="adminSaveBrand()">Save Brand to Supabase</button>
-                    <button class="btn-secondary" style="width:120px; margin-top:8px;" onclick="resetBrandForm()">Clear</button>
-                </div>
+                <input type="hidden" id="b-logo-url">
+                <img id="b-logo-preview" style="display:none; width:60px; margin-top:6px;">
+                <button class="btn-primary" onclick="adminSaveBrand()">Save Brand</button>
             </div>
-            <div class="data-card">
-                <input type="text" id="brand-search-input" class="auth-input" placeholder="Search saved brands..." oninput="renderAdminBrandsList()">
-                <div id="admin-brands-list" style="margin-top:10px;"></div>
-            </div>
+            <div id="admin-brands-list"></div>
         </div>
 
-        <!-- Admin Panel 5: Category Management (Editable First-Aid, etc.) -->
         <div class="fk-admin-panel" id="adm-panel-categories">
             <div class="data-card">
-                <h4 style="margin-top:0;">Manage Product Categories (Add First Aid, etc.)</h4>
-                <div style="display:flex; gap:6px; margin-bottom:10px;">
-                    <input type="text" id="cat-name-input" class="auth-input" style="margin:0; flex:1;" placeholder="Category Name (e.g. First Aid)">
-                    <input type="text" id="cat-icon-input" class="auth-input" style="margin:0; width:130px;" placeholder="Boxicon (e.g. bx-band-aid)" value="bx-plus-medical">
-                    <button class="btn-primary" style="width:auto; padding:10px 16px; margin:0;" onclick="adminAddCategory()">Add Category</button>
+                <h4 style="margin-top:0;">Manage Categories</h4>
+                <div style="display:flex; gap:6px;">
+                    <input type="text" id="cat-name-input" class="auth-input" placeholder="Category Name (e.g. First Aid)">
+                    <input type="text" id="cat-icon-input" class="auth-input" placeholder="Boxicon (bx-band-aid)">
                 </div>
-                <div id="admin-categories-list"></div>
+                <button class="btn-primary" onclick="adminSaveCategory()">Add Category</button>
+                <div id="admin-categories-list" style="margin-top:15px;"></div>
             </div>
         </div>
 
-        <!-- Admin Panel 6: Store Settings -->
         <div class="fk-admin-panel" id="adm-panel-settings">
             <div class="data-card">
-                <h4 style="margin-top:0;">🏥 Pharmacy Name, Logo & Contact Settings (Cloud Synced)</h4>
-                <label style="font-size:11px; font-weight:700;">Medical / Pharmacy Name (English):</label>
-                <input type="text" id="set-store-name" class="auth-input" placeholder="SUBHA MEDICAL">
+                <h4 style="margin-top:0;">Store Settings & Invoice Details</h4>
+                <input type="text" id="set-store-name" class="auth-input" placeholder="Store Name (English)">
+                <input type="text" id="set-store-tamil" class="auth-input" placeholder="Store Subtitle (Tamil)">
+                <input type="text" id="set-store-addr" class="auth-input" placeholder="Store Full Address">
+                <input type="tel" id="set-admin-phone" class="auth-input" placeholder="Admin Mobile Number">
+                
+                <h4 style="margin:10px 0 6px;">Invoice Details</h4>
+                <input type="text" id="set-dl" class="auth-input" placeholder="Drug License No.">
+                <input type="text" id="set-gstin" class="auth-input" placeholder="GSTIN">
+                <input type="text" id="set-pharm" class="auth-input" placeholder="Pharmacist Name">
+                <input type="text" id="set-doc" class="auth-input" placeholder="Ref. Doctor">
 
-                <label style="font-size:11px; font-weight:700;">Subtitle / Tamil Name:</label>
-                <input type="text" id="set-store-tamil" class="auth-input" placeholder="சுபா மெடிக்கல் • திருப்பூர்">
-
-                <label style="font-size:11px; font-weight:700;">Store Full Address:</label>
-                <input type="text" id="set-store-addr" class="auth-input" placeholder="Perumanallur–Kunnathur Road, Vallipuram, Tiruppur">
-
-                <label style="font-size:11px; font-weight:700;">Admin / Pharmacy Mobile Number:</label>
-                <input type="tel" id="set-admin-phone" class="auth-input" placeholder="10-Digit Mobile Number">
-
-                <label style="font-size:11px; font-weight:700;">Top Moving Announcement Ticker Text:</label>
-                <input type="text" id="set-ticker" class="auth-input" placeholder="Announcement text...">
-
-                <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
-                <h4 style="margin:0 0 6px;">🖼️ Pharmacy Logo (Navbar & Hero)</h4>
+                <h4 style="margin:10px 0 6px;">Store Logo & Promo Video</h4>
                 <label class="file-upload-box">
-                    <i class='bx bx-upload'></i> Upload Pharmacy Logo to Supabase Storage
+                    <i class='bx bx-image'></i> Upload Store Logo
                     <input type="file" accept="image/*" style="display:none;" onchange="handleStoreLogoUpload(this)">
                 </label>
-                <input type="text" id="set-logo-url" class="auth-input" placeholder="Or Paste Logo URL">
-
-                <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
-                <h4 style="margin:0 0 6px;">🔐 Change Admin Login Credentials</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                    <input type="text" id="adm-user-change" class="auth-input" placeholder="New Staff Username">
-                    <input type="password" id="adm-pass-change" class="auth-input" placeholder="New Staff Password">
-                </div>
-
-                <button class="btn-primary" onclick="saveStoreBrandSettings()">Save & Sync Store Settings to Supabase</button>
+                <input type="hidden" id="set-logo-url">
+                
+                <label class="file-upload-box">
+                    <i class='bx bx-video'></i> Upload Promo Video / Banner
+                    <input type="file" accept="video/mp4,image/*" style="display:none;" onchange="handlePromoFileUpload(this)">
+                </label>
+                <input type="hidden" id="set-promo-url">
+                
+                <h4 style="margin:10px 0 6px;">Admin Login Credentials</h4>
+                <input type="text" id="set-adm-user" class="auth-input" placeholder="Admin Username">
+                <input type="password" id="set-adm-pass" class="auth-input" placeholder="Admin Password">
+                
+                <button class="btn-primary" onclick="saveStoreSettings()">Save All Settings</button>
             </div>
-        </div>
-
-        <!-- Admin Panel 7: Medicine Requests -->
-        <div class="fk-admin-panel" id="adm-panel-requests">
-            <div id="admin-requests-container"></div>
         </div>
     </div>
 
+    <!-- Hidden Container for PDF Rendering -->
+    <div id="pdf-render-container"></div>
     <div id="toast">Notification</div>
 
     <script>
-        /**************************************************************
-         * 1. SUPABASE CONFIGURATION & REALTIME SYNC ENGINE
-         **************************************************************/
+        // Supabase Constants
         const DEFAULT_SUPABASE_URL = "https://ktqztbpmfxbbczojfdlr.supabase.co"; 
         const DEFAULT_SUPABASE_KEY = "sb_publishable_C0bpzdEEotuWH3UpLyB5Fw_dCb3IrJf";
-        const STORAGE_BUCKET = "subha-storage";
+        const STORAGE_BUCKET = "subha-storage"; // Ensure this bucket is created and PUBLIC
 
         let sbClient = null;
 
-        const DEFAULT_STORE_CONFIG = {
-            id: "main_config",
-            storeName: "SUBHA MEDICAL",
-            storeTamil: "சுபா மெடிக்கல் • திருப்பூர்",
-            storeAddress: "Perumanallur–Kunnathur Road, Vallipuram, Tiruppur - 641663",
-            adminPhone: "9487165045",
-            tickerText: "⚕️ சுபா மெடிக்கல் (Subha Medical) - Perumanallur–Kunnathur Road, Vallipuram, Tiruppur | BP, Sugar and Weight Check Available! / ரத்த அழுத்தம், சர்க்கரை மற்றும் உடல் எடை பரிசோதனை வசதி உள்ளது! 🐾 Veterinary Medicines Available! / கால்நடை மருந்துகள் கிடைக்கும்!",
-            logoUrl: "",
-            promoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-            promoCaption: "🎥 Subha Medical — 100% Genuine Medicines, Veterinary Care & Fast Delivery",
-            promoShow: true,
-            adminUser: "admin",
-            adminPass: "1234",
-            dlNo: "TN-TPR-20B/21B-0452",
-            gstin: "33AABCS1429B1Z5",
-            pharmacist: "A. SoundaraRajan, Reg. Pharmacist",
-            doctor: "Dr. Self / General OPD"
+        // State
+        let storeConfig = {
+            id: "main_config", storeName: "SUBHA MEDICAL", storeTamil: "சுபா மெடிக்கல்",
+            storeAddress: "Vallipuram, Tiruppur", adminPhone: "9487165045",
+            logoUrl: "", promoUrl: "", adminUser: "admin", adminPass: "1234",
+            dlNo: "", gstin: "", pharmacist: "", doctor: ""
         };
+        
+        let categoriesList = [];
+        let brands = [];
+        let products = [];
+        let orders = [];
+        let users = [];
+        let currentProductImages = []; // Array for multiple image uploads
 
-        let storeConfig = Object.assign({}, DEFAULT_STORE_CONFIG, JSON.parse(localStorage.getItem("subha_store_cfg") || "{}"));
-
-        let categoriesList = JSON.parse(localStorage.getItem("subha_categories")) || [
-            { name: "All", label: "அனைத்தும் / All", icon: "bx-grid-alt" },
-            { name: "Fever & Pain", label: "காய்ச்சல் / Fever", icon: "bx-plus-medical" },
-            { name: "Diabetes & BP", label: "சர்க்கரை & BP", icon: "bx-pulse" },
-            { name: "Veterinary", label: "கால்நடை / Vet", icon: "bxs-dog" },
-            { name: "Vitamins & Care", label: "சத்து மாத்திரை", icon: "bx-capsule" },
-            { name: "First Aid", label: "முதலுதவி / First Aid", icon: "bx-band-aid" }
-        ];
-
-        const DEFAULT_BRANDS = [
-            { id: "B1", name: "Micro Labs", logo: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200", active: true },
-            { id: "B2", name: "Glenmark", logo: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=200", active: true },
-            { id: "B3", name: "Himalaya Vet", logo: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=200", active: true },
-            { id: "B4", name: "Intas Pharma", logo: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=200", active: true },
-            { id: "B5", name: "Torrent Pharma", logo: "https://images.unsplash.com/photo-1550572017-edb959b55104?w=200", active: true }
-        ];
-
-        const SEED_PRODUCTS = [
-            { id: "P101", name: "Dolo 650mg Tablet (15 Tabs)", brand: "Micro Labs", category: "Fever & Pain", use: "காய்ச்சல் & உடல் வலி / Fever & Pain", price: 30, mrp: 35, batch: "DL6526", exp: "08/2028", hsn: "3004", gst: 12, rx: false, inStock: true, rating: 4.9, img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400", reviews: [{ author: "Ramesh K", stars: 5, text: "Genuine medicine, fast delivery in Vallipuram." }] },
-            { id: "P102", name: "Telma 40mg Strip (15 Tabs)", brand: "Glenmark", category: "Diabetes & BP", use: "ரத்த அழுத்தம் / Blood Pressure", price: 195, mrp: 230, batch: "TM4012", exp: "11/2028", hsn: "3004", gst: 12, rx: true, inStock: true, rating: 4.8, img: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400", reviews: [] }
-        ];
-
-        let products = JSON.parse(localStorage.getItem("subha_products")) || SEED_PRODUCTS;
-        let brands = JSON.parse(localStorage.getItem("subha_brands")) || DEFAULT_BRANDS;
-        let orders = JSON.parse(localStorage.getItem("subha_orders")) || [];
-        let medRequests = JSON.parse(localStorage.getItem("subha_requests")) || [];
-        let users = JSON.parse(localStorage.getItem("subha_users")) || [];
         let currentUser = JSON.parse(localStorage.getItem("subha_current_user")) || null;
         let cart = JSON.parse(localStorage.getItem("subha_cart")) || {};
         let wishlist = JSON.parse(localStorage.getItem("subha_wishlist")) || [];
-        let posItems = [];
-        let appliedCouponPct = 0;
-        let selectedReviewStars = 5;
-
-        let activeInvoiceOrderId = null;
+        
         let activeCategory = "All";
         let activeBrand = "ALL";
 
         window.addEventListener("DOMContentLoaded", () => {
-            try {
-                applyStoreBrandingToDOM();
-                initSupabaseConnection();
-                loadInvoiceConfigInputs();
-                renderCategories();
-                renderBrands();
-                renderStoreProducts();
-                updateCartUI();
-                updateUserHeader();
-                renderCustomerOrders();
-            } catch (err) {
-                console.error("Initialization error:", err);
-            }
+            initSupabaseConnection();
+            updateCartUI();
+            updateUserHeader();
         });
 
-        function saveAllLocal() {
-            try {
-                localStorage.setItem("subha_store_cfg", JSON.stringify(storeConfig));
-                localStorage.setItem("subha_products", JSON.stringify(products));
-                localStorage.setItem("subha_brands", JSON.stringify(brands));
-                localStorage.setItem("subha_categories", JSON.stringify(categoriesList));
-                localStorage.setItem("subha_orders", JSON.stringify(orders));
-                localStorage.setItem("subha_requests", JSON.stringify(medRequests));
-                localStorage.setItem("subha_users", JSON.stringify(users));
-                localStorage.setItem("subha_cart", JSON.stringify(cart));
-                localStorage.setItem("subha_wishlist", JSON.stringify(wishlist));
-                if (currentUser) localStorage.setItem("subha_current_user", JSON.stringify(currentUser));
-            } catch (e) {
-                console.error("Storage error:", e);
-            }
-        }
-
-        /********************************-----------------
-         * 2. SUPABASE STORAGE FILE UPLOAD HELPER
-         ********************************----------------*/
-        async function uploadFileToSupabaseStorage(file, folder = "uploads") {
-            if (!sbClient) throw new Error("Supabase client not initialized");
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-            
-            const { data, error } = await sbClient.storage.from(STORAGE_BUCKET).upload(fileName, file, {
-                cacheControl: '3600',
-                upsert: false
-            });
-
-            if (error) {
-                console.error("Storage upload error:", error);
-                throw error;
-            }
-
-            const { data: publicUrlData } = sbClient.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
-            return publicUrlData.publicUrl;
-        }
-
-        /********************************-----------------
-         * 3. SUPABASE REALTIME CONNECTION & CENTRAL DB SYNC
-         ********************************----------------*/
+        // 1. SUPABASE INIT & SYNC
         function initSupabaseConnection() {
-            const url = DEFAULT_SUPABASE_URL;
-            const key = DEFAULT_SUPABASE_KEY;
-            const dot = document.getElementById("cloud-status-dot");
-
-            if (url && key && window.supabase) {
+            if (window.supabase) {
                 try {
-                    sbClient = window.supabase.createClient(url, key);
+                    sbClient = window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY);
+                    const dot = document.getElementById("cloud-status-dot");
                     if (dot) dot.classList.remove("offline");
-                    const indicator = document.getElementById("live-sync-indicator");
-                    if (indicator) indicator.innerText = "☁️ Supabase Synced";
                     syncAllData();
-                    subscribeRealtimeChanges();
+                    
+                    sbClient.channel("subha-realtime")
+                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_settings" }, () => syncAllData())
+                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_categories" }, () => syncAllData())
+                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_brands" }, () => syncAllData())
+                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_products" }, () => syncAllData())
+                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_orders" }, () => syncAllData())
+                        .subscribe();
                 } catch (e) {
-                    if (dot) dot.classList.add("offline");
+                    console.error("Supabase Error:", e);
                 }
-            } else {
-                if (dot) dot.classList.add("offline");
             }
         }
 
@@ -968,600 +467,171 @@
             if (!sbClient) return;
             try {
                 const { data: sData } = await sbClient.from("subha_settings").select("*").eq("id", "main_config").maybeSingle();
-                if (sData) {
-                    storeConfig = Object.assign({}, DEFAULT_STORE_CONFIG, sData);
-                    applyStoreBrandingToDOM();
-                    loadInvoiceConfigInputs();
-                }
+                if (sData) storeConfig = Object.assign({}, storeConfig, sData);
+
+                const { data: cData } = await sbClient.from("subha_categories").select("*");
+                if (cData) categoriesList = cData;
 
                 const { data: bData } = await sbClient.from("subha_brands").select("*");
-                if (bData && bData.length > 0) brands = bData;
+                if (bData) brands = bData;
 
                 const { data: pData } = await sbClient.from("subha_products").select("*");
-                if (pData && pData.length > 0) products = pData;
+                if (pData) products = pData;
 
                 const { data: oData } = await sbClient.from("subha_orders").select("*").order("created_timestamp", { ascending: false });
                 if (oData) orders = oData;
 
-                const { data: rData } = await sbClient.from("subha_requests").select("*").order("id", { ascending: false });
-                if (rData) medRequests = rData;
-
-                saveAllLocal();
-                renderBrands();
+                applyStoreBranding();
                 renderCategories();
+                renderBrands();
                 renderStoreProducts();
                 renderCustomerOrders();
+                
                 if (document.getElementById("admin-screen").style.display === "block") {
                     renderAdminDashboard();
                 }
             } catch (err) {
-                console.log("Cloud sync notice:", err.message);
+                console.error("Sync Error:", err.message);
             }
         }
 
-        function subscribeRealtimeChanges() {
-            if (!sbClient) return;
-            sbClient.channel("subha-realtime")
-                .on("postgres_changes", { event: "*", schema: "public", table: "subha_settings" }, () => syncAllData())
-                .on("postgres_changes", { event: "*", schema: "public", table: "subha_brands" }, () => syncAllData())
-                .on("postgres_changes", { event: "*", schema: "public", table: "subha_products" }, () => syncAllData())
-                .on("postgres_changes", { event: "*", schema: "public", table: "subha_orders" }, () => syncAllData())
-                .on("postgres_changes", { event: "*", schema: "public", table: "subha_requests" }, () => syncAllData())
-                .subscribe();
+        // 2. STORAGE UPLOAD HELPER
+        async function uploadFileToSupabaseStorage(file, folder = "uploads") {
+            if (!sbClient) throw new Error("Supabase client not initialized");
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+            
+            const { error } = await sbClient.storage.from(STORAGE_BUCKET).upload(fileName, file, { cacheControl: '3600' });
+            if (error) throw error;
+
+            const { data } = sbClient.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+            return data.publicUrl;
         }
 
-        /********************************-----------------
-         * 4. BRAND & CATEGORY MANAGEMENT
-         ********************************----------------*/
-        function renderBrands() {
-            const activeBrands = brands.filter(b => b.active !== false);
-            const box = document.getElementById("brands-carousel");
-            if (!box) return;
-
-            box.innerHTML = `
-                <div class="brand-item ${activeBrand === 'ALL' ? 'active' : ''}" onclick="filterByBrand('ALL')">
-                    <div class="brand-circle">ALL</div>
-                    <div class="brand-label">All Brands</div>
-                </div>
-            ` + activeBrands.map(b => `
-                <div class="brand-item ${activeBrand === b.name ? 'active' : ''}" onclick="filterByBrand('${b.name}')">
-                    <div class="brand-circle">
-                        ${b.logo ? `<img src="${b.logo}" alt="${b.name}">` : `<span>${b.name.substring(0,6)}</span>`}
-                    </div>
-                    <div class="brand-label" title="${b.name}">${b.name}</div>
-                </div>
-            `).join("");
-
-            const sel = document.getElementById("p-brand-select");
-            if (sel) {
-                sel.innerHTML = activeBrands.map(b => `<option value="${b.name}">${b.name}</option>`).join("");
-            }
-        }
-
-        function filterByBrand(bName) {
-            activeBrand = bName;
-            renderBrands();
-            renderStoreProducts();
-        }
-
-        function handleBrandImageUpload(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            runHeartLoader("Uploading Brand Logo to Supabase Storage...", async () => {
-                try {
-                    const publicUrl = await uploadFileToSupabaseStorage(file, "brands");
-                    document.getElementById("b-logo-url").value = publicUrl;
-                    previewBrandLogoUrl(publicUrl);
-                    showToast("Brand logo uploaded successfully!");
-                } catch (err) {
-                    showToast("Upload failed: " + err.message);
-                }
-            });
-        }
-
-        function previewBrandLogoUrl(url) {
-            const prev = document.getElementById("b-logo-preview");
-            if (!prev) return;
-            if (url && url.trim()) {
-                prev.src = url.trim();
-                prev.style.display = "block";
-            } else {
-                prev.style.display = "none";
-            }
-        }
-
-        function adminSaveBrand() {
-            const editId = document.getElementById("b-edit-id").value.trim();
-            const name = document.getElementById("b-name").value.trim();
-            const logo = document.getElementById("b-logo-url").value.trim();
-            const active = document.getElementById("b-active").checked;
-
-            if (!name) {
-                showToast("Enter Brand / Company Name");
-                return;
-            }
-
-            runHeartLoader("Saving brand to Supabase...", async () => {
-                let savedBrand;
-                if (editId) {
-                    const idx = brands.findIndex(b => b.id === editId);
-                    if (idx > -1) {
-                        brands[idx] = Object.assign({}, brands[idx], { name, logo, active });
-                        savedBrand = brands[idx];
-                    }
-                } else {
-                    savedBrand = {
-                        id: "B" + Date.now(),
-                        name,
-                        logo: logo || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200",
-                        active
-                    };
-                    brands.push(savedBrand);
-                }
-
-                saveAllLocal();
-                if (sbClient && savedBrand) {
-                    await sbClient.from("subha_brands").upsert([savedBrand]);
-                }
-                resetBrandForm();
-                renderBrands();
-                renderAdminBrandsList();
-                showToast("Brand saved successfully!");
-            });
-        }
-
-        function adminEditBrand(id) {
-            const b = brands.find(x => x.id === id);
-            if (!b) return;
-            document.getElementById("brand-form-title").innerText = "Editing Brand: " + b.name;
-            document.getElementById("b-edit-id").value = b.id;
-            document.getElementById("b-name").value = b.name;
-            document.getElementById("b-logo-url").value = b.logo || "";
-            document.getElementById("b-active").checked = b.active !== false;
-            previewBrandLogoUrl(b.logo || "");
-        }
-
-        async function adminDeleteBrand(id) {
-            if (!confirm("Are you sure you want to delete this brand?")) return;
-            brands = brands.filter(b => b.id !== id);
-            saveAllLocal();
-            if (sbClient) {
-                await sbClient.from("subha_brands").delete().eq("id", id);
-            }
-            renderBrands();
-            renderAdminBrandsList();
-            showToast("Brand removed");
-        }
-
-        function resetBrandForm() {
-            document.getElementById("brand-form-title").innerText = "Add / Edit Pharmaceutical Company Brand";
-            document.getElementById("b-edit-id").value = "";
-            document.getElementById("b-name").value = "";
-            document.getElementById("b-logo-url").value = "";
-            document.getElementById("b-active").checked = true;
-            const prev = document.getElementById("b-logo-preview");
-            if (prev) prev.style.display = "none";
-        }
-
-        function renderAdminBrandsList() {
-            const searchInput = document.getElementById("brand-search-input");
-            const q = searchInput ? searchInput.value.toLowerCase() : "";
-            const list = document.getElementById("admin-brands-list");
-            if (!list) return;
-
-            const filtered = brands.filter(b => b.name.toLowerCase().includes(q));
-            list.innerHTML = filtered.map(b => `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee; font-size:12px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <img src="${b.logo || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200'}" style="width:32px; height:32px; object-fit:contain; border-radius:4px; border:1px solid #eee;">
-                        <div>
-                            <strong>${b.name}</strong>
-                            <div style="font-size:10px; color:${b.active !== false ? 'green' : 'red'};">${b.active !== false ? 'Active' : 'Disabled'}</div>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:6px;">
-                        <button class="btn-secondary" style="width:auto; padding:4px 8px; margin:0;" onclick="adminEditBrand('${b.id}')">Edit</button>
-                        <button class="btn-danger" style="width:auto; padding:4px 8px; margin:0;" onclick="adminDeleteBrand('${b.id}')">Delete</button>
-                    </div>
-                </div>
-            `).join("");
-        }
-
-        // Category Management
-        function adminAddCategory() {
-            const name = document.getElementById("cat-name-input").value.trim();
-            const icon = document.getElementById("cat-icon-input").value.trim() || "bx-plus-medical";
-            if (!name) {
-                showToast("Enter category name");
-                return;
-            }
-            if (categoriesList.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-                showToast("Category already exists");
-                return;
-            }
-            categoriesList.push({ name, label: name, icon });
-            saveAllLocal();
-            renderCategories();
-            renderAdminCategoriesList();
-            document.getElementById("cat-name-input").value = "";
-            showToast("Category added!");
-        }
-
-        function adminDeleteCategory(catName) {
-            if (catName === "All") return;
-            categoriesList = categoriesList.filter(c => c.name !== catName);
-            saveAllLocal();
-            renderCategories();
-            renderAdminCategoriesList();
-            showToast("Category removed");
-        }
-
-        function renderAdminCategoriesList() {
-            const box = document.getElementById("admin-categories-list");
-            if (!box) return;
-            box.innerHTML = categoriesList.map(c => `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #eee; font-size:12px;">
-                    <span><i class='bx ${c.icon}'></i> <strong>${c.name}</strong></span>
-                    ${c.name !== 'All' ? `<button class="btn-danger" style="width:auto; padding:3px 8px; margin:0;" onclick="adminDeleteCategory('${c.name}')">Delete</button>` : '<span style="font-size:10px; color:#888;">Default</span>'}
-                </div>
-            `).join("");
-
-            // Update Product Form Category Dropdown
-            const pCatSel = document.getElementById("p-cat");
-            if (pCatSel) {
-                pCatSel.innerHTML = categoriesList.filter(c => c.name !== 'All').map(c => `<option value="${c.name}">${c.name}</option>`).join("");
-            }
-        }
-
-        /****************-----------------
-         * 5. PRODUCT MANAGEMENT & STORAGE UPLOADS
-         ****************----------------*/
-        function handleProductImageUpload(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            runHeartLoader("Uploading Product Image to Supabase Storage...", async () => {
-                try {
-                    const publicUrl = await uploadFileToSupabaseStorage(file, "products");
-                    document.getElementById("p-img").value = publicUrl;
-                    previewProductImageUrl(publicUrl);
-                    showToast("Product image uploaded successfully!");
-                } catch (err) {
-                    showToast("Upload failed: " + err.message);
-                }
-            });
-        }
-
-        function previewProductImageUrl(url) {
-            const prev = document.getElementById("p-img-preview");
-            if (!prev) return;
-            if (url && url.trim()) {
-                prev.src = url.trim();
-                prev.style.display = "block";
-            } else {
-                prev.style.display = "none";
-            }
-        }
-
-        async function adminSaveProduct() {
-            const editId = document.getElementById("p-edit-id").value.trim();
-            const name = document.getElementById("p-name").value.trim();
-            const brandSelect = document.getElementById("p-brand-select");
-            const brand = brandSelect ? brandSelect.value : "Subha Pharma";
-            const use = document.getElementById("p-use").value.trim() || "Healthcare Support";
-            const category = document.getElementById("p-cat").value;
-            const price = Number(document.getElementById("p-price").value);
-            const mrp = Number(document.getElementById("p-mrp").value) || price;
-            const batch = document.getElementById("p-batch").value.trim() || "SM26";
-            const exp = document.getElementById("p-exp").value.trim() || "12/2028";
-            const gst = Number(document.getElementById("p-gst").value);
-            const img = document.getElementById("p-img").value.trim() || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400";
-            const rx = document.getElementById("p-rx").checked;
-            const inStock = document.getElementById("p-stock").checked;
-
-            if (!name || !price) {
-                showToast("Enter Medicine Name & Selling Price");
-                return;
-            }
-
-            runHeartLoader("Saving product to Supabase...", async () => {
-                let savedProd;
-                if (editId) {
-                    const idx = products.findIndex(x => x.id === editId);
-                    if (idx > -1) {
-                        products[idx] = Object.assign({}, products[idx], {
-                            name, brand, use, category, price, mrp, batch, exp, gst, img, rx, inStock
-                        });
-                        savedProd = products[idx];
-                    }
-                } else {
-                    savedProd = {
-                        id: "P" + Date.now(),
-                        name, brand, use, category, price, mrp,
-                        batch, exp, hsn: "3004", gst,
-                        img, rx, inStock,
-                        rating: 4.9,
-                        reviews: []
-                    };
-                    products.unshift(savedProd);
-                }
-
-                saveAllLocal();
-                if (sbClient && savedProd) {
-                    await sbClient.from("subha_products").upsert([savedProd]);
-                }
-                resetProductForm();
-                renderStoreProducts();
-                renderAdminDashboard();
-                showToast(editId ? "Medicine updated!" : "New medicine added to Supabase!");
-            });
-        }
-
-        function adminEditProduct(id) {
-            const p = products.find(x => x.id === id);
-            if (!p) return;
-            document.getElementById("prod-form-title").innerText = "Editing: " + p.name;
-            document.getElementById("p-edit-id").value = p.id;
-            document.getElementById("p-name").value = p.name;
-            const sel = document.getElementById("p-brand-select");
-            if (sel) sel.value = p.brand;
-            document.getElementById("p-use").value = p.use;
-            document.getElementById("p-cat").value = p.category;
-            document.getElementById("p-price").value = p.price;
-            document.getElementById("p-mrp").value = p.mrp;
-            document.getElementById("p-batch").value = p.batch || "SM26";
-            document.getElementById("p-exp").value = p.exp || "12/2028";
-            document.getElementById("p-gst").value = p.gst ?? 12;
-            document.getElementById("p-img").value = p.img || "";
-            document.getElementById("p-rx").checked = !!p.rx;
-            document.getElementById("p-stock").checked = p.inStock !== false;
-            previewProductImageUrl(p.img || "");
-            const adminPanel = document.getElementById("adm-panel-products");
-            if (adminPanel) adminPanel.scrollIntoView({ behavior: "smooth" });
-        }
-
-        async function adminDeleteProduct(id) {
-            if (!confirm("Delete this product?")) return;
-            products = products.filter(p => p.id !== id);
-            saveAllLocal();
-            if (sbClient) {
-                await sbClient.from("subha_products").delete().eq("id", id);
-            }
-            renderStoreProducts();
-            renderAdminDashboard();
-            showToast("Product removed");
-        }
-
-        function resetProductForm() {
-            document.getElementById("prod-form-title").innerText = "Add / Edit Medicine";
-            document.getElementById("p-edit-id").value = "";
-            document.getElementById("p-name").value = "";
-            document.getElementById("p-use").value = "";
-            document.getElementById("p-price").value = "";
-            document.getElementById("p-mrp").value = "";
-            document.getElementById("p-batch").value = "";
-            document.getElementById("p-exp").value = "";
-            document.getElementById("p-img").value = "";
-            document.getElementById("p-rx").checked = false;
-            document.getElementById("p-stock").checked = true;
-            const prev = document.getElementById("p-img-preview");
-            if (prev) prev.style.display = "none";
-        }
-
-        /********************************-----------------
-         * 6. STOREFRONT RENDERING, SEARCH & SHOPPING CART
-         ********************************----------------*/
-        function startVoiceSearch() {
-            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRec) {
-                showToast("Voice search is not supported on this browser.");
-                return;
-            }
-            const rec = new SpeechRec();
-            rec.lang = "en-IN";
-            showToast("🎤 Listening... Speak medicine name");
-            rec.onresult = (e) => {
-                const spoken = e.results[0][0].transcript;
-                const searchInput = document.getElementById("search-input");
-                if (searchInput) searchInput.value = spoken;
-                renderStoreProducts();
+        // 3. BRANDING & UI RENDER
+        function applyStoreBranding() {
+            const els = {
+                "page-title": `${storeConfig.storeName} | Online Pharmacy`,
+                "nav-store-title": storeConfig.storeName,
+                "nav-store-subtitle": storeConfig.storeTamil,
+                "hero-store-title": storeConfig.storeName,
+                "top-marquee-ticker": storeConfig.tickerText
             };
-            rec.start();
+            for (let id in els) {
+                const el = document.getElementById(id);
+                if (el) el.innerText = els[id];
+            }
+            
+            const addr = document.getElementById("hero-store-address");
+            if (addr) addr.innerHTML = `${storeConfig.storeAddress}<br>📞 +91 ${storeConfig.adminPhone} • Genuine Medicines`;
+
+            if (storeConfig.logoUrl) {
+                document.getElementById("nav-logo-box").innerHTML = `<img src="${storeConfig.logoUrl}">`;
+                document.getElementById("hero-logo-box").innerHTML = `<img src="${storeConfig.logoUrl}">`;
+            }
+
+            const promoContainer = document.getElementById("store-promo-container");
+            const promoMedia = document.getElementById("store-promo-media-box");
+            if (storeConfig.promoShow && storeConfig.promoUrl) {
+                promoContainer.style.display = "block";
+                const isVideo = /\.(mp4|webm|ogg)$/i.test(storeConfig.promoUrl);
+                promoMedia.innerHTML = isVideo ? `<video src="${storeConfig.promoUrl}" autoplay muted loop playsinline></video>` : `<img src="${storeConfig.promoUrl}">`;
+            } else {
+                promoContainer.style.display = "none";
+            }
         }
 
         function renderCategories() {
             const grid = document.getElementById("categories-grid");
             if (!grid) return;
-            grid.innerHTML = categoriesList.map(c => `
+            let displayCats = [{name:"All", icon:"bx-grid-alt", label:"All"}, ...categoriesList];
+            grid.innerHTML = displayCats.map(c => `
                 <div class="tc-card ${activeCategory === c.name ? 'active' : ''}" onclick="filterByCategory('${c.name}')">
-                    <i class='bx ${c.icon} tc-icon'></i>
-                    <span>${c.label}</span>
+                    <i class='bx ${c.icon} tc-icon'></i><span>${c.name}</span>
                 </div>
             `).join("");
         }
 
-        function filterByCategory(cat) {
-            activeCategory = cat;
-            renderCategories();
-            renderStoreProducts();
+        function filterByCategory(cat) { activeCategory = cat; renderCategories(); renderStoreProducts(); }
+
+        function renderBrands() {
+            const box = document.getElementById("brands-carousel");
+            if (!box) return;
+            const activeBrands = brands.filter(b => b.active);
+            box.innerHTML = `<div class="brand-item ${activeBrand==='ALL'?'active':''}" onclick="filterByBrand('ALL')"><div class="brand-circle">ALL</div><div class="brand-label">All</div></div>` + 
+                activeBrands.map(b => `
+                <div class="brand-item ${activeBrand===b.name?'active':''}" onclick="filterByBrand('${b.name}')">
+                    <div class="brand-circle">${b.logo ? `<img src="${b.logo}">` : `<span>${b.name.substring(0,4)}</span>`}</div>
+                    <div class="brand-label">${b.name}</div>
+                </div>
+            `).join("");
         }
 
-        function getAverageRating(p) {
-            if (!p.reviews || p.reviews.length === 0) return p.rating || 4.8;
-            const sum = p.reviews.reduce((acc, r) => acc + Number(r.stars || 5), 0);
-            return (sum / p.reviews.length).toFixed(1);
-        }
+        function filterByBrand(b) { activeBrand = b; renderBrands(); renderStoreProducts(); }
 
         function renderStoreProducts() {
-            const searchInput = document.getElementById("search-input");
-            const query = searchInput ? searchInput.value.toLowerCase() : "";
-            const sortSelect = document.getElementById("sort-select");
-            const sortBy = sortSelect ? sortSelect.value : "popular";
-
+            const q = (document.getElementById("search-input")?.value || "").toLowerCase();
             let filtered = products.filter(p => {
                 const matchCat = activeCategory === "All" || p.category === activeCategory;
                 const matchBrand = activeBrand === "ALL" || p.brand === activeBrand;
-                const matchSearch = p.name.toLowerCase().includes(query) ||
-                                    p.use.toLowerCase().includes(query) ||
-                                    p.brand.toLowerCase().includes(query);
+                const matchSearch = p.name.toLowerCase().includes(q) || (p.brand && p.brand.toLowerCase().includes(q));
                 return matchCat && matchBrand && matchSearch;
             });
 
-            if (sortBy === "price-low") filtered.sort((a, b) => a.price - b.price);
-            else if (sortBy === "price-high") filtered.sort((a, b) => b.price - a.price);
-            else if (sortBy === "discount") filtered.sort((a, b) => ((b.mrp - b.price) / b.mrp) - ((a.mrp - a.price) / a.mrp));
+            const lbl = document.getElementById("product-count-lbl");
+            if (lbl) lbl.innerText = `${filtered.length} Items`;
 
-            const countLbl = document.getElementById("product-count-lbl");
-            if (countLbl) countLbl.innerText = `${filtered.length} Items`;
-
-            const mainGrid = document.getElementById("main-product-grid");
-            if (mainGrid) mainGrid.innerHTML = filtered.map(p => buildProductCardHTML(p)).join("");
-
-            const wishedProducts = products.filter(p => wishlist.includes(p.id));
-            const wishGrid = document.getElementById("wishlist-product-grid");
-            if (wishGrid) {
-                wishGrid.innerHTML = wishedProducts.length
-                    ? wishedProducts.map(p => buildProductCardHTML(p)).join("")
-                    : `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#888;">No items in your wishlist yet.</div>`;
-            }
-
-            const wishBadge = document.getElementById("wish-badge");
-            if (wishBadge) {
-                wishBadge.innerText = wishlist.length;
-                wishBadge.style.display = wishlist.length > 0 ? "block" : "none";
-            }
-        }
-
-        function buildProductCardHTML(p) {
-            const disc = Math.round(((p.mrp - p.price) / p.mrp) * 100);
-            const qty = cart[p.id] || 0;
-            const isWished = wishlist.includes(p.id);
-            const avgStars = getAverageRating(p);
-            const inStock = p.inStock !== false;
-
-            return `
-                <div class="p-card">
-                    <div class="badge-top-left">
-                        ${disc > 0 ? `<span class="discount-badge">${disc}% OFF</span>` : ''}
-                        ${p.rx ? `<span class="rx-badge">Rx Required</span>` : ''}
-                    </div>
-                    <i class='bx ${isWished ? "bxs-heart active" : "bx-heart"} wish-icon' onclick="toggleWishlist('${p.id}')"></i>
-                    <div class="p-img-box" onclick="openProductDetail('${p.id}')">
-                        <img src="${p.img}" alt="${p.name}">
-                    </div>
-                    <div class="p-brand-text">${p.brand}</div>
-                    <div class="p-title" onclick="openProductDetail('${p.id}')">${p.name}</div>
-                    <div class="p-use">${p.use}</div>
-                    <div class="p-rating" onclick="openProductDetail('${p.id}')">
-                        <i class='bx bxs-star'></i> ${avgStars} (${(p.reviews || []).length + 1})
-                    </div>
-                    <div class="p-price-row">
-                        <span class="our-price">₹${p.price}</span>
-                        <span class="mrp-price">₹${p.mrp}</span>
-                    </div>
-                    ${!inStock ? `
-                        <button class="btn-add" disabled>OUT OF STOCK</button>
-                    ` : (qty > 0 ? `
-                        <div class="qty-controls">
-                            <button class="qty-btn" onclick="changeQty('${p.id}', -1)">−</button>
-                            <span class="qty-val">${qty}</span>
-                            <button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button>
+            const grid = document.getElementById("main-product-grid");
+            if (grid) {
+                grid.innerHTML = filtered.map(p => {
+                    const primaryImg = (p.images && p.images.length > 0) ? p.images[0] : "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400";
+                    const disc = Math.round(((p.mrp - p.price) / p.mrp) * 100);
+                    const qty = cart[p.id] || 0;
+                    return `
+                        <div class="p-card">
+                            ${disc>0 ? `<div class="badge-top-left"><span class="discount-badge">${disc}% OFF</span></div>` : ''}
+                            <div class="p-img-box" onclick="openProductDetail('${p.id}')"><img src="${primaryImg}"></div>
+                            <div class="p-brand-text">${p.brand || 'Subha Medical'}</div>
+                            <div class="p-title" onclick="openProductDetail('${p.id}')">${p.name}</div>
+                            <div class="p-price-row">
+                                <span class="our-price">₹${p.price}</span>
+                                <span class="mrp-price">₹${p.mrp}</span>
+                            </div>
+                            ${p.inStock ? 
+                                (qty > 0 ? `<div class="qty-controls"><button class="qty-btn" onclick="changeQty('${p.id}', -1)">−</button><span class="qty-val">${qty}</span><button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button></div>` : `<button class="btn-add" onclick="changeQty('${p.id}', 1)">+ ADD</button>`) 
+                                : `<button class="btn-add" disabled>OUT OF STOCK</button>`}
                         </div>
-                    ` : `
-                        <button class="btn-add" onclick="changeQty('${p.id}', 1)">+ ADD TO CART</button>
-                    `)}
-                </div>
-            `;
-        }
-
-        function toggleWishlist(id) {
-            if (wishlist.includes(id)) {
-                wishlist = wishlist.filter(item => item !== id);
-            } else {
-                wishlist.push(id);
-                showToast("Added to Wishlist ❤️");
+                    `;
+                }).join("");
             }
-            saveAllLocal();
-            renderStoreProducts();
         }
 
+        // 4. PRODUCT DETAILS & CART
         function openProductDetail(id) {
             const p = products.find(x => x.id === id);
             if (!p) return;
-            selectedReviewStars = 5;
+            const pd = document.getElementById("pd-content");
+            const primaryImg = (p.images && p.images.length > 0) ? p.images[0] : "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400";
+            const galleryHtml = (p.images || []).map(img => `<img src="${img}" onclick="document.getElementById('pd-main-img').src='${img}'">`).join("");
 
-            const reviewsHTML = (p.reviews || []).map(r => `
-                <div style="border-bottom:1px solid #eee; padding:6px 0; font-size:12px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong>${r.author}</strong>
-                        <span style="color:#f5a623; font-weight:800;">${"★".repeat(r.stars || 5)}${"☆".repeat(5 - (r.stars || 5))}</span>
-                    </div>
-                    <div style="color:#555; margin-top:2px;">${r.text}</div>
+            pd.innerHTML = `
+                <img id="pd-main-img" src="${primaryImg}" style="width:100%; height:180px; object-fit:contain; margin-bottom:10px;">
+                <div class="image-gallery-row">${galleryHtml}</div>
+                <h3 style="margin:4px 0;">${p.name}</h3>
+                <div style="font-size:11px; color:var(--brand); font-weight:800; margin-bottom:10px;">${p.brand} • ${p.category}</div>
+                <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:15px;">
+                    <span style="font-size:22px; font-weight:900;">₹${p.price}</span>
+                    <span style="text-decoration:line-through; color:#888;">MRP ₹${p.mrp}</span>
                 </div>
-            `).join("") || `<div style="font-size:12px; color:#888;">No reviews yet.</div>`;
-
-            const pdContent = document.getElementById("pd-content");
-            if (pdContent) {
-                pdContent.innerHTML = `
-                    <img src="${p.img}" style="width:100%; height:150px; object-fit:contain; margin-bottom:10px;">
-                    <span style="font-size:11px; color:var(--brand); font-weight:800;">${p.brand} • ${p.category}</span>
-                    <h3 style="margin:4px 0 8px;">${p.name}</h3>
-                    <div style="background:#eef7f6; padding:10px; border-radius:8px; font-size:12px; color:var(--brand-dark); margin-bottom:10px;">
-                        <strong>Primary Use:</strong> ${p.use}<br>
-                        <span style="font-size:11px; color:#555;">Batch: ${p.batch || 'SM26'} | Exp: ${p.exp || '12/2028'}</span>
-                    </div>
-                    <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px;">
-                        <span style="font-size:22px; font-weight:900; color:var(--brand-navy);">₹${p.price}</span>
-                        <span style="text-decoration:line-through; color:#888; font-size:13px;">MRP ₹${p.mrp}</span>
-                    </div>
-                    <button class="btn-primary" onclick="changeQty('${p.id}', 1); closeModal('pd-modal');">+ Add to Cart</button>
-                    <hr style="border:none; border-top:1px solid #eee; margin:14px 0;">
-                    <h4 style="margin:0 0 6px; font-size:13px;">Rate & Review</h4>
-                    <div class="star-input-container" id="star-selector-box">
-                        ${[1,2,3,4,5].map(num => `<i class='bx bxs-star selected' data-val="${num}" onclick="selectReviewStar(${num})"></i>`).join("")}
-                    </div>
-                    <input type="text" id="rev-text-${p.id}" class="auth-input" placeholder="Write your review...">
-                    <button class="btn-secondary" onclick="addProductReview('${p.id}')">Submit Review</button>
-                    <div style="max-height:120px; overflow-y:auto; margin-top:10px;">${reviewsHTML}</div>
-                `;
-            }
-            const pdModal = document.getElementById("pd-modal");
-            if (pdModal) pdModal.style.display = "flex";
-        }
-
-        function selectReviewStar(val) {
-            selectedReviewStars = val;
-            const stars = document.querySelectorAll("#star-selector-box i");
-            stars.forEach(st => {
-                const n = Number(st.getAttribute("data-val"));
-                st.className = n <= val ? "bx bxs-star selected" : "bx bx-star";
-            });
-        }
-
-        async function addProductReview(id) {
-            const p = products.find(x => x.id === id);
-            const revInput = document.getElementById(`rev-text-${id}`);
-            const txt = revInput ? revInput.value.trim() : "";
-            if (!txt) return;
-            if (!p.reviews) p.reviews = [];
-            p.reviews.unshift({
-                author: currentUser ? currentUser.name : "Customer",
-                stars: selectedReviewStars,
-                text: txt
-            });
-            saveAllLocal();
-            if (sbClient) {
-                await sbClient.from("subha_products").upsert([p]);
-            }
-            renderStoreProducts();
-            openProductDetail(id);
-            showToast("Review posted!");
+                <button class="btn-primary" onclick="changeQty('${p.id}', 1); closeModal('pd-modal');">+ Add to Cart</button>
+            `;
+            document.getElementById("pd-modal").style.display = "flex";
         }
 
         function changeQty(id, delta) {
-            const next = (cart[id] || 0) + delta;
-            if (next <= 0) delete cart[id];
-            else cart[id] = next;
-            saveAllLocal();
+            cart[id] = (cart[id] || 0) + delta;
+            if (cart[id] <= 0) delete cart[id];
+            localStorage.setItem("subha_cart", JSON.stringify(cart));
             renderStoreProducts();
             updateCartUI();
         }
@@ -1569,687 +639,365 @@
         function updateCartUI() {
             const container = document.getElementById("cart-items-container");
             if (!container) return;
-            let totalItems = 0, mrpTotal = 0, subTotal = 0;
+            let totalItems = 0, subTotal = 0;
             let html = "";
-
             Object.keys(cart).forEach(id => {
                 const p = products.find(x => x.id === id);
                 if (p) {
                     const q = cart[id];
                     totalItems += q;
-                    mrpTotal += p.mrp * q;
                     subTotal += p.price * q;
-                    html += `
-                        <div class="data-card" style="display:flex; justify-content:space-between; align-items:center; padding:12px; margin-bottom:8px;">
-                            <div>
-                                <div style="font-weight:800; font-size:13px;">${p.name}</div>
-                                <div style="font-size:11px; color:#666;">₹${p.price} × ${q} = <strong style="color:var(--brand-navy);">₹${p.price * q}</strong></div>
-                            </div>
-                            <div class="qty-controls" style="width:95px;">
-                                <button class="qty-btn" onclick="changeQty('${p.id}', -1)">−</button>
-                                <span class="qty-val">${q}</span>
-                                <button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button>
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="data-card" style="display:flex; justify-content:space-between; align-items:center; padding:10px; margin-bottom:8px;">
+                        <div><strong style="font-size:13px;">${p.name}</strong><br><span style="font-size:11px;">₹${p.price} x ${q}</span></div>
+                        <div class="qty-controls" style="width:85px;"><button class="qty-btn" onclick="changeQty('${p.id}', -1)">-</button><span class="qty-val">${q}</span><button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button></div>
+                    </div>`;
                 }
             });
 
-            const couponSave = Math.round(subTotal * (appliedCouponPct / 100));
-            const netTotal = Math.max(0, subTotal - couponSave);
-
-            container.innerHTML = totalItems > 0 ? html : `<div class="data-card" style="text-align:center; color:#888;">Your cart is empty.</div>`;
-            const summaryCard = document.getElementById("cart-summary-card");
-            if (summaryCard) summaryCard.style.display = totalItems > 0 ? "block" : "none";
+            container.innerHTML = totalItems > 0 ? html : `<div style="text-align:center; padding:20px; color:#888;">Cart is empty</div>`;
+            document.getElementById("cart-summary-card").style.display = totalItems > 0 ? "block" : "none";
+            document.getElementById("sum-net").innerText = `₹${subTotal}`;
             
-            const sumMrp = document.getElementById("sum-mrp");
-            if (sumMrp) sumMrp.innerText = `₹${mrpTotal}`;
-            const sumDisc = document.getElementById("sum-disc");
-            if (sumDisc) sumDisc.innerText = `-₹${mrpTotal - subTotal}`;
-            const sumCoupon = document.getElementById("sum-coupon");
-            if (sumCoupon) sumCoupon.innerText = `-₹${couponSave}`;
-            const sumNet = document.getElementById("sum-net");
-            if (sumNet) sumNet.innerText = `₹${netTotal}`;
-
             const badge = document.getElementById("cart-badge");
-            if (badge) {
-                badge.innerText = totalItems;
-                badge.style.display = totalItems > 0 ? "block" : "none";
-            }
-
+            if (badge) { badge.innerText = totalItems; badge.style.display = totalItems > 0 ? "block" : "none"; }
+            
             const fBar = document.getElementById("floating-checkout-bar");
             if (fBar) {
-                if (totalItems > 0) {
-                    fBar.style.display = "flex";
-                    const fcItems = document.getElementById("fc-items");
-                    if (fcItems) fcItems.innerText = `${totalItems} Items`;
-                    const fcTotal = document.getElementById("fc-total");
-                    if (fcTotal) fcTotal.innerText = `₹${netTotal}`;
-                } else {
-                    fBar.style.display = "none";
-                }
+                fBar.style.display = totalItems > 0 ? "flex" : "none";
+                document.getElementById("fc-items").innerText = `${totalItems} Items`;
+                document.getElementById("fc-total").innerText = `₹${subTotal}`;
             }
-        }
-
-        function applyCartCoupon() {
-            const couponInput = document.getElementById("coupon-input");
-            const code = couponInput ? couponInput.value.trim().toUpperCase() : "";
-            if (code === "SUBHA10") {
-                appliedCouponPct = 10;
-                showToast("Coupon applied: 10% OFF!");
-            } else {
-                appliedCouponPct = 0;
-                showToast("Invalid Coupon");
-            }
-            updateCartUI();
         }
 
         function openCheckoutModal() {
             if (currentUser) {
-                const chkName = document.getElementById("chk-name");
-                if (chkName) chkName.value = currentUser.name || "";
-                const chkPhone = document.getElementById("chk-phone");
-                if (chkPhone) chkPhone.value = currentUser.phone || "";
-                const chkAddress = document.getElementById("chk-address");
-                if (chkAddress) chkAddress.value = currentUser.address || "";
+                document.getElementById("chk-name").value = currentUser.name || "";
+                document.getElementById("chk-phone").value = currentUser.phone || "";
+                document.getElementById("chk-address").value = currentUser.address || "";
             }
-            const modal = document.getElementById("checkout-modal");
-            if (modal) modal.style.display = "flex";
-        }
-
-        function runHeartLoader(msg, callback) {
-            const loader = document.getElementById("loader-overlay");
-            const fill = document.getElementById("fill-box");
-            const loaderText = document.getElementById("loader-text");
-            if (loaderText) loaderText.innerText = msg;
-            if (loader) loader.style.display = "flex";
-            if (fill) fill.style.height = "0%";
-            setTimeout(() => { if (fill) fill.style.height = "100%"; }, 50);
-            setTimeout(() => {
-                if (loader) loader.style.display = "none";
-                if (callback) callback();
-            }, 800);
+            document.getElementById("checkout-modal").style.display = "flex";
         }
 
         async function placeFinalOrder() {
-            const chkName = document.getElementById("chk-name");
-            const chkPhone = document.getElementById("chk-phone");
-            const chkAddress = document.getElementById("chk-address");
-            const chkPayment = document.getElementById("chk-payment");
+            const name = document.getElementById("chk-name").value.trim();
+            const phone = document.getElementById("chk-phone").value.trim();
+            const address = document.getElementById("chk-address").value.trim();
+            const payment = document.getElementById("chk-payment").value;
 
-            const name = chkName ? chkName.value.trim() : "";
-            const phone = chkPhone ? chkPhone.value.trim() : "";
-            const address = chkAddress ? chkAddress.value.trim() : "";
-            const payment = chkPayment ? chkPayment.value : "COD";
+            if (!name || !phone || !address) { showToast("Fill all details"); return; }
 
-            if (!name || !phone || !address) {
-                showToast("Please fill name, phone and address");
-                return;
-            }
-
-            let orderItems = [];
-            let subTotal = 0;
+            let orderItems = []; let netTotal = 0;
             Object.keys(cart).forEach(id => {
                 const p = products.find(x => x.id === id);
                 if (p) {
-                    orderItems.push({
-                        id: p.id, name: p.name, qty: cart[id], price: p.price, mrp: p.mrp,
-                        batch: p.batch || "SM26", exp: p.exp || "12/2028", hsn: "3004", gst: p.gst ?? 12
-                    });
-                    subTotal += p.price * cart[id];
+                    orderItems.push({ id: p.id, name: p.name, qty: cart[id], price: p.price });
+                    netTotal += p.price * cart[id];
                 }
             });
 
-            const netTotal = Math.max(0, subTotal - Math.round(subTotal * (appliedCouponPct / 100)));
             const newOrder = {
                 id: "SM" + Math.floor(100000 + Math.random() * 900000),
-                customer_name: name,
-                customer_phone: phone,
-                address: address,
-                payment_mode: payment,
-                items: orderItems,
-                total: netTotal,
-                status: "Placed",
-                created_at: new Date().toLocaleString(),
-                created_timestamp: Date.now()
+                customer_name: name, customer_phone: phone, address: address,
+                payment_mode: payment, items: orderItems, total: netTotal,
+                status: "Placed", created_at: new Date().toLocaleString(), created_timestamp: Date.now()
             };
 
             closeModal("checkout-modal");
-            runHeartLoader("Saving Order to Supabase...", async () => {
-                orders.unshift(newOrder);
-                cart = {};
-                appliedCouponPct = 0;
-                saveAllLocal();
-                if (sbClient) {
-                    await sbClient.from("subha_orders").upsert([newOrder]);
-                }
-                updateCartUI();
-                renderStoreProducts();
-                switchBottomNav("orders");
-                showToast(`Order #${newOrder.id} Placed Successfully!`);
-
-                // Automated WhatsApp Notification to Admin upon Order Placement
-                const itemsListText = orderItems.map(i => `• ${i.name} (x${i.qty})`).join("\n");
-                const waMessage = encodeURIComponent(`📦 *New Order Received! (#${newOrder.id})*\n\n*Customer:* ${name}\n*Phone:* ${phone}\n*Address:* ${address}\n\n*Items:*\n${itemsListText}\n\n*Total Amount:* ₹${netTotal}\n*Payment:* ${payment}`);
-                const adminPhoneClean = (storeConfig.adminPhone || "9487165045").replace(/\D/g, "");
-                window.open(`https://wa.me/91${adminPhoneClean}?text=${waMessage}`, "_blank");
+            runHeartLoader("Saving Order to Cloud...", async () => {
+                if (sbClient) await sbClient.from("subha_orders").insert([newOrder]);
+                cart = {}; localStorage.removeItem("subha_cart");
+                updateCartUI(); switchBottomNav("orders");
+                showToast("Order Placed Successfully!");
+                
+                // Open WhatsApp notification
+                const wPhone = storeConfig.adminPhone.replace(/\D/g, "");
+                const wMsg = encodeURIComponent(`*New Order #${newOrder.id}*\nName: ${name}\nPhone: ${phone}\nTotal: ₹${netTotal}\nTrack in Admin Panel.`);
+                window.open(`https://wa.me/91${wPhone}?text=${wMsg}`, "_blank");
             });
         }
 
-        /****************-----------------
-         * 7. CUSTOMER AUTH & ORDER TRACKING
-         ****************----------------*/
+        // 5. CUSTOMER AUTH & ORDERS (PDF DOWNLOAD)
         function openAccountModal() {
-            const outBox = document.getElementById("logged-out-box");
-            const inBox = document.getElementById("logged-in-box");
-            if (outBox) outBox.style.display = currentUser ? "none" : "block";
-            if (inBox) inBox.style.display = currentUser ? "block" : "none";
+            document.getElementById("logged-out-box").style.display = currentUser ? "none" : "block";
+            document.getElementById("logged-in-box").style.display = currentUser ? "block" : "none";
             if (currentUser) {
-                const pName = document.getElementById("prof-name");
-                if (pName) pName.innerText = currentUser.name;
-                const pPhone = document.getElementById("prof-phone");
-                if (pPhone) pPhone.innerText = currentUser.phone;
-                const pAddr = document.getElementById("prof-addr");
-                if (pAddr) pAddr.innerText = currentUser.address;
+                document.getElementById("prof-name").innerText = currentUser.name;
+                document.getElementById("prof-phone").innerText = currentUser.phone;
             }
-            const modal = document.getElementById("account-modal");
-            if (modal) modal.style.display = "flex";
+            document.getElementById("account-modal").style.display = "flex";
         }
 
         async function handleCustomerAuth() {
-            const lPhone = document.getElementById("login-phone");
-            const lPin = document.getElementById("login-pin");
-            const lName = document.getElementById("login-name");
-            const lAddr = document.getElementById("login-addr");
-
-            const phone = lPhone ? lPhone.value.trim() : "";
-            const pin = lPin ? lPin.value.trim() : "";
-            const name = lName ? lName.value.trim() : "";
-            const address = lAddr ? lAddr.value.trim() : "";
-
-            if (phone.length < 10 || !pin) {
-                showToast("Enter valid 10-digit mobile & 4-digit PIN");
-                return;
-            }
-
-            let existing = users.find(u => u.phone === phone);
-            if (existing) {
-                if (existing.pin !== pin) {
-                    showToast("Incorrect PIN!");
-                    return;
-                }
-                currentUser = existing;
-            } else {
-                currentUser = { phone, pin, name: name || "Customer", address: address || "Tiruppur" };
-                users.push(currentUser);
-            }
-
-            saveAllLocal();
-            if (sbClient) {
-                await sbClient.from("subha_users").upsert([currentUser]);
-            }
-            updateUserHeader();
-            renderCustomerOrders();
-            closeModal("account-modal");
-            showToast(`Welcome ${currentUser.name}`);
+            const phone = document.getElementById("login-phone").value.trim();
+            const pin = document.getElementById("login-pin").value.trim();
+            const name = document.getElementById("login-name").value.trim();
+            if (phone.length < 10 || !pin) { showToast("Enter valid details"); return; }
+            
+            currentUser = { phone, pin, name: name || "Customer" };
+            localStorage.setItem("subha_current_user", JSON.stringify(currentUser));
+            if (sbClient) await sbClient.from("subha_users").upsert([currentUser]);
+            updateUserHeader(); renderCustomerOrders(); closeModal("account-modal");
+            showToast("Logged in successfully");
         }
 
         function logoutCustomer() {
-            currentUser = null;
-            localStorage.removeItem("subha_current_user");
-            updateUserHeader();
-            renderCustomerOrders();
-            closeModal("account-modal");
-            showToast("Signed out");
+            currentUser = null; localStorage.removeItem("subha_current_user");
+            updateUserHeader(); renderCustomerOrders(); closeModal("account-modal");
         }
-
-        function updateUserHeader() {
-            const userLabel = document.getElementById("nav-user-label");
-            if (userLabel) userLabel.innerText = currentUser ? currentUser.name.split(" ")[0] : "Login";
-            const welcomeText = document.getElementById("welcome-text");
-            if (welcomeText) {
-                welcomeText.innerText = currentUser
-                    ? `👋 வணக்கம் ${currentUser.name}`
-                    : `👋 நல்வரவு! Welcome to ${storeConfig.storeName}`;
-            }
-        }
+        function updateUserHeader() { document.getElementById("nav-user-label").innerText = currentUser ? "Profile" : "Login"; }
 
         function renderCustomerOrders() {
             const box = document.getElementById("customer-orders-list");
             if (!box) return;
-            const visibleOrders = currentUser
-                ? orders.filter(o => o.customer_phone === currentUser.phone)
-                : orders;
-
-            if (visibleOrders.length === 0) {
-                box.innerHTML = `<div class="data-card" style="text-align:center; color:#888;">No orders found.</div>`;
-                return;
-            }
+            const vis = currentUser ? orders.filter(o => o.customer_phone === currentUser.phone) : orders;
+            if (vis.length === 0) { box.innerHTML = `<div class="data-card" style="text-align:center;">No orders found.</div>`; return; }
 
             const steps = ["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered"];
-
-            box.innerHTML = visibleOrders.map(o => {
+            box.innerHTML = vis.map(o => {
                 const curIdx = steps.indexOf(o.status);
-                const isDelivered = (o.status === "Delivered");
-                const progressHTML = o.status === "Cancelled"
-                    ? `<div style="color:red; font-weight:800; font-size:12px;">❌ Cancelled</div>`
-                    : `<div class="subha-track-steps">
-                        ${steps.map((s, idx) => `
-                            <div class="subha-track-step ${idx < curIdx ? 'done' : (idx === curIdx ? 'current' : '')}">
-                                <div class="subha-track-dot">${idx <= curIdx ? '✓' : idx + 1}</div>
-                                <div>${s}</div>
-                            </div>
-                        `).join("")}
-                       </div>`;
-
-                return `
-                    <div class="data-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:8px;">
-                            <div>
-                                <strong style="color:var(--brand-navy);">Order #${o.id}</strong>
-                                <div style="font-size:10px; color:#888;">${o.created_at}</div>
-                            </div>
-                            <div style="display:flex; gap:6px; align-items:center;">
-                                ${isDelivered ? `<button class="nav-pill-btn" style="background:#d4edda; color:#155724; border-color:#c3e6cb;" onclick="openGstInvoiceModal('${o.id}')"><i class='bx bx-receipt'></i> Print Bill</button>` : `<span style="font-size:10px; color:#888; font-style:italic;">Bill available after delivery</span>`}
-                                <span style="background:var(--brand-light); color:var(--brand-dark); font-weight:800; font-size:11px; padding:4px 8px; border-radius:6px;">${o.status}</span>
-                            </div>
-                        </div>
-                        <div style="font-size:12px; margin:8px 0; color:#333;">
-                            ${(o.items || []).map(i => `${i.name} (x${i.qty})`).join(", ")}
-                        </div>
-                        <div class="subha-track">
-                            <div class="subha-track-title">
-                                <span>LIVE ORDER TRACKING</span>
-                                <span>Total: ₹${o.total}</span>
-                            </div>
-                            ${progressHTML}
-                        </div>
+                const isDelivered = o.status === "Delivered";
+                const pBar = o.status === "Cancelled" ? `<div style="color:red;font-weight:bold;">Cancelled</div>` : `<div class="subha-track-steps">${steps.map((s,i)=>`<div class="subha-track-step ${i<=curIdx?'done':''}"><div class="subha-track-dot">${i<=curIdx?'✓':''}</div>${s}</div>`).join('')}</div>`;
+                
+                return `<div class="data-card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:8px;">
+                        <strong>Order #${o.id}</strong>
+                        ${isDelivered ? `<button class="nav-pill-btn" style="background:#d4edda; color:#155724; border:1px solid #c3e6cb;" onclick="downloadPdfBill('${o.id}')"><i class='bx bxs-file-pdf'></i> Download Bill</button>` : `<span style="font-size:10px; color:#888;">Bill after delivery</span>`}
                     </div>
-                `;
+                    <div style="font-size:12px; margin-bottom:10px;">${(o.items||[]).map(i=>`${i.name} (x${i.qty})`).join(", ")}</div>
+                    ${pBar}
+                </div>`;
             }).join("");
         }
 
-        /****************-----------------
-         * 8. ADMIN DASHBOARD & ACTIONS
-         ****************----------------*/
-        function openAdminAuth() {
-            const u = document.getElementById("adm-user");
-            if (u) u.value = "";
-            const p = document.getElementById("adm-pass");
-            if (p) p.value = "";
-            const modal = document.getElementById("admin-auth-modal");
-            if (modal) modal.style.display = "flex";
+        // 6. PDF GENERATOR (HTML2PDF)
+        function downloadPdfBill(orderId) {
+            const ord = orders.find(o => o.id === orderId);
+            if (!ord) return;
+            
+            const rowsHTML = (ord.items || []).map((i, idx) => `<tr><td>${idx+1}</td><td>${i.name}</td><td>${i.qty}</td><td>₹${i.price}</td><td>₹${i.price * i.qty}</td></tr>`).join("");
+            const container = document.getElementById("pdf-render-container");
+            
+            container.innerHTML = `
+                <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:15px;">
+                    <h2 style="margin:0; color:#008b87;">${storeConfig.storeName}</h2>
+                    <p style="margin:2px 0; font-size:12px;">${storeConfig.storeAddress}<br>Phone: +91 ${storeConfig.adminPhone}</p>
+                    <p style="margin:2px 0; font-size:10px;">DL: ${storeConfig.dlNo || 'N/A'} | GSTIN: ${storeConfig.gstin || 'N/A'}</p>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:15px;">
+                    <div><strong>Billed To:</strong><br>${ord.customer_name}<br>Ph: ${ord.customer_phone}</div>
+                    <div style="text-align:right;"><strong>Invoice:</strong> #INV-${ord.id}<br><strong>Date:</strong> ${ord.created_at}</div>
+                </div>
+                <table class="inv-table">
+                    <thead><tr><th>#</th><th>Description</th><th>Qty</th><th>Rate</th><th>Total</th></tr></thead>
+                    <tbody>${rowsHTML}</tbody>
+                </table>
+                <div style="text-align:right; margin-top:15px; font-size:16px;"><strong>Grand Total: ₹${ord.total}</strong></div>
+                <div style="margin-top:40px; font-size:10px; text-align:center;">Thank you! Get well soon.<br>Authorized Signatory: ${storeConfig.pharmacist || 'Admin'}</div>
+            `;
+
+            showToast("Generating PDF Bill...");
+            html2pdf().set({
+                margin: 10,
+                filename: `Invoice_${ord.id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(container).save();
         }
 
+        // 7. ADMIN PANEL
+        function openAdminAuth() { document.getElementById("admin-auth-modal").style.display = "flex"; }
         function verifyAdminLogin() {
-            const uInput = document.getElementById("adm-user");
-            const pInput = document.getElementById("adm-pass");
-            const u = uInput ? uInput.value.trim() : "";
-            const p = pInput ? pInput.value.trim() : "";
-
+            const u = document.getElementById("adm-user").value.trim();
+            const p = document.getElementById("adm-pass").value.trim();
             if (u === storeConfig.adminUser && p === storeConfig.adminPass) {
                 closeModal("admin-auth-modal");
-                const adminScreen = document.getElementById("admin-screen");
-                if (adminScreen) adminScreen.style.display = "block";
-                loadAdminSettingsInputs();
-                renderBrands();
-                renderAdminBrandsList();
-                renderAdminCategoriesList();
-                renderPosMedicineDropdown();
-                renderAdminDashboard();
-            } else {
-                showToast("Invalid Staff Credentials");
-            }
+                document.getElementById("admin-screen").style.display = "block";
+                loadAdminSettings(); renderAdminDashboard();
+            } else { showToast("Invalid Credentials"); }
         }
-
-        function closeAdminScreen() {
-            const adminScreen = document.getElementById("admin-screen");
-            if (adminScreen) adminScreen.style.display = "none";
-        }
-
+        function closeAdminScreen() { document.getElementById("admin-screen").style.display = "none"; }
+        
         function switchAdminTab(tab) {
-            ["orders", "pos", "products", "brands", "categories", "settings", "requests"].forEach(t => {
-                const btn = document.getElementById(`adm-tab-${t}-btn`);
-                if (btn) btn.classList.toggle("active", t === tab);
-                const panel = document.getElementById(`adm-panel-${t}`);
-                if (panel) panel.classList.toggle("active", t === tab);
+            ["orders", "products", "brands", "categories", "settings"].forEach(t => {
+                document.getElementById(`adm-tab-${t}-btn`).classList.toggle("active", t === tab);
+                document.getElementById(`adm-panel-${t}`).classList.toggle("active", t === tab);
             });
-            if (tab === "brands") renderAdminBrandsList();
-            if (tab === "categories") renderAdminCategoriesList();
-            if (tab === "settings") loadAdminSettingsInputs();
-            if (tab === "pos") renderPosMedicineDropdown();
+            if(tab==='categories') renderAdminCategoriesList();
+            if(tab==='brands') renderAdminBrandsList();
             renderAdminDashboard();
         }
 
         function renderAdminDashboard() {
-            const totalRev = orders.filter(o => o.status !== "Cancelled").reduce((acc, o) => acc + Number(o.total || 0), 0);
-            const statOrders = document.getElementById("stat-orders");
-            if (statOrders) statOrders.innerText = orders.length;
-            const statRev = document.getElementById("stat-rev");
-            if (statRev) statRev.innerText = `₹${totalRev}`;
-            const statProds = document.getElementById("stat-prods");
-            if (statProds) statProds.innerText = products.length;
-            const statBrands = document.getElementById("stat-brands");
-            if (statBrands) statBrands.innerText = brands.length;
-
-            const ordBox = document.getElementById("admin-orders-container");
-            if (ordBox) {
-                ordBox.innerHTML = orders.length ? orders.map(o => `
-                    <div class="data-card">
-                        <div style="display:flex; justify-content:space-between; font-weight:800; align-items:center; flex-wrap:wrap; gap:6px;">
-                            <span>#${o.id} — ${o.customer_name} (${o.customer_phone})</span>
-                            <span style="color:var(--brand); font-size:15px;">₹${o.total}</span>
-                        </div>
-                        <div style="font-size:11px; color:#555; margin:4px 0;">📍 ${o.address} | 🕒 ${o.created_at}</div>
-                        <div style="font-size:12px; background:#f8fafc; padding:8px; border-radius:6px; margin:6px 0;">
-                            ${(o.items || []).map(i => `${i.name} × ${i.qty}`).join(", ")}
-                        </div>
-                        <div style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;">
-                            <select id="status-sel-${o.id}" class="auth-input" style="margin:0; flex:1; min-width:140px;">
-                                ${["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"].map(st =>
-                                    `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`
-                                ).join("")}
-                            </select>
-                            <button class="fk-offer-btn" style="background:var(--brand); color:#fff; padding:9px 12px;" onclick="adminUpdateOrderStatus('${o.id}')">Update</button>
-                            <button class="fk-offer-btn" style="background:var(--brand-navy); color:#fff; padding:9px 12px;" onclick="openGstInvoiceModal('${o.id}')">Print Bill</button>
-                        </div>
+            document.getElementById("admin-orders-container").innerHTML = orders.map(o => `
+                <div class="data-card">
+                    <div style="display:flex; justify-content:space-between; font-weight:800; align-items:center;">
+                        <span>#${o.id} - ${o.customer_name}</span><span>₹${o.total}</span>
                     </div>
-                `).join("") : `<div class="data-card">No orders yet.</div>`;
-            }
-
-            const prodBox = document.getElementById("admin-products-list");
-            if (prodBox) {
-                prodBox.innerHTML = products.map(p => `
-                    <div class="data-card" style="display:flex; justify-content:space-between; align-items:center; padding:10px; gap:10px;">
-                        <img src="${p.img}" style="width:48px; height:48px; object-fit:contain; border-radius:6px; border:1px solid #eee; flex-shrink:0;">
-                        <div style="flex:1; min-width:0;">
-                            <strong style="font-size:13px;">${p.name}</strong>
-                            <div style="font-size:11px; color:#666;">${p.brand} • ₹${p.price} (MRP ₹${p.mrp})</div>
-                        </div>
-                        <div style="display:flex; gap:6px;">
-                            <button class="btn-secondary" style="width:auto; padding:6px 10px; margin:0;" onclick="adminEditProduct('${p.id}')">Edit</button>
-                            <button class="btn-danger" style="width:auto; padding:6px 10px; margin:0;" onclick="adminDeleteProduct('${p.id}')">Delete</button>
-                        </div>
+                    <div style="font-size:12px; margin:8px 0; background:#f8fafc; padding:8px; border-radius:6px;">${(o.items||[]).map(i=>`${i.name} x${i.qty}`).join(", ")}</div>
+                    <div style="display:flex; gap:8px;">
+                        <select id="adm-status-${o.id}" class="auth-input" style="margin:0;">
+                            ${["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join("")}
+                        </select>
+                        <button class="btn-primary" style="margin:0; width:auto; padding:8px 12px;" onclick="updateOrderStatus('${o.id}')">Update</button>
+                        <button class="btn-secondary" style="margin:0; width:auto; padding:8px 12px;" onclick="downloadPdfBill('${o.id}')">PDF</button>
                     </div>
-                `).join("");
-            }
-        }
-
-        async function adminUpdateOrderStatus(orderId) {
-            const sel = document.getElementById(`status-sel-${orderId}`);
-            const newStatus = sel ? sel.value : "Confirmed";
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return;
-            ord.status = newStatus;
-            saveAllLocal();
-            if (sbClient) {
-                await sbClient.from("subha_orders").update({ status: newStatus }).eq("id", orderId);
-            }
-            renderCustomerOrders();
-            renderAdminDashboard();
-            showToast(`Order status updated to ${newStatus}`);
-        }
-
-        // Store Settings
-        function loadAdminSettingsInputs() {
-            const setStoreName = document.getElementById("set-store-name");
-            if (setStoreName) setStoreName.value = storeConfig.storeName || "";
-            const setStoreTamil = document.getElementById("set-store-tamil");
-            if (setStoreTamil) setStoreTamil.value = storeConfig.storeTamil || "";
-            const setStoreAddr = document.getElementById("set-store-addr");
-            if (setStoreAddr) setStoreAddr.value = storeConfig.storeAddress || "";
-            const setAdminPhone = document.getElementById("set-admin-phone");
-            if (setAdminPhone) setAdminPhone.value = storeConfig.adminPhone || "";
-            const setTicker = document.getElementById("set-ticker");
-            if (setTicker) setTicker.value = storeConfig.tickerText || "";
-            const setLogoUrl = document.getElementById("set-logo-url");
-            if (setLogoUrl) setLogoUrl.value = storeConfig.logoUrl || "";
-            const setAdmUser = document.getElementById("adm-user-change");
-            if (setAdmUser) setAdmUser.value = storeConfig.adminUser || "";
-            const setAdmPass = document.getElementById("adm-pass-change");
-            if (setAdmPass) setAdmPass.value = storeConfig.adminPass || "";
-        }
-
-        async function handleStoreLogoUpload(input) {
-            if (!input.files || !input.files[0]) return;
-            try {
-                const url = await uploadFileToSupabaseStorage(input.files[0], "logo");
-                const logoUrlInput = document.getElementById("set-logo-url");
-                if (logoUrlInput) logoUrlInput.value = url;
-                showToast("Logo uploaded to Supabase!");
-            } catch (err) {
-                showToast("Logo upload failed: " + err.message);
-            }
-        }
-
-        async function saveStoreBrandSettings() {
-            storeConfig.id = "main_config";
-            const setStoreName = document.getElementById("set-store-name");
-            storeConfig.storeName = setStoreName ? setStoreName.value.trim() || "SUBHA MEDICAL" : "SUBHA MEDICAL";
-            const setStoreTamil = document.getElementById("set-store-tamil");
-            storeConfig.storeTamil = setStoreTamil ? setStoreTamil.value.trim() || "சுபா மெடிக்கல்" : "சுபா மெடிக்கல்";
-            const setStoreAddr = document.getElementById("set-store-addr");
-            storeConfig.storeAddress = setStoreAddr ? setStoreAddr.value.trim() || "" : "";
-            const setAdminPhone = document.getElementById("set-admin-phone");
-            storeConfig.adminPhone = setAdminPhone ? setAdminPhone.value.trim() || "9487165045" : "9487165045";
-            const setTicker = document.getElementById("set-ticker");
-            storeConfig.tickerText = setTicker ? setTicker.value.trim() || "" : "";
-            const setLogoUrl = document.getElementById("set-logo-url");
-            storeConfig.logoUrl = setLogoUrl ? setLogoUrl.value.trim() : "";
-            
-            const setAdmUser = document.getElementById("adm-user-change");
-            const setAdmPass = document.getElementById("adm-pass-change");
-            const u = setAdmUser ? setAdmUser.value.trim() : "";
-            const p = setAdmPass ? setAdmPass.value.trim() : "";
-            if (u) storeConfig.adminUser = u;
-            if (p) storeConfig.adminPass = p;
-
-            saveAllLocal();
-            applyStoreBrandingToDOM();
-
-            if (sbClient) {
-                await sbClient.from("subha_settings").upsert([storeConfig]);
-            }
-            showToast("Store settings saved to Supabase!");
-        }
-
-        function applyStoreBrandingToDOM() {
-            const pageTitle = document.getElementById("page-title");
-            if (pageTitle) pageTitle.innerText = `${storeConfig.storeName} | Online Pharmacy`;
-            const navStoreTitle = document.getElementById("nav-store-title");
-            if (navStoreTitle) navStoreTitle.innerText = storeConfig.storeName;
-            const navStoreSubtitle = document.getElementById("nav-store-subtitle");
-            if (navStoreSubtitle) navStoreSubtitle.innerText = storeConfig.storeTamil;
-            const heroStoreTitle = document.getElementById("hero-store-title");
-            if (heroStoreTitle) heroStoreTitle.innerText = storeConfig.storeName;
-            const heroStoreAddr = document.getElementById("hero-store-address");
-            if (heroStoreAddr) heroStoreAddr.innerHTML = `${storeConfig.storeAddress}<br>📞 +91 ${storeConfig.adminPhone} • Genuine Medicines`;
-            const topMarquee = document.getElementById("top-marquee-ticker");
-            if (topMarquee) topMarquee.innerText = `${storeConfig.tickerText} 📞 +91 ${storeConfig.adminPhone}`;
-
-            const navLogo = document.getElementById("nav-logo-box");
-            const heroLogo = document.getElementById("hero-logo-box");
-            if (storeConfig.logoUrl) {
-                if (navLogo) navLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
-                if (heroLogo) heroLogo.innerHTML = `<img src="${storeConfig.logoUrl}" alt="Logo">`;
-            } else {
-                if (navLogo) navLogo.innerHTML = `<i class='bx bx-plus-medical'></i>`;
-                if (heroLogo) heroLogo.innerHTML = `<i class='bx bx-plus-medical' style="font-size:28px; color:var(--brand);"></i>`;
-            }
-            updateUserHeader();
-        }
-
-        // POS Billing
-        function renderPosMedicineDropdown() {
-            const sel = document.getElementById("pos-med-select");
-            if (!sel) return;
-            sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} — ₹${p.price}</option>`).join("");
-        }
-
-        function addPosItem() {
-            const sel = document.getElementById("pos-med-select");
-            const id = sel ? sel.value : "";
-            const qtyInput = document.getElementById("pos-med-qty");
-            const qty = Math.max(1, Number(qtyInput ? qtyInput.value || 1 : 1));
-            const p = products.find(x => x.id === id);
-            if (!p) return;
-            posItems.push({ id: p.id, name: p.name, qty, price: p.price, mrp: p.mrp });
-            renderPosItems();
-        }
-
-        function renderPosItems() {
-            const box = document.getElementById("pos-items-list");
-            if (!box) return;
-            let total = 0;
-            box.innerHTML = posItems.map((item, idx) => {
-                total += item.price * item.qty;
-                return `<div style="display:flex; justify-content:space-between; padding:4px 0; font-size:12px;"><span>${item.name} x${item.qty} = ₹${item.price*item.qty}</span><button class="btn-danger" style="width:auto; padding:2px 6px;" onclick="posItems.splice(${idx},1); renderPosItems();">×</button></div>`;
-            }).join("");
-            const totalLbl = document.getElementById("pos-total-lbl");
-            if (totalLbl) totalLbl.innerText = `₹${total}`;
-        }
-
-        async function completePosBill() {
-            if (posItems.length === 0) return;
-            const cName = document.getElementById("pos-cust-name");
-            const cPhone = document.getElementById("pos-cust-phone");
-            const name = cName ? cName.value.trim() || "Walk-In Customer" : "Walk-In Customer";
-            const phone = cPhone ? cPhone.value.trim() || storeConfig.adminPhone : storeConfig.adminPhone;
-            const total = posItems.reduce((acc, i) => acc + (i.price * i.qty), 0);
-
-            const posOrder = {
-                id: "POS" + Math.floor(100000 + Math.random() * 900000),
-                customer_name: name, customer_phone: phone, address: "Counter Sale", payment_mode: "Cash",
-                items: [...posItems], total, status: "Delivered", created_at: new Date().toLocaleString(), created_timestamp: Date.now()
-            };
-
-            orders.unshift(posOrder);
-            posItems = [];
-            renderPosItems();
-            saveAllLocal();
-            if (sbClient) await sbClient.from("subha_orders").upsert([posOrder]);
-            renderAdminDashboard();
-            openGstInvoiceModal(posOrder.id);
-        }
-
-        // Invoice Generator
-        function loadInvoiceConfigInputs() {
-            const invDl = document.getElementById("inv-cfg-dl");
-            if (invDl) invDl.value = storeConfig.dlNo || "TN-TPR-20B/21B-0452";
-            const invGstin = document.getElementById("inv-cfg-gstin");
-            if (invGstin) invGstin.value = storeConfig.gstin || "33AABCS1429B1Z5";
-            const invPharm = document.getElementById("inv-cfg-pharm");
-            if (invPharm) invPharm.value = storeConfig.pharmacist || "A. SoundaraRajan";
-            const invDoc = document.getElementById("inv-cfg-doc");
-            if (invDoc) invDoc.value = storeConfig.doctor || "Dr. Self";
-        }
-
-        function saveInvoiceConfigAndRefresh() {
-            const invDl = document.getElementById("inv-cfg-dl");
-            const invGstin = document.getElementById("inv-cfg-gstin");
-            const invPharm = document.getElementById("inv-cfg-pharm");
-            const invDoc = document.getElementById("inv-cfg-doc");
-
-            storeConfig.dlNo = invDl ? invDl.value.trim() : "TN-TPR-20B/21B-0452";
-            storeConfig.gstin = invGstin ? invGstin.value.trim() : "33AABCS1429B1Z5";
-            storeConfig.pharmacist = invPharm ? invPharm.value.trim() : "A. SoundaraRajan";
-            storeConfig.doctor = invDoc ? invDoc.value.trim() : "Dr. Self";
-
-            saveAllLocal();
-            if (activeInvoiceOrderId) renderPrintableInvoice(activeInvoiceOrderId);
-        }
-
-        function openGstInvoiceModal(orderId) {
-            activeInvoiceOrderId = orderId;
-            loadInvoiceConfigInputs();
-            renderPrintableInvoice(orderId);
-            const modal = document.getElementById("gst-invoice-modal");
-            if (modal) modal.style.display = "flex";
-        }
-
-        function toggleThermalMode() {
-            const area = document.getElementById("printable-invoice-area");
-            if (area) area.classList.toggle("thermal-mode");
-        }
-
-        function renderPrintableInvoice(orderId) {
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return;
-            const rowsHTML = (ord.items || []).map((i, idx) => `
-                <tr><td>${idx+1}</td><td>${i.name}</td><td>${i.qty}</td><td>₹${i.price}</td><td>₹${i.price * i.qty}</td></tr>
+                </div>
             `).join("");
 
-            const area = document.getElementById("printable-invoice-area");
-            if (area) {
-                area.innerHTML = `
-                    <div class="inv-header">
-                        <div>
-                            <div class="inv-store-title">${storeConfig.storeName} (${storeConfig.storeTamil})</div>
-                            <div style="font-size:11px;">${storeConfig.storeAddress}</div>
-                            <div style="font-size:11px;">Phone: +91 ${storeConfig.adminPhone}</div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div style="background:#12243a; color:#fff; padding:4px 8px; font-weight:900;">TAX INVOICE</div>
-                            <div style="font-size:11px;">#INV-${ord.id}</div>
-                        </div>
-                    </div>
-                    <div><strong>Customer:</strong> ${ord.customer_name} (${ord.customer_phone})</div>
-                    <table class="inv-table" style="margin-top:10px;">
-                        <thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-                        <tbody>${rowsHTML}</tbody>
-                    </table>
-                    <div style="text-align:right; font-weight:900; font-size:15px; margin-top:10px;">GRAND TOTAL: ₹${ord.total}</div>
-                `;
+            // Populate Brands & Categories in Product form
+            document.getElementById("p-brand-select").innerHTML = brands.map(b => `<option value="${b.name}">${b.name}</option>`).join("");
+            document.getElementById("p-cat").innerHTML = categoriesList.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
+
+            document.getElementById("admin-products-list").innerHTML = products.map(p => `
+                <div class="data-card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><strong>${p.name}</strong><div style="font-size:11px; color:#555;">₹${p.price}</div></div>
+                    <button class="btn-danger" style="width:auto; padding:4px 8px;" onclick="adminDeleteProduct('${p.id}')">Delete</button>
+                </div>
+            `).join("");
+        }
+
+        async function updateOrderStatus(id) {
+            const status = document.getElementById(`adm-status-${id}`).value;
+            const ord = orders.find(o => o.id === id);
+            if(ord) {
+                ord.status = status;
+                if(sbClient) await sbClient.from("subha_orders").update({status}).eq("id",id);
+                showToast("Status updated");
+                renderAdminDashboard(); renderCustomerOrders();
             }
         }
 
-        function sendWhatsAppInvoice() {
-            const ord = orders.find(o => o.id === activeInvoiceOrderId);
-            if (!ord) return;
-            const msg = encodeURIComponent(`*${storeConfig.storeName} Invoice #${ord.id}*\nTotal: ₹${ord.total}\nThank you!`);
-            window.open(`https://wa.me/91${ord.customer_phone.replace(/\D/g,"") || storeConfig.adminPhone}?text=${msg}`, "_blank");
-        }
-
-        function orderViaWhatsApp() {
-            const msg = encodeURIComponent(`வணக்கம் ${storeConfig.storeName}, எனக்கு மருந்துகள் ஆர்டர் செய்ய வேண்டும்.`);
-            window.open(`https://wa.me/91${storeConfig.adminPhone}?text=${msg}`, "_blank");
-        }
-
-        function callStoreDirect() {
-            window.location.href = `tel:+91${storeConfig.adminPhone}`;
-        }
-
-        function openReqModal() {
-            const modal = document.getElementById("req-modal");
-            if (modal) modal.style.display = "flex";
-        }
-        function submitMedicineRequest() {
-            showToast("Prescription submitted!");
-            closeModal("req-modal");
-        }
-
-        function switchBottomNav(tab) {
-            ["home", "wishlist", "cart", "orders"].forEach(t => {
-                const tabEl = document.getElementById(`tab-${t}`);
-                if (tabEl) tabEl.style.display = (t === tab) ? "block" : "none";
-                const navEl = document.getElementById(`bnav-${t}`);
-                if (navEl) navEl.classList.toggle("active", t === tab);
+        async function handleProductMultiUpload(input) {
+            if (!input.files || input.files.length === 0) return;
+            runHeartLoader("Uploading images...", async () => {
+                try {
+                    for (let i = 0; i < input.files.length; i++) {
+                        const url = await uploadFileToSupabaseStorage(input.files[i], "products");
+                        currentProductImages.push(url);
+                    }
+                    renderMultiImagePreview();
+                    showToast("Images uploaded successfully!");
+                } catch(e) { showToast("Upload error"); }
             });
-            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        function renderMultiImagePreview() {
+            document.getElementById("p-multi-preview").innerHTML = currentProductImages.map(img => `<img src="${img}">`).join("");
         }
 
-        function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.style.display = "none";
+        async function adminSaveProduct() {
+            const name = document.getElementById("p-name").value.trim();
+            const brand = document.getElementById("p-brand-select").value;
+            const category = document.getElementById("p-cat").value;
+            const price = Number(document.getElementById("p-price").value);
+            const inStock = document.getElementById("p-stock").checked;
+            
+            if(!name || !price) { showToast("Enter name and price"); return; }
+            
+            const newProd = {
+                id: "P" + Date.now(), name, brand, category, price,
+                images: [...currentProductImages], inStock
+            };
+            runHeartLoader("Saving Product...", async () => {
+                if(sbClient) await sbClient.from("subha_products").upsert([newProd]);
+                currentProductImages = [];
+                renderMultiImagePreview();
+                document.getElementById("p-name").value = "";
+                showToast("Product saved");
+                syncAllData();
+            });
+        }
+        async function adminDeleteProduct(id) {
+            if(sbClient) await sbClient.from("subha_products").delete().eq("id", id);
+            syncAllData();
+        }
+
+        // CATEGORY & BRAND MANAGEMENT
+        async function adminSaveCategory() {
+            const name = document.getElementById("cat-name-input").value.trim();
+            const icon = document.getElementById("cat-icon-input").value.trim() || "bx-plus-medical";
+            if(!name) return;
+            const cat = { id: "C"+Date.now(), name, icon };
+            if(sbClient) await sbClient.from("subha_categories").insert([cat]);
+            document.getElementById("cat-name-input").value = "";
+            showToast("Category Added");
+            syncAllData();
+        }
+        function renderAdminCategoriesList() {
+            document.getElementById("admin-categories-list").innerHTML = categoriesList.map(c => `
+                <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee;">
+                    <span><i class='bx ${c.icon}'></i> ${c.name}</span>
+                    <button class="btn-danger" style="width:auto; padding:2px 6px;" onclick="adminDelCategory('${c.id}')">Del</button>
+                </div>
+            `).join("");
+        }
+        async function adminDelCategory(id) {
+            if(sbClient) await sbClient.from("subha_categories").delete().eq("id", id);
+            syncAllData();
+        }
+
+        // SETTINGS (Logo, Promo Video, PDF Header fields)
+        function loadAdminSettings() {
+            document.getElementById("set-store-name").value = storeConfig.storeName;
+            document.getElementById("set-admin-phone").value = storeConfig.adminPhone;
+            document.getElementById("set-dl").value = storeConfig.dlNo;
+            document.getElementById("set-gstin").value = storeConfig.gstin;
+            document.getElementById("set-pharm").value = storeConfig.pharmacist;
+            document.getElementById("set-doc").value = storeConfig.doctor;
+            document.getElementById("set-logo-url").value = storeConfig.logoUrl;
+            document.getElementById("set-promo-url").value = storeConfig.promoUrl;
         }
         
-        function showToast(msg) {
-            const t = document.getElementById("toast");
-            if (!t) return;
-            t.innerText = msg;
-            t.className = "show";
-            setTimeout(() => { t.className = ""; }, 2600);
+        async function handleStoreLogoUpload(input) {
+            if (!input.files[0]) return;
+            const url = await uploadFileToSupabaseStorage(input.files[0], "logo");
+            document.getElementById("set-logo-url").value = url;
+            showToast("Logo ready. Click Save Settings.");
         }
+        
+        async function handlePromoFileUpload(input) {
+            if (!input.files[0]) return;
+            runHeartLoader("Uploading Promo Media...", async () => {
+                const url = await uploadFileToSupabaseStorage(input.files[0], "promo");
+                document.getElementById("set-promo-url").value = url;
+                showToast("Promo Media ready. Click Save Settings.");
+            });
+        }
+
+        async function saveStoreSettings() {
+            storeConfig.storeName = document.getElementById("set-store-name").value.trim();
+            storeConfig.adminPhone = document.getElementById("set-admin-phone").value.trim();
+            storeConfig.dlNo = document.getElementById("set-dl").value.trim();
+            storeConfig.gstin = document.getElementById("set-gstin").value.trim();
+            storeConfig.pharmacist = document.getElementById("set-pharm").value.trim();
+            storeConfig.doctor = document.getElementById("set-doc").value.trim();
+            storeConfig.logoUrl = document.getElementById("set-logo-url").value.trim();
+            storeConfig.promoUrl = document.getElementById("set-promo-url").value.trim();
+
+            const u = document.getElementById("set-adm-user").value.trim();
+            const p = document.getElementById("set-adm-pass").value.trim();
+            if(u) storeConfig.adminUser = u;
+            if(p) storeConfig.adminPass = p;
+
+            if(sbClient) await sbClient.from("subha_settings").upsert([Object.assign({id: "main_config"}, storeConfig)]);
+            showToast("Settings Synced to Cloud!");
+            syncAllData();
+        }
+
+        // Utilities
+        function runHeartLoader(msg, cb) {
+            const l = document.getElementById("loader-overlay");
+            if(l) { document.getElementById("loader-text").innerText = msg; l.style.display="flex"; setTimeout(()=>{ l.style.display="none"; if(cb)cb(); }, 800); }
+        }
+        function switchBottomNav(tab) {
+            ["home", "wishlist", "cart", "orders"].forEach(t => {
+                document.getElementById(`tab-${t}`).style.display = (t===tab)?"block":"none";
+                document.getElementById(`bnav-${t}`).classList.toggle("active", t===tab);
+            });
+            window.scrollTo({top:0});
+        }
+        function closeModal(id) { document.getElementById(id).style.display="none"; }
+        function showToast(msg) { const t=document.getElementById("toast"); t.innerText=msg; t.className="show"; setTimeout(()=>t.className="", 2600); }
     </script>
 </body>
 </html>
