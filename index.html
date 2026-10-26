@@ -1,1004 +1,1262 @@
 
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title id="page-title">Subha Medical | Online Pharmacy</title>
-    <!-- Boxicons, Supabase JS, and HTML2PDF JS -->
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#087443">
+<title>Subha Medical | Online Pharmacy</title>
 
-    <style>
-        :root {
-            --brand: #008b87; --brand-dark: #006c6a; --brand-light: #e7f7f6; --brand-border: #b8dfdd;
-            --brand-navy: #12243a; --brand-red: #ed2424; --brand-yellow: #ffc928; --bg-color: #f4f7f9;
-            --text-dark: #12243a; --text-light: #667085; --card-bg: #ffffff;
-            --danger: #ed2424; --star-color: #f5a623; --yellow-bg: #f7fbfb;
-        }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg-color); margin: 0; padding-bottom: 135px; color: var(--text-dark); }
-
-        .moving-ticker { background: #fff3cd; color: #856404; padding: 7px 10px; font-size: 12px; font-weight: bold; border-bottom: 1px solid #ffeeba; display: block; width: 100%; }
-
-        .full-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.96); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .heart-container { position: relative; width: 90px; height: 90px; }
-        .heart-bg { font-size: 90px; color: #e0e0e0; position: absolute; left: 0; top: 0; }
-        .heart-fill { position: absolute; bottom: 0; left: 0; height: 0%; width: 100%; overflow: hidden; color: var(--brand); transition: height 0.4s ease; display: flex; align-items: flex-end; }
-        .heart-fill i { font-size: 90px; line-height: 90px; }
-
-        .navbar { background: #fff; padding: 10px 14px 12px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #e7ecef; box-shadow: 0 2px 12px rgba(18,36,58,0.07); }
-        .nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
-        .brand-name { font-weight: 900; font-size: 17px; color: var(--brand-navy); display: flex; align-items: center; gap: 8px; cursor: pointer; min-width: 0; }
-        .brand-logo-badge { width: 38px; height: 38px; border-radius: 8px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; }
-        .brand-logo-badge img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
-        .nav-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-        .nav-pill-btn { background: var(--brand-light); color: var(--brand-dark); border: 1px solid var(--brand-border); padding: 6px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; }
-        .sync-dot.offline { background: #f59e0b; }
-
-        .search-row { display: flex; gap: 6px; align-items: center; }
-        .search-bar { flex: 1; display: flex; background: #f3f6f8; border-radius: 8px; border: 1px solid #dce4e8; align-items: center; padding: 0 10px; }
-        .search-bar input { flex: 1; padding: 10px 8px; border: none; outline: none; background: transparent; font-size: 13px; }
-        .search-bar i { color: var(--brand); font-size: 20px; }
-
-        .subha-brand-hero { margin: 10px 14px 6px; background: #fff; border-radius: 12px; border: 1px solid #e3eaee; display: flex; align-items: center; gap: 12px; padding: 12px 14px; box-shadow: 0 3px 12px rgba(18,36,58,0.05); }
-        .subha-brand-hero-logo { width: 64px; height: 52px; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--brand-light); flex-shrink: 0; border: 1px solid var(--brand-border); }
-        .subha-brand-hero-logo img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
-        .subha-brand-hero-title { font-size: 15px; font-weight: 900; color: var(--brand-navy); }
-
-        .promo-container { margin: 10px 14px; border-radius: 12px; overflow: hidden; box-shadow: 0 3px 12px rgba(18,36,58,0.08); background: #0f172a; position: relative; border: 1px solid #e2e8f0; }
-        .promo-container video, .promo-container img { width: 100%; max-height: 230px; display: block; object-fit: cover; }
-        .promo-overlay-bar { padding: 9px 12px; background: linear-gradient(90deg, var(--brand-navy), var(--brand-dark)); color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 800; }
-
-        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 14px 8px; }
-        .section-header h3 { margin: 0; font-size: 15px; color: var(--brand-navy); font-weight: 800; }
-
-        .brands-carousel { display: flex; overflow-x: auto; gap: 12px; padding: 10px 14px; background: var(--yellow-bg); scrollbar-width: none; border-bottom: 1px solid #edf2f4; }
-        .brands-carousel::-webkit-scrollbar { display: none; }
-        .brand-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; flex-shrink: 0; width: 60px;}
-        .brand-circle { width: 56px; height: 56px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid #9bc8c6; font-weight: 900; font-size: 11px; color: var(--brand-navy); text-align: center; padding: 4px; overflow: hidden; }
-        .brand-circle img { width: 100%; height: 100%; object-fit: contain; }
-        .brand-item.active .brand-circle { background: var(--brand); color: #fff; border-color: var(--brand-dark); }
-        .brand-label { font-size: 10px; margin-top: 5px; font-weight: 700; color: var(--text-dark); max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center;}
-
-        .top-categories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 14px; }
-        .tc-card { background: #fff; border-radius: 8px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid #e6eef0; transition: 0.2s; }
-        .tc-card.active { border-color: var(--brand); background: var(--brand-light); }
-        .tc-icon { font-size: 26px; margin-bottom: 5px; color: var(--brand); }
-
-        .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 14px 15px; }
-        .p-card { background: #fff; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(18,36,58,0.05); border: 1px solid #e5eaee; position: relative; }
-        .p-img-box { height: 120px; width: 100%; display: flex; justify-content: center; align-items: center; margin: 14px 0 8px; cursor: pointer; background: #fff; border-radius: 8px; overflow: hidden; }
-        .p-img-box img { max-height: 100%; max-width: 100%; object-fit: contain; }
-        .p-brand-text { font-size: 10px; color: var(--text-light); margin-bottom: 4px; font-weight: bold; }
-        .p-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--brand-navy); line-height: 1.3; height: 34px; overflow: hidden; cursor: pointer; }
-        .p-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; margin-top: auto; }
-        .our-price { font-size: 16px; font-weight: 900; color: var(--brand-navy); }
-        .mrp-price { font-size: 11px; color: var(--text-light); text-decoration: line-through; }
-        
-        .btn-add { background: #fff; color: var(--brand); border: 1.5px solid var(--brand); padding: 7px; border-radius: 6px; font-weight: 800; cursor: pointer; text-align: center; font-size: 12px; width: 100%; }
-        .qty-controls { display: flex; align-items: center; justify-content: space-between; background: var(--brand-light); border-radius: 6px; border: 1.5px solid var(--brand-border); width: 100%; }
-        .qty-btn { background: transparent; border: none; width: 32px; height: 30px; font-weight: 900; cursor: pointer; color: var(--brand); font-size: 16px; }
-        
-        .image-gallery-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; }
-        .image-gallery-row img { width: 50px; height: 50px; border-radius: 6px; border: 1px solid #ddd; object-fit: contain; cursor: pointer; }
-
-        .checkout-bar { position: fixed; bottom: 58px; left: 0; width: 100%; background: var(--brand-navy); color: #fff; padding: 10px 15px; box-shadow: 0 -4px 15px rgba(0,0,0,0.12); display: none; justify-content: space-between; align-items: center; z-index: 950; border-top-left-radius: 12px; border-top-right-radius: 12px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 7px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.06); z-index: 1000; border-top: 1px solid #e1e7eb; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-light); cursor: pointer; font-weight: 700; position: relative; width: 20%; }
-        .nav-item i { font-size: 21px; margin-bottom: 2px; }
-        .nav-item.active { color: var(--brand); }
-        .cart-badge { position: absolute; top: -4px; right: 18%; background: var(--brand-red); color: #fff; font-size: 9px; font-weight: 800; border-radius: 10px; padding: 1px 5px; display: none; }
-
-        .subha-track { margin: 12px 0 8px; padding: 12px; background: #f7fbf8; border: 1px solid #e2eee6; border-radius: 10px; }
-        .subha-track-steps { display: flex; justify-content: space-between; margin-top: 8px; }
-        .subha-track-step { text-align: center; font-size: 9px; color: #8a9690; width: 20%; }
-        .subha-track-dot { width: 18px; height: 18px; margin: 0 auto 4px; border-radius: 50%; display: grid; place-items: center; background: #e1e9e4; color: #718178; font-size: 10px; font-weight: 900; }
-        .subha-track-step.done { color: #087f5b; font-weight: 800; }
-        .subha-track-step.done .subha-track-dot { background: #087f5b; color: #fff; }
-
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18,36,58,0.65); z-index: 3500; justify-content: center; align-items: center; padding: 16px; }
-        .modal-card { background: #fff; padding: 20px; border-radius: 14px; width: 100%; max-width: 400px; position: relative; max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; }
-        .close-btn { position: absolute; top: 12px; right: 14px; font-size: 24px; color: #888; cursor: pointer; }
-        .auth-input { width: 100%; padding: 10px 12px; margin: 6px 0; border: 1px solid #d0d7de; border-radius: 8px; outline: none; font-size: 13px; background: #fafafa; }
-        .file-upload-box { border: 1.5px dashed var(--brand); background: var(--brand-light); padding: 10px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: 700; color: var(--brand-dark); margin: 6px 0; cursor: pointer; display: block; }
-        .btn-primary { background: var(--brand); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; margin-top: 8px; }
-        .btn-danger { background: var(--brand-red); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; }
-
-        /* Admin UI */
-        .admin-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 3000; overflow-y: auto; padding-bottom: 60px; }
-        .admin-header { background: var(--brand-navy); color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .fk-admin-nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px 14px; background: #fff; border-bottom: 1px solid #ddd; }
-        .fk-admin-nav button { white-space: nowrap; border: 1px solid #cbd5e1; background: #fff; border-radius: 20px; padding: 8px 14px; font-size: 12px; font-weight: 800; cursor: pointer; }
-        .fk-admin-nav button.active { background: var(--brand); color: #fff; border-color: var(--brand); }
-        .fk-admin-panel { display: none; padding: 14px; }
-        .fk-admin-panel.active { display: block; }
-        .data-card { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 14px; border: 1px solid #e2e8ee; }
-
-        /* Printable Bill Area (Hidden from normal UI, generated by HTML2PDF) */
-        #pdf-render-container { position: absolute; left: -9999px; top: 0; width: 700px; background: #fff; padding: 20px; color: #000; font-family: 'Helvetica Neue', Arial, sans-serif; }
-        .inv-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 15px; }
-        .inv-table th, .inv-table td { padding: 8px; border: 1px solid #ccc; text-align: left; }
-        .inv-table th { background: #f0f0f0; }
-        
-        #toast { visibility: hidden; min-width: 240px; background-color: #12243a; color: #fff; text-align: center; border-radius: 8px; padding: 12px 16px; position: fixed; z-index: 6000; left: 50%; bottom: 75px; transform: translateX(-50%); font-size: 13px; font-weight: 700; }
-        #toast.show { visibility: visible; }
-    </style>
+<style>
+:root {
+  --green: #087443;
+  --green-dark: #045b35;
+  --green-light: #e9f8ef;
+  --bg: #f5f8f6;
+  --text: #17231c;
+  --muted: #64746a;
+  --border: #e0e9e3;
+  --white: #fff;
+  --red: #d92d20;
+  --shadow: 0 4px 18px rgba(0,50,25,.08);
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+button,input,select,textarea { font:inherit; }
+button { cursor:pointer; }
+button:disabled { opacity:.55; cursor:not-allowed; }
+header {
+  background:var(--green);
+  color:white;
+  position:sticky;
+  top:0;
+  z-index:10;
+  box-shadow:var(--shadow);
+}
+.topbar {
+  max-width:1200px;
+  margin:auto;
+  padding:14px 18px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.logo { font-size:22px; font-weight:850; white-space:nowrap; }
+.logo small { display:block; font-size:11px; font-weight:500; }
+.search { flex:1; min-width:180px; display:flex; }
+.search input {
+  width:100%; border:0; outline:none;
+  padding:12px 14px; border-radius:10px 0 0 10px;
+}
+.search button {
+  border:0; padding:0 17px; background:#dff7e7;
+  color:var(--green-dark); border-radius:0 10px 10px 0;
+}
+.header-actions { display:flex; gap:8px; }
+.btn {
+  border:0; border-radius:9px; padding:10px 14px;
+  font-weight:700; background:var(--green); color:white;
+}
+.btn.light { background:white; color:var(--green-dark); }
+.btn.soft { background:var(--green-light); color:var(--green-dark); }
+.btn.danger { background:var(--red); color:white; }
+.btn.outline { background:white; color:var(--green); border:1px solid var(--green); }
+main { max-width:1200px; margin:auto; padding:18px; }
+.hero {
+  padding:30px;
+  border-radius:18px;
+  background:linear-gradient(120deg,#05643b,#11975a);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+}
+.hero h1 { font-size:clamp(26px,4vw,42px); margin:0 0 10px; }
+.hero p { margin:0; max-width:580px; line-height:1.6; }
+.hero-badge {
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.3);
+  padding:20px; border-radius:15px;
+}
+.section-head {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; margin:25px 0 14px; flex-wrap:wrap;
+}
+.section-head h2 { margin:0; font-size:21px; }
+.muted { color:var(--muted); font-size:13px; }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(175px,1fr));
+  gap:15px;
+}
+.card {
+  background:white; border:1px solid var(--border);
+  border-radius:14px; overflow:hidden; box-shadow:var(--shadow);
+}
+.product-img {
+  width:100%; height:160px; object-fit:contain;
+  background:white; padding:12px;
+}
+.product-body { padding:13px; }
+.product-name { font-weight:750; line-height:1.4; }
+.product-brand { color:var(--muted); font-size:12px; margin:5px 0; }
+.price { font-weight:850; color:var(--green-dark); font-size:18px; }
+.mrp { text-decoration:line-through; color:#89958d; font-size:12px; margin-left:5px; }
+.stock { font-size:12px; color:var(--muted); margin:7px 0; }
+.card-actions { display:flex; gap:7px; margin-top:10px; }
+.card-actions .btn { flex:1; padding:9px 5px; font-size:12px; }
+.pill {
+  display:inline-block; padding:5px 9px; border-radius:20px;
+  font-size:11px; background:var(--green-light); color:var(--green-dark);
+}
+.panel {
+  background:white; border:1px solid var(--border);
+  border-radius:15px; padding:18px; margin:18px 0;
+}
+.field { display:grid; gap:6px; margin-bottom:12px; }
+.field label { font-size:13px; font-weight:700; }
+.field input,.field select,.field textarea {
+  width:100%; padding:11px; border:1px solid var(--border);
+  border-radius:8px; background:white;
+}
+.row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.hidden { display:none !important; }
+.status { padding:12px; border-radius:9px; background:var(--green-light); margin:12px 0; }
+.error { background:#fff0ef; color:#a52219; }
+.tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px; }
+.tabs button.active { background:var(--green); color:white; }
+table { width:100%; border-collapse:collapse; min-width:580px; }
+th,td { text-align:left; padding:11px; border-bottom:1px solid var(--border); font-size:13px; }
+.table-wrap { overflow:auto; }
+.cart-row { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+footer { text-align:center; padding:30px 15px; color:var(--muted); font-size:12px; }
+.bottom-nav {
+  display:none; position:fixed; bottom:0; left:0; right:0;
+  background:white; border-top:1px solid var(--border);
+  padding:9px; z-index:20; justify-content:space-around;
+}
+.bottom-nav button { border:0; background:none; color:var(--green-dark); font-size:12px; }
+@media(max-width:600px) {
+  main { padding:12px; padding-bottom:80px; }
+  .topbar { padding:12px; gap:9px; }
+  .logo { font-size:19px; }
+  .header-actions { width:100%; }
+  .header-actions .btn { flex:1; }
+  .hero { padding:22px; }
+  .grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .product-img { height:130px; }
+  .product-body { padding:10px; }
+  .row { grid-template-columns:1fr; gap:0; }
+  .bottom-nav { display:flex; }
+}
+</style>
 </head>
+
 <body>
+<header>
+  <div class="topbar">
+    <div class="logo">💊 SUBHA MEDICAL<small>Online Pharmacy & Healthcare</small></div>
+    <div class="search">
+      <input id="searchInput" placeholder="Search medicines, brands..." aria-label="Search products">
+      <button id="searchBtn">Search</button>
+    </div>
+    <div class="header-actions">
+      <button class="btn light" id="accountBtn">Login</button>
+      <button class="btn light" id="cartBtn">Cart (<span id="cartCount">0</span>)</button>
+    </div>
+  </div>
+</header>
 
-    <marquee class="moving-ticker" id="top-marquee-ticker" scrollamount="5">Welcome to Online Pharmacy</marquee>
+<main>
+  <section class="hero">
+    <div>
+      <span class="pill">YOUR HEALTH, OUR PRIORITY</span>
+      <h1>Healthcare made simpler.</h1>
+      <p>Explore medicines and healthcare essentials from Subha Medical. Prescription medicines require appropriate prescription review.</p>
+      <button class="btn light" style="margin-top:18px" onclick="scrollToProducts()">Shop Products →</button>
+    </div>
+    <div class="hero-badge">
+      <div style="font-size:38px">🩺 💚</div>
+      <strong>Trusted Pharmacy</strong>
+      <div class="muted" style="color:white;margin-top:6px">Order online with account access</div>
+    </div>
+  </section>
 
-    <div id="loader-overlay" class="full-overlay">
-        <div class="heart-container">
-            <i class='bx bxs-heart heart-bg'></i>
-            <div class="heart-fill" id="fill-box"><i class='bx bxs-heart'></i></div>
-        </div>
-        <div style="margin-top: 12px; font-weight: 800; color: var(--brand);" id="loader-text">Loading...</div>
+  <div id="notice" class="status hidden" role="status"></div>
+
+  <section id="authPanel" class="panel hidden">
+    <div class="section-head"><h2 id="authTitle">Customer Login</h2><button class="btn soft" id="authToggle">Create Account</button></div>
+    <form id="authForm">
+      <div id="signupFields" class="hidden">
+        <div class="field"><label>Full name</label><input id="authName" autocomplete="name"></div>
+        <div class="field"><label>Phone number</label><input id="authPhone" autocomplete="tel"></div>
+      </div>
+      <div class="field"><label>Email</label><input id="authEmail" type="email" required autocomplete="email"></div>
+      <div class="field"><label>Password</label><input id="authPassword" type="password" required minlength="6" autocomplete="current-password"></div>
+      <button class="btn" id="authSubmit" type="submit">Login</button>
+      <button class="btn outline" type="button" id="closeAuth">Close</button>
+    </form>
+  </section>
+
+  <section id="accountPanel" class="panel hidden">
+    <div class="section-head"><h2>My Account</h2><button class="btn outline" id="logoutBtn">Logout</button></div>
+    <p id="accountDetails" class="muted"></p>
+    <div class="tabs">
+      <button class="btn soft" id="myOrdersBtn">My Orders</button>
+      <button class="btn soft" id="myWishlistBtn">My Wishlist</button>
+    </div>
+    <div id="accountContent"></div>
+  </section>
+
+  <section id="adminPanel" class="panel hidden">
+    <div class="section-head">
+      <h2>🛠️ Subha Medical Admin</h2>
+      <button class="btn outline" id="refreshAdminBtn">Refresh</button>
+    </div>
+    <div id="adminStats" class="grid"></div>
+    <div class="tabs" style="margin-top:18px">
+      <button class="btn soft active" data-admin-tab="products">Products</button>
+      <button class="btn soft" data-admin-tab="orders">Orders</button>
+      <button class="btn soft" data-admin-tab="brands">Brands</button>
+      <button class="btn soft" data-admin-tab="promotions">Promotions</button>
     </div>
 
-    <!-- MAIN STOREFRONT -->
-    <div id="store-view">
-        <div class="navbar">
-            <div class="nav-top">
-                <div class="brand-name" onclick="switchBottomNav('home')">
-                    <div class="brand-logo-badge" id="nav-logo-box"><i class='bx bx-plus-medical'></i></div>
-                    <div style="min-width:0;">
-                        <div style="line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="nav-store-title">SUBHA MEDICAL</div>
-                        <div style="font-size:10px; color:var(--brand); font-weight:700;" id="nav-store-subtitle">Pharmacy</div>
-                    </div>
-                </div>
-                <div class="nav-right">
-                    <button class="nav-pill-btn" onclick="openAccountModal()"><span class="sync-dot" id="cloud-status-dot"></span><span id="nav-user-label">Login</span></button>
-                    <button class="nav-pill-btn" onclick="openAdminAuth()"><i class='bx bx-shield-quarter'></i></button>
-                </div>
-            </div>
-
-            <div class="search-row">
-                <div class="search-bar">
-                    <i class='bx bx-search'></i>
-                    <input type="text" id="search-input" placeholder="Search medicines, categories..." oninput="renderStoreProducts()">
-                </div>
-            </div>
+    <div id="adminProducts">
+      <h3>Add / Update Product</h3>
+      <form id="productForm">
+        <input type="hidden" id="productId">
+        <div class="row">
+          <div class="field"><label>Medicine name</label><input id="pName" required maxlength="200"></div>
+          <div class="field"><label>Generic name</label><input id="pGeneric"></div>
+          <div class="field"><label>Brand</label><select id="pBrand"><option value="">Select brand</option></select></div>
+          <div class="field"><label>Category</label><select id="pCategory"><option value="">Select category</option></select></div>
+          <div class="field"><label>MRP (₹)</label><input id="pMrp" type="number" min="0" step=".01" required></div>
+          <div class="field"><label>Selling price (₹)</label><input id="pPrice" type="number" min="0" step=".01" required></div>
+          <div class="field"><label>Stock</label><input id="pStock" type="number" min="0" step="1" required></div>
+          <div class="field"><label>SKU / Barcode</label><input id="pSku"></div>
         </div>
-
-        <!-- TAB 1: HOME -->
-        <div id="tab-home">
-            <div class="subha-brand-hero">
-                <div class="subha-brand-hero-logo" id="hero-logo-box"><i class='bx bx-plus-medical' style="font-size:28px; color:var(--brand);"></i></div>
-                <div style="flex:1; min-width:0;">
-                    <div class="subha-brand-hero-title" id="hero-store-title">SUBHA MEDICAL</div>
-                    <div class="subha-brand-hero-sub" id="hero-store-address">Genuine Medicines</div>
-                </div>
-            </div>
-
-            <div class="promo-container" id="store-promo-container" style="display:none;">
-                <div id="store-promo-media-box"></div>
-                <div class="promo-overlay-bar">
-                    <span id="store-promo-caption">Featured Promotion</span>
-                    <span class="promo-live-tag">PROMO</span>
-                </div>
-            </div>
-
-            <div class="section-header"><h3>Shop by Brands</h3><span class="view-more" onclick="filterByBrand('ALL')">Reset</span></div>
-            <div class="brands-carousel" id="brands-carousel"></div>
-
-            <div class="top-categories-bg">
-                <div class="section-header"><h3>Top Categories</h3></div>
-                <div class="top-categories-grid" id="categories-grid"></div>
-            </div>
-
-            <div class="section-header">
-                <h3 id="products-heading">All Medicines</h3>
-                <span class="view-more" id="product-count-lbl">0 Items</span>
-            </div>
-            <div class="product-grid" id="main-product-grid"></div>
-        </div>
-
-        <!-- TAB 2: CART -->
-        <div id="tab-cart" style="display:none; padding: 14px;">
-            <h3 style="margin-top:0;">Shopping Cart</h3>
-            <div id="cart-items-container"></div>
-            <div id="cart-summary-card" class="data-card" style="display:none; margin-top:12px;">
-                <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:900;">
-                    <span>Net Total:</span><span id="sum-net" style="color:var(--brand-navy);">₹0</span>
-                </div>
-                <button class="btn-primary" onclick="openCheckoutModal()">Proceed to Checkout</button>
-            </div>
-        </div>
-
-        <!-- TAB 3: ORDERS -->
-        <div id="tab-orders" style="display:none; padding: 14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h3 style="margin:0;">My Orders</h3>
-                <button class="nav-pill-btn" onclick="syncAllData()"><i class='bx bx-refresh'></i> Refresh</button>
-            </div>
-            <div id="customer-orders-list"></div>
-        </div>
+        <div class="field"><label>Product description</label><textarea id="pDescription" rows="3"></textarea></div>
+        <div class="field"><label>Product image</label><input id="pImage" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div>
+        <div class="field"><label><input id="pRx" type="checkbox"> Requires prescription</label></div>
+        <div class="field"><label><input id="pFeatured" type="checkbox"> Featured product</label></div>
+        <button class="btn" type="submit">Save Product</button>
+        <button class="btn outline" type="button" id="resetProduct">Clear Form</button>
+      </form>
+      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead><tbody id="adminProductRows"></tbody></table></div>
     </div>
 
-    <!-- Floating Checkout Bar -->
-    <div class="checkout-bar" id="floating-checkout-bar">
-        <div><div style="font-size:11px;" id="fc-items">0 Items</div><div style="font-size:15px; font-weight:900;" id="fc-total">₹0</div></div>
-        <button class="btn-primary" style="margin:0; width:auto; padding:8px 16px;" onclick="switchBottomNav('cart')">View Cart</button>
+    <div id="adminOrders" class="hidden">
+      <h3>Customer Orders</h3>
+      <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Update</th></tr></thead><tbody id="adminOrderRows"></tbody></table></div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item active" id="bnav-home" onclick="switchBottomNav('home')"><i class='bx bx-store-alt'></i><span>Store</span></div>
-        <div class="nav-item" id="bnav-cart" onclick="switchBottomNav('cart')">
-            <i class='bx bx-cart-alt'></i><span>Cart</span>
-            <span class="cart-badge" id="cart-badge">0</span>
-        </div>
-        <div class="nav-item" id="bnav-orders" onclick="switchBottomNav('orders')"><i class='bx bx-package'></i><span>Orders</span></div>
-        <div class="nav-item" id="bnav-account" onclick="openAccountModal()"><i class='bx bx-user-circle'></i><span>Account</span></div>
+    <div id="adminBrands" class="hidden">
+      <h3>Brand Management</h3>
+      <form id="brandForm">
+        <div class="field"><label>Brand name</label><input id="brandName" required></div>
+        <div class="field"><label>Description</label><input id="brandDescription"></div>
+        <div class="field"><label>Logo image</label><input id="brandImage" type="file" accept="image/jpeg,image/png,image/webp"></div>
+        <button class="btn" type="submit">Add Brand</button>
+      </form>
+      <div id="brandRows"></div>
     </div>
 
-    <!-- MODALS -->
-    <div class="overlay" id="account-modal">
-        <div class="modal-card">
-            <span class="close-btn" onclick="closeModal('account-modal')">&times;</span>
-            <h3 style="margin-top:0;">Customer Login</h3>
-            <div id="logged-out-box">
-                <input type="tel" id="login-phone" class="auth-input" placeholder="10-Digit Mobile Number">
-                <input type="password" id="login-pin" class="auth-input" placeholder="4-Digit PIN">
-                <input type="text" id="login-name" class="auth-input" placeholder="Full Name (For New User)">
-                <input type="text" id="login-addr" class="auth-input" placeholder="Delivery Address">
-                <button class="btn-primary" onclick="handleCustomerAuth()">Login / Sync Account</button>
-            </div>
-            <div id="logged-in-box" style="display:none;">
-                <div style="background:var(--brand-light); padding:12px; border-radius:8px; margin-bottom:10px;">
-                    <div><strong>Name:</strong> <span id="prof-name"></span></div>
-                    <div><strong>Mobile:</strong> <span id="prof-phone"></span></div>
-                </div>
-                <button class="btn-danger" style="width:100%" onclick="logoutCustomer()">Sign Out</button>
-            </div>
+    <div id="adminPromotions" class="hidden">
+      <h3>Promotional Banner / Video</h3>
+      <form id="promotionForm">
+        <div class="field"><label>Title</label><input id="promoTitle" required></div>
+        <div class="field"><label>Description</label><textarea id="promoDescription"></textarea></div>
+        <div class="field"><label>Type</label>
+          <select id="promoType"><option value="banner">Banner</option><option value="offer">Offer</option><option value="video">Video</option><option value="flash_sale">Flash Sale</option></select>
         </div>
+        <div class="field"><label>Image or video file</label><input id="promoFile" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"></div>
+        <button class="btn" type="submit">Publish Promotion</button>
+      </form>
+      <div id="promotionRows"></div>
     </div>
+  </section>
 
-    <div class="overlay" id="pd-modal">
-        <div class="modal-card" style="padding-top:30px;">
-            <span class="close-btn" onclick="closeModal('pd-modal')">&times;</span>
-            <div id="pd-content"></div>
-        </div>
+  <section id="categoriesSection">
+    <div class="section-head"><h2>Shop by Category</h2><span class="muted">Browse healthcare essentials</span></div>
+    <div id="categoryGrid" class="grid"></div>
+  </section>
+
+  <section id="promotionsSection">
+    <div class="section-head"><h2>Offers & Promotions</h2></div>
+    <div id="promotionGrid" class="grid"></div>
+  </section>
+
+  <section id="productsSection">
+    <div class="section-head">
+      <h2>Popular Products</h2>
+      <select id="sortSelect" aria-label="Sort products">
+        <option value="newest">Newest</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="name">Name</option>
+      </select>
     </div>
+    <div id="productGrid" class="grid"></div>
+    <div id="emptyProducts" class="panel hidden">No products found. Please try another search.</div>
+  </section>
 
-    <div class="overlay" id="checkout-modal">
-        <div class="modal-card">
-            <span class="close-btn" onclick="closeModal('checkout-modal')">&times;</span>
-            <h3 style="margin-top:0;">Delivery Details</h3>
-            <input type="text" id="chk-name" class="auth-input" placeholder="Full Name">
-            <input type="tel" id="chk-phone" class="auth-input" placeholder="Mobile Number">
-            <textarea id="chk-address" class="auth-input" style="height:65px;" placeholder="Full Address"></textarea>
-            <select id="chk-payment" class="auth-input">
-                <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
-                <option value="Store Pickup">Store Pickup</option>
-            </select>
-            <button class="btn-primary" onclick="placeFinalOrder()">Confirm Order</button>
+  <section id="cartPanel" class="panel hidden">
+    <div class="section-head"><h2>🛒 Your Cart</h2><button class="btn outline" id="closeCart">Continue Shopping</button></div>
+    <div id="cartItems"></div>
+    <div class="section-head"><strong>Subtotal</strong><strong id="cartTotal">₹0.00</strong></div>
+    <p class="muted">Final availability and prescription requirements are checked at checkout.</p>
+    <button class="btn" id="checkoutBtn">Proceed to Checkout</button>
+  </section>
+
+  <section id="checkoutPanel" class="panel hidden">
+    <h2>Checkout</h2>
+    <form id="checkoutForm">
+      <div class="field"><label>Full name</label><input id="checkoutName" required></div>
+      <div class="field"><label>Phone number</label><input id="checkoutPhone" required inputmode="tel"></div>
+      <div class="field"><label>Delivery address</label><textarea id="checkoutAddress" required rows="3"></textarea></div>
+      <div class="field"><label>Payment method</label>
+        <select id="paymentMethod"><option value="COD">Cash on Delivery</option></select>
+      </div>
+      <div class="field"><label>Order note (optional)</label><textarea id="checkoutNote" rows="2"></textarea></div>
+      <button class="btn" type="submit">Place Order</button>
+      <button class="btn outline" type="button" id="cancelCheckout">Cancel</button>
+    </form>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <button onclick="window.scrollTo({top:0,behavior:'smooth'})">🏠<br>Home</button>
+  <button onclick="scrollToProducts()">💊<br>Products</button>
+  <button onclick="openCart()">🛒<br>Cart</button>
+  <button onclick="openAccount()">👤<br>Account</button>
+</nav>
+
+<footer>
+  <strong>Subha Medical</strong><br>
+  Online Pharmacy & Healthcare<br>
+  Always follow your pharmacist's advice. Prescription medicines require valid prescriptions.
+</footer>
+
+<script>
+"use strict";
+
+/* Replace only with your project's actual URL and publishable key. */
+const SUPABASE_URL = "https://ktqztbpmfxbbczojfdlr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_C0bpzdEEotuWH3UpLyB5Fw_dCb3IrJf";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let currentProfile = null;
+let allProducts = [];
+let allBrands = [];
+let allCategories = [];
+let cart = JSON.parse(localStorage.getItem("subha_cart") || "{}");
+let authMode = "login";
+let searchTerm = "";
+let adminChannel = null;
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  })[c]);
+}
+
+function money(value) {
+  return "₹" + Number(value || 0).toLocaleString("en-IN", {
+    minimumFractionDigits:2, maximumFractionDigits:2
+  });
+}
+
+function showNotice(message, isError=false) {
+  const el = $("notice");
+  el.textContent = message;
+  el.classList.remove("hidden","error");
+  if (isError) el.classList.add("error");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function hideNotice() {
+  $("notice").classList.add("hidden");
+}
+
+function setVisible(id, visible) {
+  $(id).classList.toggle("hidden", !visible);
+}
+
+function saveCart() {
+  localStorage.setItem("subha_cart", JSON.stringify(cart));
+  updateCartCount();
+}
+
+function updateCartCount() {
+  $("cartCount").textContent = Object.values(cart)
+    .reduce((n, item) => n + Number(item.quantity || 0), 0);
+}
+
+function scrollToProducts() {
+  $("productsSection").scrollIntoView({behavior:"smooth"});
+}
+
+function openCart() {
+  setVisible("cartPanel", true);
+  renderCart();
+  $("cartPanel").scrollIntoView({behavior:"smooth"});
+}
+
+function openAccount() {
+  if (!currentUser) {
+    setVisible("authPanel", true);
+    $("authPanel").scrollIntoView({behavior:"smooth"});
+  } else {
+    setVisible("accountPanel", true);
+    $("accountPanel").scrollIntoView({behavior:"smooth"});
+  }
+}
+
+function showCustomerView() {
+  setVisible("adminPanel", false);
+  setVisible("accountPanel", !!currentUser);
+  $("accountBtn").textContent = currentUser ? "My Account" : "Login";
+}
+
+function showAdminView() {
+  setVisible("adminPanel", true);
+  setVisible("accountPanel", true);
+  $("accountBtn").textContent = "Admin";
+}
+
+async function refreshSession() {
+  const {data, error} = await db.auth.getSession();
+  if (error) throw error;
+
+  currentUser = data.session?.user || null;
+  currentProfile = null;
+
+  if (!currentUser) {
+    showCustomerView();
+    return "guest";
+  }
+
+  const {data: profile, error: profileError} = await db
+    .from("profiles")
+    .select("id,full_name,phone,email,role,is_active")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  if (profileError) throw profileError;
+  currentProfile = profile;
+
+  if (!profile || !profile.is_active) {
+    showCustomerView();
+    return "unknown";
+  }
+
+  $("accountDetails").textContent =
+    (profile.full_name || currentUser.email || "Customer") +
+    " · " + profile.role;
+
+  if (profile.role === "admin") {
+    showAdminView();
+    await loadAdminDashboard();
+    startAdminRealtime();
+    return "admin";
+  }
+
+  showCustomerView();
+  return profile.role;
+}
+
+async function loadPublicData() {
+  const [productsResult, brandsResult, categoriesResult, promoResult] =
+    await Promise.all([
+      db.from("products")
+        .select("id,name,generic_name,brand_id,category_id,description,image_url,mrp,selling_price,stock,requires_prescription,featured,created_at,brands(name),categories(name)")
+        .eq("is_active", true)
+        .order("created_at", {ascending:false}),
+      db.from("brands")
+        .select("id,name,description,logo_url")
+        .eq("is_active", true)
+        .order("name"),
+      db.from("categories")
+        .select("id,name,image_url")
+        .eq("is_active", true)
+        .order("sort_order"),
+      db.from("promotions")
+        .select("id,title,description,image_url,video_url,promotion_type,sort_order")
+        .eq("is_active", true)
+        .order("sort_order")
+    ]);
+
+  for (const r of [productsResult, brandsResult, categoriesResult, promoResult]) {
+    if (r.error) throw r.error;
+  }
+
+  allProducts = productsResult.data || [];
+  allBrands = brandsResult.data || [];
+  allCategories = categoriesResult.data || [];
+
+  renderProducts();
+  renderCategories(allCategories);
+  renderPromotions(promoResult.data || []);
+}
+
+function renderProducts() {
+  const sort = $("sortSelect").value;
+  let products = allProducts.filter(p => {
+    const text = [
+      p.name, p.generic_name, p.brands?.name,
+      p.categories?.name, p.description
+    ].join(" ").toLowerCase();
+    return text.includes(searchTerm.toLowerCase());
+  });
+
+  if (sort === "price-low") products.sort((a,b) => a.selling_price-b.selling_price);
+  if (sort === "price-high") products.sort((a,b) => b.selling_price-a.selling_price);
+  if (sort === "name") products.sort((a,b) => a.name.localeCompare(b.name));
+
+  $("emptyProducts").classList.toggle("hidden", products.length > 0);
+
+  $("productGrid").innerHTML = products.map(p => `
+    <article class="card">
+      <img class="product-img"
+        src="${escapeHtml(p.image_url || "")}"
+        alt="${escapeHtml(p.name)}"
+        loading="lazy"
+        onerror="this.style.visibility='hidden'">
+      <div class="product-body">
+        ${p.featured ? '<span class="pill">Featured</span>' : ""}
+        <div class="product-name">${escapeHtml(p.name)}</div>
+        <div class="product-brand">${escapeHtml(p.brands?.name || p.generic_name || "Healthcare")}</div>
+        ${p.requires_prescription ? '<span class="pill">Prescription required</span>' : ""}
+        <div style="margin-top:8px">
+          <span class="price">${money(p.selling_price)}</span>
+          ${Number(p.mrp) > Number(p.selling_price)
+            ? `<span class="mrp">${money(p.mrp)}</span>` : ""}
         </div>
+        <div class="stock">${p.stock > 0 ? "In stock" : "Currently unavailable"}</div>
+        <div class="card-actions">
+          <button class="btn" ${p.stock < 1 ? "disabled" : ""}
+            onclick="addToCart('${p.id}')">Add to Cart</button>
+          <button class="btn soft" onclick="toggleWishlist('${p.id}')">♡</button>
+        </div>
+      </div>
+    </article>
+  `).join("");
+}
+
+function renderCategories(categories) {
+  $("categoryGrid").innerHTML = categories.map(c => `
+    <button class="card" style="border:1px solid var(--border);padding:15px;text-align:left"
+      onclick="filterCategory('${c.id}')">
+      ${c.image_url
+        ? `<img src="${escapeHtml(c.image_url)}" alt="" style="width:100%;height:80px;object-fit:contain">`
+        : '<div style="font-size:28px">🩺</div>'}
+      <strong>${escapeHtml(c.name)}</strong>
+    </button>
+  `).join("");
+}
+
+function filterCategory(categoryId) {
+  const category = allCategories.find(c => c.id === categoryId);
+  searchTerm = category?.name || "";
+  $("searchInput").value = searchTerm;
+  renderProducts();
+  scrollToProducts();
+}
+
+function renderPromotions(promotions) {
+  $("promotionGrid").innerHTML = promotions.map(p => `
+    <article class="card">
+      ${p.video_url
+        ? `<video controls playsinline preload="metadata" style="width:100%;max-height:220px" src="${escapeHtml(p.video_url)}"></video>`
+        : p.image_url
+          ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.title)}" style="width:100%;height:160px;object-fit:cover">`
+          : ""}
+      <div class="product-body">
+        <span class="pill">${escapeHtml(p.promotion_type)}</span>
+        <h3>${escapeHtml(p.title)}</h3>
+        <p class="muted">${escapeHtml(p.description || "")}</p>
+      </div>
+    </article>
+  `).join("");
+}
+
+function addToCart(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p || p.stock < 1) return showNotice("Product is unavailable.", true);
+
+  const existing = cart[id]?.quantity || 0;
+  if (existing + 1 > p.stock) {
+    return showNotice("Requested quantity exceeds available stock.", true);
+  }
+
+  cart[id] = {quantity: existing + 1};
+  saveCart();
+  showNotice("Added to cart: " + p.name);
+}
+
+function renderCart() {
+  const ids = Object.keys(cart);
+  const items = ids.map(id => {
+    const p = allProducts.find(x => x.id === id);
+    return p ? {...p, quantity:Number(cart[id].quantity)} : null;
+  }).filter(Boolean);
+
+  const total = items.reduce((sum,p) => sum + p.selling_price*p.quantity, 0);
+
+  $("cartItems").innerHTML = items.length ? items.map(p => `
+    <div class="cart-row">
+      <div>
+        <strong>${escapeHtml(p.name)}</strong><br>
+        <span class="muted">${money(p.selling_price)} each</span>
+      </div>
+      <div style="text-align:right">
+        <div>
+          <button class="btn soft" onclick="changeQty('${p.id}',-1)">−</button>
+          <strong style="padding:8px">${p.quantity}</strong>
+          <button class="btn soft" onclick="changeQty('${p.id}',1)">+</button>
+        </div>
+        <strong>${money(p.selling_price*p.quantity)}</strong>
+      </div>
     </div>
+  `).join("") : "<p>Your cart is empty.</p>";
 
-    <div class="overlay" id="admin-auth-modal">
-        <div class="modal-card">
-            <span class="close-btn" onclick="closeModal('admin-auth-modal')">&times;</span>
-            <h3 style="margin-top:0;">Admin Access</h3>
-            <input type="text" id="adm-user" class="auth-input" placeholder="Username">
-            <input type="password" id="adm-pass" class="auth-input" placeholder="Password">
-            <button class="btn-primary" onclick="verifyAdminLogin()">Sign In</button>
-        </div>
+  $("cartTotal").textContent = money(total);
+}
+
+function changeQty(id, delta) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p || !cart[id]) return;
+
+  const next = cart[id].quantity + delta;
+  if (next < 1) delete cart[id];
+  else if (next > p.stock) return showNotice("Not enough stock.", true);
+  else cart[id].quantity = next;
+
+  saveCart();
+  renderCart();
+}
+
+async function toggleWishlist(productId) {
+  if (!currentUser) {
+    openAccount();
+    return showNotice("Please log in to save wishlist items.");
+  }
+
+  const {data: existing, error: findError} = await db
+    .from("wishlist")
+    .select("id")
+    .eq("user_id", currentUser.id)
+    .eq("product_id", productId)
+    .maybeSingle();
+
+  if (findError) return showNotice(findError.message, true);
+
+  if (existing) {
+    const {error} = await db.from("wishlist").delete().eq("id", existing.id);
+    if (error) return showNotice(error.message, true);
+    showNotice("Removed from wishlist.");
+  } else {
+    const {error} = await db.from("wishlist").insert({
+      user_id: currentUser.id,
+      product_id: productId
+    });
+    if (error) return showNotice(error.message, true);
+    showNotice("Added to wishlist.");
+  }
+}
+
+function openAuth() {
+  setVisible("authPanel", true);
+  $("authPanel").scrollIntoView({behavior:"smooth"});
+}
+
+$("accountBtn").addEventListener("click", openAccount);
+$("cartBtn").addEventListener("click", openCart);
+$("closeCart").addEventListener("click", () => setVisible("cartPanel", false));
+$("closeAuth").addEventListener("click", () => setVisible("authPanel", false));
+$("searchBtn").addEventListener("click", () => {
+  searchTerm = $("searchInput").value.trim();
+  renderProducts();
+  scrollToProducts();
+});
+$("searchInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    searchTerm = e.target.value.trim();
+    renderProducts();
+    scrollToProducts();
+  }
+});
+$("sortSelect").addEventListener("change", renderProducts);
+
+$("authToggle").addEventListener("click", () => {
+  authMode = authMode === "login" ? "signup" : "login";
+  $("authTitle").textContent = authMode === "login" ? "Customer Login" : "Create Account";
+  $("authSubmit").textContent = authMode === "login" ? "Login" : "Create Account";
+  $("authToggle").textContent = authMode === "login" ? "Create Account" : "Back to Login";
+  setVisible("signupFields", authMode === "signup");
+});
+
+$("authForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  hideNotice();
+
+  try {
+    const email = $("authEmail").value.trim();
+    const password = $("authPassword").value;
+
+    if (authMode === "signup") {
+      const {data,error} = await db.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: $("authName").value.trim(),
+            phone: $("authPhone").value.trim()
+          }
+        }
+      });
+      if (error) throw error;
+
+      if (!data.session) {
+        showNotice("Account created. Verify your email if requested, then log in.");
+      } else {
+        await refreshSession();
+        setVisible("authPanel", false);
+        showNotice("Account created successfully.");
+      }
+    } else {
+      const {error} = await db.auth.signInWithPassword({email,password});
+      if (error) throw error;
+      await refreshSession();
+      setVisible("authPanel", false);
+      showNotice("Login successful.");
+    }
+  } catch (error) {
+    showNotice(error.message || "Authentication failed.", true);
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  const {error} = await db.auth.signOut();
+  if (error) return showNotice(error.message, true);
+
+  currentUser = null;
+  currentProfile = null;
+  if (adminChannel) {
+    await db.removeChannel(adminChannel);
+    adminChannel = null;
+  }
+  showCustomerView();
+  setVisible("authPanel", false);
+  showNotice("You have logged out.");
+});
+
+$("checkoutBtn").addEventListener("click", async () => {
+  if (!currentUser) {
+    openAccount();
+    return showNotice("Please log in before checkout.");
+  }
+  if (!Object.keys(cart).length) return showNotice("Your cart is empty.", true);
+
+  $("checkoutName").value = currentProfile?.full_name || "";
+  $("checkoutPhone").value = currentProfile?.phone || "";
+  setVisible("checkoutPanel", true);
+  $("checkoutPanel").scrollIntoView({behavior:"smooth"});
+});
+
+$("cancelCheckout").addEventListener("click", () => setVisible("checkoutPanel", false));
+
+$("checkoutForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  if (!currentUser) return showNotice("Please log in again.", true);
+
+  const items = Object.entries(cart).map(([product_id, item]) => ({
+    product_id,
+    quantity: Number(item.quantity)
+  }));
+
+  try {
+    $("checkoutForm").querySelector('[type="submit"]').disabled = true;
+
+    const {data,error} = await db.rpc("place_order", {
+      p_customer_name: $("checkoutName").value.trim(),
+      p_customer_phone: $("checkoutPhone").value.trim(),
+      p_delivery_address: $("checkoutAddress").value.trim(),
+      p_items: items,
+      p_payment_method: $("paymentMethod").value,
+      p_customer_note: $("checkoutNote").value.trim()
+    });
+
+    if (error) throw error;
+    if (!data?.success) throw new Error("Order was not confirmed.");
+
+    cart = {};
+    saveCart();
+    renderCart();
+    setVisible("checkoutPanel", false);
+    setVisible("cartPanel", false);
+    showNotice("Order placed successfully. Order number: " + data.order_number);
+    await loadPublicData();
+    await loadMyOrders();
+  } catch (error) {
+    showNotice(error.message || "Checkout failed.", true);
+  } finally {
+    $("checkoutForm").querySelector('[type="submit"]').disabled = false;
+  }
+});
+
+async function loadMyOrders() {
+  if (!currentUser) return;
+
+  const {data,error} = await db
+    .from("orders")
+    .select("id,order_number,total,status,payment_status,created_at,order_items(product_name,quantity,unit_price,line_total)")
+    .eq("user_id", currentUser.id)
+    .order("created_at", {ascending:false});
+
+  if (error) return showNotice(error.message, true);
+
+  $("accountContent").innerHTML = (data || []).length
+    ? data.map(o => `
+      <article class="panel">
+        <strong>Order #${o.order_number}</strong>
+        <span class="pill">${escapeHtml(o.status)}</span>
+        <p class="muted">${new Date(o.created_at).toLocaleString()}</p>
+        ${(o.order_items || []).map(i =>
+          `<div>${escapeHtml(i.product_name)} × ${i.quantity} — ${money(i.line_total)}</div>`
+        ).join("")}
+        <p><strong>Total: ${money(o.total)}</strong></p>
+      </article>
+    `).join("")
+    : "<p>No orders yet.</p>";
+}
+
+async function loadMyWishlist() {
+  if (!currentUser) return;
+
+  const {data,error} = await db
+    .from("wishlist")
+    .select("product_id,products(name,image_url,selling_price)")
+    .eq("user_id", currentUser.id);
+
+  if (error) return showNotice(error.message, true);
+
+  $("accountContent").innerHTML = (data || []).map(w => `
+    <div class="cart-row">
+      <span>${escapeHtml(w.products?.name || "Product")}</span>
+      <strong>${money(w.products?.selling_price)}</strong>
     </div>
+  `).join("") || "<p>Your wishlist is empty.</p>";
+}
 
-    <!-- ADMIN ERP SCREEN -->
-    <div class="admin-screen" id="admin-screen">
-        <div class="admin-header">
-            <div><strong style="font-size:16px;">ADMIN ERP</strong><div style="font-size:10px;">Store Management & Cloud Sync</div></div>
-            <button class="btn-danger" style="padding:6px 12px; margin:0;" onclick="closeAdminScreen()">Exit</button>
-        </div>
-        
-        <div class="fk-admin-nav">
-            <button class="active" id="adm-tab-orders-btn" onclick="switchAdminTab('orders')">📦 Orders & PDF Bills</button>
-            <button id="adm-tab-products-btn" onclick="switchAdminTab('products')">💊 Products</button>
-            <button id="adm-tab-brands-btn" onclick="switchAdminTab('brands')">🏷️ Brands</button>
-            <button id="adm-tab-categories-btn" onclick="switchAdminTab('categories')">📁 Categories</button>
-            <button id="adm-tab-settings-btn" onclick="switchAdminTab('settings')">⚙️ Settings</button>
-        </div>
+$("myOrdersBtn").addEventListener("click", loadMyOrders);
+$("myWishlistBtn").addEventListener("click", loadMyWishlist);
 
-        <div class="fk-admin-panel active" id="adm-panel-orders"><div id="admin-orders-container"></div></div>
-        
-        <div class="fk-admin-panel" id="adm-panel-products">
-            <div class="data-card">
-                <h4 style="margin-top:0;" id="prod-form-title">Add / Edit Medicine</h4>
-                <input type="hidden" id="p-edit-id">
-                <input type="text" id="p-name" class="auth-input" placeholder="Medicine Name">
-                <select id="p-brand-select" class="auth-input"></select>
-                <select id="p-cat" class="auth-input"></select>
-                <input type="text" id="p-use" class="auth-input" placeholder="Usage / Generic">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                    <input type="number" id="p-price" class="auth-input" placeholder="Price (₹)">
-                    <input type="number" id="p-mrp" class="auth-input" placeholder="MRP (₹)">
-                </div>
-                
-                <!-- Multiple Image Upload -->
-                <label class="file-upload-box" style="margin-top:10px;">
-                    <i class='bx bx-images'></i> Upload Multiple Images
-                    <input type="file" id="p-img-files" accept="image/*" multiple style="display:none;" onchange="handleProductMultiUpload(this)">
-                </label>
-                <div class="image-gallery-row" id="p-multi-preview" style="margin-top:8px;"></div>
-                
-                <div style="display:flex; gap:16px; margin:8px 0; font-size:12px;">
-                    <label><input type="checkbox" id="p-stock" checked> In Stock</label>
-                </div>
-                <button class="btn-primary" onclick="adminSaveProduct()">Save Product</button>
-                <button class="btn-secondary" onclick="resetProductForm()">Clear</button>
-            </div>
-            <div id="admin-products-list"></div>
-        </div>
+async function uploadMedia(file, folder) {
+  if (!currentUser || currentProfile?.role !== "admin") {
+    throw new Error("Admin access required.");
+  }
 
-        <div class="fk-admin-panel" id="adm-panel-brands">
-            <div class="data-card">
-                <h4 style="margin-top:0;" id="brand-form-title">Add Brand</h4>
-                <input type="hidden" id="b-edit-id">
-                <input type="text" id="b-name" class="auth-input" placeholder="Brand Name">
-                <label class="file-upload-box">
-                    <i class='bx bx-upload'></i> Upload Logo
-                    <input type="file" accept="image/*" style="display:none;" onchange="handleBrandImageUpload(this)">
-                </label>
-                <input type="hidden" id="b-logo-url">
-                <img id="b-logo-preview" style="display:none; width:60px; margin-top:6px;">
-                <button class="btn-primary" onclick="adminSaveBrand()">Save Brand</button>
-            </div>
-            <div id="admin-brands-list"></div>
-        </div>
+  if (!file) return null;
 
-        <div class="fk-admin-panel" id="adm-panel-categories">
-            <div class="data-card">
-                <h4 style="margin-top:0;">Manage Categories</h4>
-                <div style="display:flex; gap:6px;">
-                    <input type="text" id="cat-name-input" class="auth-input" placeholder="Category Name (e.g. First Aid)">
-                    <input type="text" id="cat-icon-input" class="auth-input" placeholder="Boxicon (bx-band-aid)">
-                </div>
-                <button class="btn-primary" onclick="adminSaveCategory()">Add Category</button>
-                <div id="admin-categories-list" style="margin-top:15px;"></div>
-            </div>
-        </div>
+  const allowedTypes = [
+    "image/jpeg","image/png","image/webp","image/gif",
+    "video/mp4","video/webm"
+  ];
 
-        <div class="fk-admin-panel" id="adm-panel-settings">
-            <div class="data-card">
-                <h4 style="margin-top:0;">Store Settings & Invoice Details</h4>
-                <input type="text" id="set-store-name" class="auth-input" placeholder="Store Name (English)">
-                <input type="text" id="set-store-tamil" class="auth-input" placeholder="Store Subtitle (Tamil)">
-                <input type="text" id="set-store-addr" class="auth-input" placeholder="Store Full Address">
-                <input type="tel" id="set-admin-phone" class="auth-input" placeholder="Admin Mobile Number">
-                
-                <h4 style="margin:10px 0 6px;">Invoice Details</h4>
-                <input type="text" id="set-dl" class="auth-input" placeholder="Drug License No.">
-                <input type="text" id="set-gstin" class="auth-input" placeholder="GSTIN">
-                <input type="text" id="set-pharm" class="auth-input" placeholder="Pharmacist Name">
-                <input type="text" id="set-doc" class="auth-input" placeholder="Ref. Doctor">
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("Unsupported file type.");
+  }
 
-                <h4 style="margin:10px 0 6px;">Store Logo & Promo Video</h4>
-                <label class="file-upload-box">
-                    <i class='bx bx-image'></i> Upload Store Logo
-                    <input type="file" accept="image/*" style="display:none;" onchange="handleStoreLogoUpload(this)">
-                </label>
-                <input type="hidden" id="set-logo-url">
-                
-                <label class="file-upload-box">
-                    <i class='bx bx-video'></i> Upload Promo Video / Banner
-                    <input type="file" accept="video/mp4,image/*" style="display:none;" onchange="handlePromoFileUpload(this)">
-                </label>
-                <input type="hidden" id="set-promo-url">
-                
-                <h4 style="margin:10px 0 6px;">Admin Login Credentials</h4>
-                <input type="text" id="set-adm-user" class="auth-input" placeholder="Admin Username">
-                <input type="password" id="set-adm-pass" class="auth-input" placeholder="Admin Password">
-                
-                <button class="btn-primary" onclick="saveStoreSettings()">Save All Settings</button>
-            </div>
-        </div>
+  if (file.size > 50 * 1024 * 1024) {
+    throw new Error("File must be under 50 MB.");
+  }
+
+  const extension = file.name.split(".").pop().toLowerCase();
+  const path = folder + "/" + crypto.randomUUID() + "." + extension;
+
+  const {error} = await db.storage.from("subha-media").upload(path,file,{
+    upsert:false,
+    contentType:file.type
+  });
+  if (error) throw error;
+
+  return db.storage.from("subha-media").getPublicUrl(path).data.publicUrl;
+}
+
+async function loadAdminDashboard() {
+  if (currentProfile?.role !== "admin") return;
+
+  const [products,orders,brands] = await Promise.all([
+    db.from("products").select("id,stock,selling_price,is_active"),
+    db.from("orders").select("id,total,status,created_at").order("created_at",{ascending:false}).limit(200),
+    db.from("brands").select("id,name,logo_url,is_active").order("name")
+  ]);
+
+  if (products.error) throw products.error;
+  if (orders.error) throw orders.error;
+  if (brands.error) throw brands.error;
+
+  const productData = products.data || [];
+  const orderData = orders.data || [];
+  allBrands = brands.data || [];
+
+  const stockValue = productData.reduce(
+    (sum,p) => sum + Number(p.stock)*Number(p.selling_price),0
+  );
+  const lowStock = productData.filter(p => p.stock <= 5 && p.is_active).length;
+  const sales = orderData
+    .filter(o => o.status !== "cancelled" && o.status !== "rejected")
+    .reduce((sum,o) => sum + Number(o.total),0);
+
+  $("adminStats").innerHTML = [
+    ["Products",productData.length],
+    ["Low stock",lowStock],
+    ["Orders",orderData.length],
+    ["Order value",money(sales)],
+    ["Inventory value",money(stockValue)]
+  ].map(([label,value]) => `
+    <div class="card" style="padding:15px">
+      <div class="muted">${escapeHtml(label)}</div>
+      <div style="font-size:22px;font-weight:850;margin-top:5px">${escapeHtml(value)}</div>
     </div>
+  `).join("");
 
-    <!-- Hidden Container for PDF Rendering -->
-    <div id="pdf-render-container"></div>
-    <div id="toast">Notification</div>
+  $("adminOrderRows").innerHTML = orderData.map(o => `
+    <tr>
+      <td>#${o.order_number || o.id.slice(0,8)}</td>
+      <td>${new Date(o.created_at).toLocaleDateString()}</td>
+      <td>${money(o.total)}</td>
+      <td>${escapeHtml(o.status)}</td>
+      <td>
+        <select id="status-${o.id}">
+          ${["placed","confirmed","processing","packed","shipped","out_for_delivery","delivered","cancelled","rejected"]
+            .map(s=>`<option value="${s}" ${o.status===s?"selected":""}>${s}</option>`).join("")}
+        </select>
+        <button class="btn soft" onclick="updateOrderStatus('${o.id}')">Save</button>
+      </td>
+    </tr>
+  `).join("");
 
-    <script>
-        // Supabase Constants
-        const DEFAULT_SUPABASE_URL = "https://ktqztbpmfxbbczojfdlr.supabase.co"; 
-        const DEFAULT_SUPABASE_KEY = "sb_publishable_C0bpzdEEotuWH3UpLyB5Fw_dCb3IrJf";
-        const STORAGE_BUCKET = "subha-storage"; // Ensure this bucket is created and PUBLIC
+  $("brandRows").innerHTML = allBrands.map(b => `
+    <div class="cart-row">
+      <span>${b.logo_url ? `<img src="${escapeHtml(b.logo_url)}" style="width:32px;height:32px;object-fit:contain;vertical-align:middle"> ` : ""}
+      ${escapeHtml(b.name)}</span>
+      <button class="btn danger" onclick="deleteBrand('${b.id}')">Delete</button>
+    </div>
+  `).join("");
 
-        let sbClient = null;
+  const {data: categories,error:categoryError} = await db
+    .from("categories").select("id,name").eq("is_active",true).order("name");
+  if (categoryError) throw categoryError;
+  allCategories = categories || [];
 
-        // State
-        let storeConfig = {
-            id: "main_config", storeName: "SUBHA MEDICAL", storeTamil: "சுபா மெடிக்கல்",
-            storeAddress: "Vallipuram, Tiruppur", adminPhone: "9487165045",
-            logoUrl: "", promoUrl: "", adminUser: "admin", adminPass: "1234",
-            dlNo: "", gstin: "", pharmacist: "", doctor: ""
-        };
-        
-        let categoriesList = [];
-        let brands = [];
-        let products = [];
-        let orders = [];
-        let users = [];
-        let currentProductImages = []; // Array for multiple image uploads
+  $("pBrand").innerHTML = '<option value="">Select brand</option>' +
+    allBrands.filter(b=>b.is_active).map(b=>`<option value="${b.id}">${escapeHtml(b.name)}</option>`).join("");
+  $("pCategory").innerHTML = '<option value="">Select category</option>' +
+    allCategories.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
 
-        let currentUser = JSON.parse(localStorage.getItem("subha_current_user")) || null;
-        let cart = JSON.parse(localStorage.getItem("subha_cart")) || {};
-        let wishlist = JSON.parse(localStorage.getItem("subha_wishlist")) || [];
-        
-        let activeCategory = "All";
-        let activeBrand = "ALL";
+  await loadAdminProducts();
+  await loadAdminPromotions();
+}
 
-        window.addEventListener("DOMContentLoaded", () => {
-            initSupabaseConnection();
-            updateCartUI();
-            updateUserHeader();
-        });
+async function loadAdminProducts() {
+  if (currentProfile?.role !== "admin") return;
 
-        // 1. SUPABASE INIT & SYNC
-        function initSupabaseConnection() {
-            if (window.supabase) {
-                try {
-                    sbClient = window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY);
-                    const dot = document.getElementById("cloud-status-dot");
-                    if (dot) dot.classList.remove("offline");
-                    syncAllData();
-                    
-                    sbClient.channel("subha-realtime")
-                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_settings" }, () => syncAllData())
-                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_categories" }, () => syncAllData())
-                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_brands" }, () => syncAllData())
-                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_products" }, () => syncAllData())
-                        .on("postgres_changes", { event: "*", schema: "public", table: "subha_orders" }, () => syncAllData())
-                        .subscribe();
-                } catch (e) {
-                    console.error("Supabase Error:", e);
-                }
-            }
+  const {data,error} = await db.from("products")
+    .select("id,name,mrp,selling_price,stock,is_active,image_url,brand_id,category_id,generic_name,description,requires_prescription,featured,sku")
+    .order("created_at",{ascending:false});
+
+  if (error) throw error;
+
+  $("adminProductRows").innerHTML = (data || []).map(p => `
+    <tr>
+      <td>${escapeHtml(p.name)}<br><small>${p.is_active ? "Active" : "Hidden"}</small></td>
+      <td>${money(p.selling_price)}<br><small>MRP ${money(p.mrp)}</small></td>
+      <td>${p.stock}</td>
+      <td>
+        <button class="btn soft" onclick="editProduct('${p.id}')">Edit</button>
+        <button class="btn danger" onclick="deactivateProduct('${p.id}')">Hide</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+async function editProduct(id) {
+  const {data,error} = await db.from("products").select("*").eq("id",id).single();
+  if (error) return showNotice(error.message,true);
+
+  $("productId").value = data.id;
+  $("pName").value = data.name || "";
+  $("pGeneric").value = data.generic_name || "";
+  $("pBrand").value = data.brand_id || "";
+  $("pCategory").value = data.category_id || "";
+  $("pMrp").value = data.mrp;
+  $("pPrice").value = data.selling_price;
+  $("pStock").value = data.stock;
+  $("pSku").value = data.sku || "";
+  $("pDescription").value = data.description || "";
+  $("pRx").checked = !!data.requires_prescription;
+  $("pFeatured").checked = !!data.featured;
+  $("productForm").scrollIntoView({behavior:"smooth"});
+}
+
+async function deactivateProduct(id) {
+  if (!confirm("Hide this product from the storefront?")) return;
+  const {error} = await db.from("products")
+    .update({is_active:false}).eq("id",id);
+  if (error) return showNotice(error.message,true);
+  await loadPublicData();
+  await loadAdminProducts();
+  showNotice("Product hidden.");
+}
+
+$("resetProduct").addEventListener("click", () => {
+  $("productForm").reset();
+  $("productId").value = "";
+});
+
+$("productForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  if (currentProfile?.role !== "admin") return showNotice("Admin access required.",true);
+
+  try {
+    const mrp = Number($("pMrp").value);
+    const price = Number($("pPrice").value);
+    const stock = Number($("pStock").value);
+
+    if (mrp < 0 || price < 0 || price > mrp || stock < 0) {
+      throw new Error("Check MRP, selling price and stock.");
+    }
+
+    const id = $("productId").value;
+    const current = id
+      ? (await db.from("products").select("image_url").eq("id",id).single()).data
+      : null;
+
+    const imageFile = $("pImage").files[0];
+    const image_url = imageFile
+      ? await uploadMedia(imageFile,"products")
+      : current?.image_url || null;
+
+    const product = {
+      name:$("pName").value.trim(),
+      generic_name:$("pGeneric").value.trim(),
+      brand_id:$("pBrand").value || null,
+      category_id:$("pCategory").value || null,
+      mrp,selling_price:price,stock,
+      sku:$("pSku").value.trim() || null,
+      description:$("pDescription").value.trim(),
+      requires_prescription:$("pRx").checked,
+      featured:$("pFeatured").checked,
+      image_url,
+      is_active:true
+    };
+
+    const result = id
+      ? await db.from("products").update(product).eq("id",id)
+      : await db.from("products").insert(product);
+
+    if (result.error) throw result.error;
+
+    $("productForm").reset();
+    $("productId").value = "";
+    await loadPublicData();
+    await loadAdminDashboard();
+    showNotice("Product saved successfully.");
+  } catch (error) {
+    showNotice(error.message || "Could not save product.",true);
+  }
+});
+
+$("brandForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (currentProfile?.role !== "admin") return showNotice("Admin access required.",true);
+
+  try {
+    const file = $("brandImage").files[0];
+    const logo_url = file ? await uploadMedia(file,"brands") : null;
+
+    const {error} = await db.from("brands").insert({
+      name:$("brandName").value.trim(),
+      description:$("brandDescription").value.trim(),
+      logo_url,
+      is_active:true
+    });
+    if (error) throw error;
+
+    $("brandForm").reset();
+    await loadPublicData();
+    await loadAdminDashboard();
+    showNotice("Brand added.");
+  } catch (error) {
+    showNotice(error.message || "Brand creation failed.",true);
+  }
+});
+
+async function deleteBrand(id) {
+  if (!confirm("Deactivate this brand?")) return;
+  const {error} = await db.from("brands").update({is_active:false}).eq("id",id);
+  if (error) return showNotice(error.message,true);
+  await loadAdminDashboard();
+  await loadPublicData();
+}
+
+$("promotionForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (currentProfile?.role !== "admin") return showNotice("Admin access required.",true);
+
+  try {
+    const title = $("promoTitle").value.trim();
+    const description = $("promoDescription").value.trim();
+    const type = $("promoType").value;
+    const file = $("promoFile").files[0];
+
+    let image_url = null;
+    let video_url = null;
+
+    if (file) {
+      const url = await uploadMedia(file,"promotions");
+      if (file.type.startsWith("video/")) video_url = url;
+      else image_url = url;
+    }
+
+    const {error} = await db.from("promotions").insert({
+      title,description,promotion_type:type,
+      image_url,video_url,is_active:true
+    });
+    if (error) throw error;
+
+    $("promotionForm").reset();
+    await loadPublicData();
+    await loadAdminPromotions();
+    showNotice("Promotion published.");
+  } catch (error) {
+    showNotice(error.message || "Promotion upload failed.",true);
+  }
+});
+
+async function loadAdminPromotions() {
+  const {data,error} = await db.from("promotions")
+    .select("id,title,promotion_type,is_active")
+    .order("created_at",{ascending:false});
+  if (error) throw error;
+
+  $("promotionRows").innerHTML = (data || []).map(p => `
+    <div class="cart-row">
+      <span>${escapeHtml(p.title)} · ${escapeHtml(p.promotion_type)}</span>
+      <button class="btn danger" onclick="deactivatePromotion('${p.id}')">Hide</button>
+    </div>
+  `).join("");
+}
+
+async function deactivatePromotion(id) {
+  const {error} = await db.from("promotions")
+    .update({is_active:false}).eq("id",id);
+  if (error) return showNotice(error.message,true);
+  await loadPublicData();
+  await loadAdminPromotions();
+}
+
+async function updateOrderStatus(id) {
+  if (currentProfile?.role !== "admin") return showNotice("Admin access required.",true);
+
+  const status = $("status-"+id).value;
+  const {data,error} = await db.rpc("admin_update_order_status",{
+    p_order_id:id,
+    p_new_status:status,
+    p_note:"Updated from Subha Medical admin panel"
+  });
+
+  if (error) return showNotice(error.message,true);
+  if (!data?.success) return showNotice("Order status was not updated.",true);
+
+  await loadAdminDashboard();
+  showNotice("Order status updated.");
+}
+
+function startAdminRealtime() {
+  if (adminChannel) return;
+
+  adminChannel = db.channel("subha-admin-orders")
+    .on("postgres_changes",{
+      event:"*",
+      schema:"public",
+      table:"orders"
+    }, async () => {
+      try { await loadAdminDashboard(); }
+      catch (error) { console.error(error); }
+    })
+    .subscribe();
+}
+
+document.querySelectorAll("[data-admin-tab]").forEach(button => {
+  button.addEventListener("click", () => {
+    const tab = button.dataset.adminTab;
+    ["products","orders","brands","promotions"].forEach(name => {
+      $("admin" + name[0].toUpperCase() + name.slice(1))
+        .classList.toggle("hidden",name !== tab);
+    });
+    document.querySelectorAll("[data-admin-tab]").forEach(b =>
+      b.classList.toggle("active",b === button)
+    );
+  });
+});
+
+$("refreshAdminBtn").addEventListener("click", async () => {
+  try {
+    await loadAdminDashboard();
+    showNotice("Admin dashboard refreshed.");
+  } catch (error) {
+    showNotice(error.message,true);
+  }
+});
+
+async function startApp() {
+  updateCartCount();
+
+  try {
+    await loadPublicData();
+    await refreshSession();
+
+    db.auth.onAuthStateChange(() => {
+      // Defer database calls to avoid running Supabase requests
+      // inside the auth callback.
+      setTimeout(async () => {
+        try {
+          await refreshSession();
+        } catch (error) {
+          console.error("Session refresh failed:",error);
         }
+      },0);
+    });
+  } catch (error) {
+    console.error(error);
+    showNotice(
+      "Could not connect to Supabase. Check project URL, publishable key, tables and RLS policies. " +
+      (error.message || ""),
+      true
+    );
+  }
+}
 
-        async function syncAllData() {
-            if (!sbClient) return;
-            try {
-                const { data: sData } = await sbClient.from("subha_settings").select("*").eq("id", "main_config").maybeSingle();
-                if (sData) storeConfig = Object.assign({}, storeConfig, sData);
-
-                const { data: cData } = await sbClient.from("subha_categories").select("*");
-                if (cData) categoriesList = cData;
-
-                const { data: bData } = await sbClient.from("subha_brands").select("*");
-                if (bData) brands = bData;
-
-                const { data: pData } = await sbClient.from("subha_products").select("*");
-                if (pData) products = pData;
-
-                const { data: oData } = await sbClient.from("subha_orders").select("*").order("created_timestamp", { ascending: false });
-                if (oData) orders = oData;
-
-                applyStoreBranding();
-                renderCategories();
-                renderBrands();
-                renderStoreProducts();
-                renderCustomerOrders();
-                
-                if (document.getElementById("admin-screen").style.display === "block") {
-                    renderAdminDashboard();
-                }
-            } catch (err) {
-                console.error("Sync Error:", err.message);
-            }
-        }
-
-        // 2. STORAGE UPLOAD HELPER
-        async function uploadFileToSupabaseStorage(file, folder = "uploads") {
-            if (!sbClient) throw new Error("Supabase client not initialized");
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-            
-            const { error } = await sbClient.storage.from(STORAGE_BUCKET).upload(fileName, file, { cacheControl: '3600' });
-            if (error) throw error;
-
-            const { data } = sbClient.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
-            return data.publicUrl;
-        }
-
-        // 3. BRANDING & UI RENDER
-        function applyStoreBranding() {
-            const els = {
-                "page-title": `${storeConfig.storeName} | Online Pharmacy`,
-                "nav-store-title": storeConfig.storeName,
-                "nav-store-subtitle": storeConfig.storeTamil,
-                "hero-store-title": storeConfig.storeName,
-                "top-marquee-ticker": storeConfig.tickerText
-            };
-            for (let id in els) {
-                const el = document.getElementById(id);
-                if (el) el.innerText = els[id];
-            }
-            
-            const addr = document.getElementById("hero-store-address");
-            if (addr) addr.innerHTML = `${storeConfig.storeAddress}<br>📞 +91 ${storeConfig.adminPhone} • Genuine Medicines`;
-
-            if (storeConfig.logoUrl) {
-                document.getElementById("nav-logo-box").innerHTML = `<img src="${storeConfig.logoUrl}">`;
-                document.getElementById("hero-logo-box").innerHTML = `<img src="${storeConfig.logoUrl}">`;
-            }
-
-            const promoContainer = document.getElementById("store-promo-container");
-            const promoMedia = document.getElementById("store-promo-media-box");
-            if (storeConfig.promoShow && storeConfig.promoUrl) {
-                promoContainer.style.display = "block";
-                const isVideo = /\.(mp4|webm|ogg)$/i.test(storeConfig.promoUrl);
-                promoMedia.innerHTML = isVideo ? `<video src="${storeConfig.promoUrl}" autoplay muted loop playsinline></video>` : `<img src="${storeConfig.promoUrl}">`;
-            } else {
-                promoContainer.style.display = "none";
-            }
-        }
-
-        function renderCategories() {
-            const grid = document.getElementById("categories-grid");
-            if (!grid) return;
-            let displayCats = [{name:"All", icon:"bx-grid-alt", label:"All"}, ...categoriesList];
-            grid.innerHTML = displayCats.map(c => `
-                <div class="tc-card ${activeCategory === c.name ? 'active' : ''}" onclick="filterByCategory('${c.name}')">
-                    <i class='bx ${c.icon} tc-icon'></i><span>${c.name}</span>
-                </div>
-            `).join("");
-        }
-
-        function filterByCategory(cat) { activeCategory = cat; renderCategories(); renderStoreProducts(); }
-
-        function renderBrands() {
-            const box = document.getElementById("brands-carousel");
-            if (!box) return;
-            const activeBrands = brands.filter(b => b.active);
-            box.innerHTML = `<div class="brand-item ${activeBrand==='ALL'?'active':''}" onclick="filterByBrand('ALL')"><div class="brand-circle">ALL</div><div class="brand-label">All</div></div>` + 
-                activeBrands.map(b => `
-                <div class="brand-item ${activeBrand===b.name?'active':''}" onclick="filterByBrand('${b.name}')">
-                    <div class="brand-circle">${b.logo ? `<img src="${b.logo}">` : `<span>${b.name.substring(0,4)}</span>`}</div>
-                    <div class="brand-label">${b.name}</div>
-                </div>
-            `).join("");
-        }
-
-        function filterByBrand(b) { activeBrand = b; renderBrands(); renderStoreProducts(); }
-
-        function renderStoreProducts() {
-            const q = (document.getElementById("search-input")?.value || "").toLowerCase();
-            let filtered = products.filter(p => {
-                const matchCat = activeCategory === "All" || p.category === activeCategory;
-                const matchBrand = activeBrand === "ALL" || p.brand === activeBrand;
-                const matchSearch = p.name.toLowerCase().includes(q) || (p.brand && p.brand.toLowerCase().includes(q));
-                return matchCat && matchBrand && matchSearch;
-            });
-
-            const lbl = document.getElementById("product-count-lbl");
-            if (lbl) lbl.innerText = `${filtered.length} Items`;
-
-            const grid = document.getElementById("main-product-grid");
-            if (grid) {
-                grid.innerHTML = filtered.map(p => {
-                    const primaryImg = (p.images && p.images.length > 0) ? p.images[0] : "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400";
-                    const disc = Math.round(((p.mrp - p.price) / p.mrp) * 100);
-                    const qty = cart[p.id] || 0;
-                    return `
-                        <div class="p-card">
-                            ${disc>0 ? `<div class="badge-top-left"><span class="discount-badge">${disc}% OFF</span></div>` : ''}
-                            <div class="p-img-box" onclick="openProductDetail('${p.id}')"><img src="${primaryImg}"></div>
-                            <div class="p-brand-text">${p.brand || 'Subha Medical'}</div>
-                            <div class="p-title" onclick="openProductDetail('${p.id}')">${p.name}</div>
-                            <div class="p-price-row">
-                                <span class="our-price">₹${p.price}</span>
-                                <span class="mrp-price">₹${p.mrp}</span>
-                            </div>
-                            ${p.inStock ? 
-                                (qty > 0 ? `<div class="qty-controls"><button class="qty-btn" onclick="changeQty('${p.id}', -1)">−</button><span class="qty-val">${qty}</span><button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button></div>` : `<button class="btn-add" onclick="changeQty('${p.id}', 1)">+ ADD</button>`) 
-                                : `<button class="btn-add" disabled>OUT OF STOCK</button>`}
-                        </div>
-                    `;
-                }).join("");
-            }
-        }
-
-        // 4. PRODUCT DETAILS & CART
-        function openProductDetail(id) {
-            const p = products.find(x => x.id === id);
-            if (!p) return;
-            const pd = document.getElementById("pd-content");
-            const primaryImg = (p.images && p.images.length > 0) ? p.images[0] : "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400";
-            const galleryHtml = (p.images || []).map(img => `<img src="${img}" onclick="document.getElementById('pd-main-img').src='${img}'">`).join("");
-
-            pd.innerHTML = `
-                <img id="pd-main-img" src="${primaryImg}" style="width:100%; height:180px; object-fit:contain; margin-bottom:10px;">
-                <div class="image-gallery-row">${galleryHtml}</div>
-                <h3 style="margin:4px 0;">${p.name}</h3>
-                <div style="font-size:11px; color:var(--brand); font-weight:800; margin-bottom:10px;">${p.brand} • ${p.category}</div>
-                <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:15px;">
-                    <span style="font-size:22px; font-weight:900;">₹${p.price}</span>
-                    <span style="text-decoration:line-through; color:#888;">MRP ₹${p.mrp}</span>
-                </div>
-                <button class="btn-primary" onclick="changeQty('${p.id}', 1); closeModal('pd-modal');">+ Add to Cart</button>
-            `;
-            document.getElementById("pd-modal").style.display = "flex";
-        }
-
-        function changeQty(id, delta) {
-            cart[id] = (cart[id] || 0) + delta;
-            if (cart[id] <= 0) delete cart[id];
-            localStorage.setItem("subha_cart", JSON.stringify(cart));
-            renderStoreProducts();
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const container = document.getElementById("cart-items-container");
-            if (!container) return;
-            let totalItems = 0, subTotal = 0;
-            let html = "";
-            Object.keys(cart).forEach(id => {
-                const p = products.find(x => x.id === id);
-                if (p) {
-                    const q = cart[id];
-                    totalItems += q;
-                    subTotal += p.price * q;
-                    html += `<div class="data-card" style="display:flex; justify-content:space-between; align-items:center; padding:10px; margin-bottom:8px;">
-                        <div><strong style="font-size:13px;">${p.name}</strong><br><span style="font-size:11px;">₹${p.price} x ${q}</span></div>
-                        <div class="qty-controls" style="width:85px;"><button class="qty-btn" onclick="changeQty('${p.id}', -1)">-</button><span class="qty-val">${q}</span><button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button></div>
-                    </div>`;
-                }
-            });
-
-            container.innerHTML = totalItems > 0 ? html : `<div style="text-align:center; padding:20px; color:#888;">Cart is empty</div>`;
-            document.getElementById("cart-summary-card").style.display = totalItems > 0 ? "block" : "none";
-            document.getElementById("sum-net").innerText = `₹${subTotal}`;
-            
-            const badge = document.getElementById("cart-badge");
-            if (badge) { badge.innerText = totalItems; badge.style.display = totalItems > 0 ? "block" : "none"; }
-            
-            const fBar = document.getElementById("floating-checkout-bar");
-            if (fBar) {
-                fBar.style.display = totalItems > 0 ? "flex" : "none";
-                document.getElementById("fc-items").innerText = `${totalItems} Items`;
-                document.getElementById("fc-total").innerText = `₹${subTotal}`;
-            }
-        }
-
-        function openCheckoutModal() {
-            if (currentUser) {
-                document.getElementById("chk-name").value = currentUser.name || "";
-                document.getElementById("chk-phone").value = currentUser.phone || "";
-                document.getElementById("chk-address").value = currentUser.address || "";
-            }
-            document.getElementById("checkout-modal").style.display = "flex";
-        }
-
-        async function placeFinalOrder() {
-            const name = document.getElementById("chk-name").value.trim();
-            const phone = document.getElementById("chk-phone").value.trim();
-            const address = document.getElementById("chk-address").value.trim();
-            const payment = document.getElementById("chk-payment").value;
-
-            if (!name || !phone || !address) { showToast("Fill all details"); return; }
-
-            let orderItems = []; let netTotal = 0;
-            Object.keys(cart).forEach(id => {
-                const p = products.find(x => x.id === id);
-                if (p) {
-                    orderItems.push({ id: p.id, name: p.name, qty: cart[id], price: p.price });
-                    netTotal += p.price * cart[id];
-                }
-            });
-
-            const newOrder = {
-                id: "SM" + Math.floor(100000 + Math.random() * 900000),
-                customer_name: name, customer_phone: phone, address: address,
-                payment_mode: payment, items: orderItems, total: netTotal,
-                status: "Placed", created_at: new Date().toLocaleString(), created_timestamp: Date.now()
-            };
-
-            closeModal("checkout-modal");
-            runHeartLoader("Saving Order to Cloud...", async () => {
-                if (sbClient) await sbClient.from("subha_orders").insert([newOrder]);
-                cart = {}; localStorage.removeItem("subha_cart");
-                updateCartUI(); switchBottomNav("orders");
-                showToast("Order Placed Successfully!");
-                
-                // Open WhatsApp notification
-                const wPhone = storeConfig.adminPhone.replace(/\D/g, "");
-                const wMsg = encodeURIComponent(`*New Order #${newOrder.id}*\nName: ${name}\nPhone: ${phone}\nTotal: ₹${netTotal}\nTrack in Admin Panel.`);
-                window.open(`https://wa.me/91${wPhone}?text=${wMsg}`, "_blank");
-            });
-        }
-
-        // 5. CUSTOMER AUTH & ORDERS (PDF DOWNLOAD)
-        function openAccountModal() {
-            document.getElementById("logged-out-box").style.display = currentUser ? "none" : "block";
-            document.getElementById("logged-in-box").style.display = currentUser ? "block" : "none";
-            if (currentUser) {
-                document.getElementById("prof-name").innerText = currentUser.name;
-                document.getElementById("prof-phone").innerText = currentUser.phone;
-            }
-            document.getElementById("account-modal").style.display = "flex";
-        }
-
-        async function handleCustomerAuth() {
-            const phone = document.getElementById("login-phone").value.trim();
-            const pin = document.getElementById("login-pin").value.trim();
-            const name = document.getElementById("login-name").value.trim();
-            if (phone.length < 10 || !pin) { showToast("Enter valid details"); return; }
-            
-            currentUser = { phone, pin, name: name || "Customer" };
-            localStorage.setItem("subha_current_user", JSON.stringify(currentUser));
-            if (sbClient) await sbClient.from("subha_users").upsert([currentUser]);
-            updateUserHeader(); renderCustomerOrders(); closeModal("account-modal");
-            showToast("Logged in successfully");
-        }
-
-        function logoutCustomer() {
-            currentUser = null; localStorage.removeItem("subha_current_user");
-            updateUserHeader(); renderCustomerOrders(); closeModal("account-modal");
-        }
-        function updateUserHeader() { document.getElementById("nav-user-label").innerText = currentUser ? "Profile" : "Login"; }
-
-        function renderCustomerOrders() {
-            const box = document.getElementById("customer-orders-list");
-            if (!box) return;
-            const vis = currentUser ? orders.filter(o => o.customer_phone === currentUser.phone) : orders;
-            if (vis.length === 0) { box.innerHTML = `<div class="data-card" style="text-align:center;">No orders found.</div>`; return; }
-
-            const steps = ["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered"];
-            box.innerHTML = vis.map(o => {
-                const curIdx = steps.indexOf(o.status);
-                const isDelivered = o.status === "Delivered";
-                const pBar = o.status === "Cancelled" ? `<div style="color:red;font-weight:bold;">Cancelled</div>` : `<div class="subha-track-steps">${steps.map((s,i)=>`<div class="subha-track-step ${i<=curIdx?'done':''}"><div class="subha-track-dot">${i<=curIdx?'✓':''}</div>${s}</div>`).join('')}</div>`;
-                
-                return `<div class="data-card">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:8px;">
-                        <strong>Order #${o.id}</strong>
-                        ${isDelivered ? `<button class="nav-pill-btn" style="background:#d4edda; color:#155724; border:1px solid #c3e6cb;" onclick="downloadPdfBill('${o.id}')"><i class='bx bxs-file-pdf'></i> Download Bill</button>` : `<span style="font-size:10px; color:#888;">Bill after delivery</span>`}
-                    </div>
-                    <div style="font-size:12px; margin-bottom:10px;">${(o.items||[]).map(i=>`${i.name} (x${i.qty})`).join(", ")}</div>
-                    ${pBar}
-                </div>`;
-            }).join("");
-        }
-
-        // 6. PDF GENERATOR (HTML2PDF)
-        function downloadPdfBill(orderId) {
-            const ord = orders.find(o => o.id === orderId);
-            if (!ord) return;
-            
-            const rowsHTML = (ord.items || []).map((i, idx) => `<tr><td>${idx+1}</td><td>${i.name}</td><td>${i.qty}</td><td>₹${i.price}</td><td>₹${i.price * i.qty}</td></tr>`).join("");
-            const container = document.getElementById("pdf-render-container");
-            
-            container.innerHTML = `
-                <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:15px;">
-                    <h2 style="margin:0; color:#008b87;">${storeConfig.storeName}</h2>
-                    <p style="margin:2px 0; font-size:12px;">${storeConfig.storeAddress}<br>Phone: +91 ${storeConfig.adminPhone}</p>
-                    <p style="margin:2px 0; font-size:10px;">DL: ${storeConfig.dlNo || 'N/A'} | GSTIN: ${storeConfig.gstin || 'N/A'}</p>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:15px;">
-                    <div><strong>Billed To:</strong><br>${ord.customer_name}<br>Ph: ${ord.customer_phone}</div>
-                    <div style="text-align:right;"><strong>Invoice:</strong> #INV-${ord.id}<br><strong>Date:</strong> ${ord.created_at}</div>
-                </div>
-                <table class="inv-table">
-                    <thead><tr><th>#</th><th>Description</th><th>Qty</th><th>Rate</th><th>Total</th></tr></thead>
-                    <tbody>${rowsHTML}</tbody>
-                </table>
-                <div style="text-align:right; margin-top:15px; font-size:16px;"><strong>Grand Total: ₹${ord.total}</strong></div>
-                <div style="margin-top:40px; font-size:10px; text-align:center;">Thank you! Get well soon.<br>Authorized Signatory: ${storeConfig.pharmacist || 'Admin'}</div>
-            `;
-
-            showToast("Generating PDF Bill...");
-            html2pdf().set({
-                margin: 10,
-                filename: `Invoice_${ord.id}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(container).save();
-        }
-
-        // 7. ADMIN PANEL
-        function openAdminAuth() { document.getElementById("admin-auth-modal").style.display = "flex"; }
-        function verifyAdminLogin() {
-            const u = document.getElementById("adm-user").value.trim();
-            const p = document.getElementById("adm-pass").value.trim();
-            if (u === storeConfig.adminUser && p === storeConfig.adminPass) {
-                closeModal("admin-auth-modal");
-                document.getElementById("admin-screen").style.display = "block";
-                loadAdminSettings(); renderAdminDashboard();
-            } else { showToast("Invalid Credentials"); }
-        }
-        function closeAdminScreen() { document.getElementById("admin-screen").style.display = "none"; }
-        
-        function switchAdminTab(tab) {
-            ["orders", "products", "brands", "categories", "settings"].forEach(t => {
-                document.getElementById(`adm-tab-${t}-btn`).classList.toggle("active", t === tab);
-                document.getElementById(`adm-panel-${t}`).classList.toggle("active", t === tab);
-            });
-            if(tab==='categories') renderAdminCategoriesList();
-            if(tab==='brands') renderAdminBrandsList();
-            renderAdminDashboard();
-        }
-
-        function renderAdminDashboard() {
-            document.getElementById("admin-orders-container").innerHTML = orders.map(o => `
-                <div class="data-card">
-                    <div style="display:flex; justify-content:space-between; font-weight:800; align-items:center;">
-                        <span>#${o.id} - ${o.customer_name}</span><span>₹${o.total}</span>
-                    </div>
-                    <div style="font-size:12px; margin:8px 0; background:#f8fafc; padding:8px; border-radius:6px;">${(o.items||[]).map(i=>`${i.name} x${i.qty}`).join(", ")}</div>
-                    <div style="display:flex; gap:8px;">
-                        <select id="adm-status-${o.id}" class="auth-input" style="margin:0;">
-                            ${["Placed", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join("")}
-                        </select>
-                        <button class="btn-primary" style="margin:0; width:auto; padding:8px 12px;" onclick="updateOrderStatus('${o.id}')">Update</button>
-                        <button class="btn-secondary" style="margin:0; width:auto; padding:8px 12px;" onclick="downloadPdfBill('${o.id}')">PDF</button>
-                    </div>
-                </div>
-            `).join("");
-
-            // Populate Brands & Categories in Product form
-            document.getElementById("p-brand-select").innerHTML = brands.map(b => `<option value="${b.name}">${b.name}</option>`).join("");
-            document.getElementById("p-cat").innerHTML = categoriesList.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
-
-            document.getElementById("admin-products-list").innerHTML = products.map(p => `
-                <div class="data-card" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div><strong>${p.name}</strong><div style="font-size:11px; color:#555;">₹${p.price}</div></div>
-                    <button class="btn-danger" style="width:auto; padding:4px 8px;" onclick="adminDeleteProduct('${p.id}')">Delete</button>
-                </div>
-            `).join("");
-        }
-
-        async function updateOrderStatus(id) {
-            const status = document.getElementById(`adm-status-${id}`).value;
-            const ord = orders.find(o => o.id === id);
-            if(ord) {
-                ord.status = status;
-                if(sbClient) await sbClient.from("subha_orders").update({status}).eq("id",id);
-                showToast("Status updated");
-                renderAdminDashboard(); renderCustomerOrders();
-            }
-        }
-
-        async function handleProductMultiUpload(input) {
-            if (!input.files || input.files.length === 0) return;
-            runHeartLoader("Uploading images...", async () => {
-                try {
-                    for (let i = 0; i < input.files.length; i++) {
-                        const url = await uploadFileToSupabaseStorage(input.files[i], "products");
-                        currentProductImages.push(url);
-                    }
-                    renderMultiImagePreview();
-                    showToast("Images uploaded successfully!");
-                } catch(e) { showToast("Upload error"); }
-            });
-        }
-        function renderMultiImagePreview() {
-            document.getElementById("p-multi-preview").innerHTML = currentProductImages.map(img => `<img src="${img}">`).join("");
-        }
-
-        async function adminSaveProduct() {
-            const name = document.getElementById("p-name").value.trim();
-            const brand = document.getElementById("p-brand-select").value;
-            const category = document.getElementById("p-cat").value;
-            const price = Number(document.getElementById("p-price").value);
-            const inStock = document.getElementById("p-stock").checked;
-            
-            if(!name || !price) { showToast("Enter name and price"); return; }
-            
-            const newProd = {
-                id: "P" + Date.now(), name, brand, category, price,
-                images: [...currentProductImages], inStock
-            };
-            runHeartLoader("Saving Product...", async () => {
-                if(sbClient) await sbClient.from("subha_products").upsert([newProd]);
-                currentProductImages = [];
-                renderMultiImagePreview();
-                document.getElementById("p-name").value = "";
-                showToast("Product saved");
-                syncAllData();
-            });
-        }
-        async function adminDeleteProduct(id) {
-            if(sbClient) await sbClient.from("subha_products").delete().eq("id", id);
-            syncAllData();
-        }
-
-        // CATEGORY & BRAND MANAGEMENT
-        async function adminSaveCategory() {
-            const name = document.getElementById("cat-name-input").value.trim();
-            const icon = document.getElementById("cat-icon-input").value.trim() || "bx-plus-medical";
-            if(!name) return;
-            const cat = { id: "C"+Date.now(), name, icon };
-            if(sbClient) await sbClient.from("subha_categories").insert([cat]);
-            document.getElementById("cat-name-input").value = "";
-            showToast("Category Added");
-            syncAllData();
-        }
-        function renderAdminCategoriesList() {
-            document.getElementById("admin-categories-list").innerHTML = categoriesList.map(c => `
-                <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee;">
-                    <span><i class='bx ${c.icon}'></i> ${c.name}</span>
-                    <button class="btn-danger" style="width:auto; padding:2px 6px;" onclick="adminDelCategory('${c.id}')">Del</button>
-                </div>
-            `).join("");
-        }
-        async function adminDelCategory(id) {
-            if(sbClient) await sbClient.from("subha_categories").delete().eq("id", id);
-            syncAllData();
-        }
-
-        // SETTINGS (Logo, Promo Video, PDF Header fields)
-        function loadAdminSettings() {
-            document.getElementById("set-store-name").value = storeConfig.storeName;
-            document.getElementById("set-admin-phone").value = storeConfig.adminPhone;
-            document.getElementById("set-dl").value = storeConfig.dlNo;
-            document.getElementById("set-gstin").value = storeConfig.gstin;
-            document.getElementById("set-pharm").value = storeConfig.pharmacist;
-            document.getElementById("set-doc").value = storeConfig.doctor;
-            document.getElementById("set-logo-url").value = storeConfig.logoUrl;
-            document.getElementById("set-promo-url").value = storeConfig.promoUrl;
-        }
-        
-        async function handleStoreLogoUpload(input) {
-            if (!input.files[0]) return;
-            const url = await uploadFileToSupabaseStorage(input.files[0], "logo");
-            document.getElementById("set-logo-url").value = url;
-            showToast("Logo ready. Click Save Settings.");
-        }
-        
-        async function handlePromoFileUpload(input) {
-            if (!input.files[0]) return;
-            runHeartLoader("Uploading Promo Media...", async () => {
-                const url = await uploadFileToSupabaseStorage(input.files[0], "promo");
-                document.getElementById("set-promo-url").value = url;
-                showToast("Promo Media ready. Click Save Settings.");
-            });
-        }
-
-        async function saveStoreSettings() {
-            storeConfig.storeName = document.getElementById("set-store-name").value.trim();
-            storeConfig.adminPhone = document.getElementById("set-admin-phone").value.trim();
-            storeConfig.dlNo = document.getElementById("set-dl").value.trim();
-            storeConfig.gstin = document.getElementById("set-gstin").value.trim();
-            storeConfig.pharmacist = document.getElementById("set-pharm").value.trim();
-            storeConfig.doctor = document.getElementById("set-doc").value.trim();
-            storeConfig.logoUrl = document.getElementById("set-logo-url").value.trim();
-            storeConfig.promoUrl = document.getElementById("set-promo-url").value.trim();
-
-            const u = document.getElementById("set-adm-user").value.trim();
-            const p = document.getElementById("set-adm-pass").value.trim();
-            if(u) storeConfig.adminUser = u;
-            if(p) storeConfig.adminPass = p;
-
-            if(sbClient) await sbClient.from("subha_settings").upsert([Object.assign({id: "main_config"}, storeConfig)]);
-            showToast("Settings Synced to Cloud!");
-            syncAllData();
-        }
-
-        // Utilities
-        function runHeartLoader(msg, cb) {
-            const l = document.getElementById("loader-overlay");
-            if(l) { document.getElementById("loader-text").innerText = msg; l.style.display="flex"; setTimeout(()=>{ l.style.display="none"; if(cb)cb(); }, 800); }
-        }
-        function switchBottomNav(tab) {
-            ["home", "wishlist", "cart", "orders"].forEach(t => {
-                document.getElementById(`tab-${t}`).style.display = (t===tab)?"block":"none";
-                document.getElementById(`bnav-${t}`).classList.toggle("active", t===tab);
-            });
-            window.scrollTo({top:0});
-        }
-        function closeModal(id) { document.getElementById(id).style.display="none"; }
-        function showToast(msg) { const t=document.getElementById("toast"); t.innerText=msg; t.className="show"; setTimeout(()=>t.className="", 2600); }
-    </script>
+startApp();
+</script>
 </body>
 </html>
-
