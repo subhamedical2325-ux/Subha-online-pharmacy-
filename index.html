@@ -1,17 +1,15 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subha Medical | சுபா மருந்தகம் - Tata 1mg Style Online Pharmacy</title>
-    <!-- RemixIcon & Google Fonts -->
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <style>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Subha Medical | சுபா மருந்தகம் - Tata 1mg Style Online Pharmacy</title>
+  <!-- RemixIcon & Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
         :root {
             --brand: #ff6f61;
             --brand-dark: #e05346;
@@ -995,650 +993,574 @@
             display: block;
             margin-bottom: 8px;
         }
+
+        /* Premium responsive polish */
+        :root { --brand:#e94f65; --brand-dark:#c9344b; --brand-light:#fff0f3; --brand-border:#ffcbd4; --shadow-sm:0 3px 14px rgba(22,34,51,.06); --shadow-md:0 14px 34px rgba(22,34,51,.12); }
+        body { background-image: radial-gradient(circle at 8% 0%, rgba(233,79,101,.055), transparent 30%), radial-gradient(circle at 100% 18%, rgba(14,165,233,.045), transparent 28%); }
+        .navbar { backdrop-filter: blur(18px); background: color-mix(in srgb, var(--card-bg) 92%, transparent); }
+        .brand-logo-badge { border-radius:14px; background:linear-gradient(135deg,#f56f7e,#d93456); box-shadow:0 8px 22px rgba(217,52,86,.28); }
+        .promo-banner-card { border-radius:20px; min-height:230px; box-shadow:0 16px 36px rgba(15,23,42,.15); }
+        .promo-banner-overlay { padding:24px; background:linear-gradient(0deg,rgba(10,18,35,.94),rgba(10,18,35,.04)); }
+        .promo-banner-overlay h2 { font-size:clamp(20px,3vw,30px); letter-spacing:-.6px; }
+        .coupon-strip,.panel-card,.p-card,.cat-card { border-radius:14px; }
+        .p-card { padding:14px; box-shadow:0 4px 16px rgba(15,23,42,.035); }
+        .p-card:hover,.cat-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-md); }
+        .primary-btn,.add-cart-btn,.nav-pill-btn,.quick-action-btn,.secondary-btn { border-radius:10px; }
+        .primary-btn { box-shadow:0 5px 14px rgba(233,79,101,.16); }
+        .form-control { border-radius:10px; min-height:42px; }
+        .bottom-nav { padding:10px 0 max(8px,env(safe-area-inset-bottom)); backdrop-filter:blur(18px); }
+        .bottom-nav button { gap:4px; }
+        .bottom-nav button.active i { transform:translateY(-2px); }
+        @media (min-width:760px) { .promo-banner-wrap { margin-top:22px; } .promo-banner-card { min-height:300px; } .product-grid { gap:18px; } }
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; } }
+\n    
+        /* Premium compact mobile storefront: keep the medicine catalogue prominent. */
+        .navbar { padding: 8px 0 10px !important; }
+        .navbar .container-max { padding-left: 12px; padding-right: 12px; }
+        .nav-top { gap: 8px !important; margin-bottom: 8px !important; }
+        .brand-logo-badge { width: 42px !important; height: 42px !important; border-radius: 13px !important; }
+        .brand-title-main { font-size: 20px !important; line-height: 1.05 !important; }
+        .brand-title-sub { font-size: 11px !important; margin-top: 2px !important; }
+        .nav-right { gap: 6px !important; }
+        .nav-pill-btn { padding: 7px 10px !important; min-height: 34px !important; font-size: 12px !important; }
+        .search-row { display: grid !important; grid-template-columns: minmax(0,1fr) auto !important; gap: 7px !important; margin-top: 7px !important; }
+        .loc-chip { grid-column: 1 / -1; justify-content: flex-start; padding: 5px 9px !important; min-height: 29px !important; font-size: 11px !important; border-radius: 8px !important; }
+        .search-bar { min-height: 42px !important; padding: 0 10px !important; border-radius: 10px !important; }
+        .search-bar input { font-size: 13px !important; }
+        .sort-select { min-height: 42px !important; max-width: 142px; padding: 0 8px !important; font-size: 11px !important; }
+        .action-bar-row { display: flex !important; gap: 6px !important; margin-top: 8px !important; }
+        .quick-action-btn { flex: 1 1 0; min-width: 0; padding: 8px 5px !important; min-height: 38px !important; border-radius: 9px !important; font-size: 10px !important; line-height: 1.15 !important; }
+        .quick-action-btn i { font-size: 14px !important; }
+        .moving-ticker-wrap { padding: 4px 0 !important; font-size: 10px !important; }
+        .promo-banner-wrap { margin: 10px 12px 8px !important; }
+        .promo-banner-card { min-height: 120px !important; max-height: 150px !important; border-radius: 12px !important; }
+        .promo-banner-card img { max-height: 150px !important; object-fit: cover !important; }
+        .promo-banner-overlay { padding: 12px !important; }
+        .promo-banner-overlay h2 { font-size: 18px !important; line-height: 1.15 !important; margin: 5px 0 !important; }
+        .promo-banner-overlay p { font-size: 10px !important; margin: 0 !important; }
+        .coupon-strip { margin: 8px 12px !important; padding: 9px 10px !important; gap: 8px !important; }
+        .coupon-strip strong { font-size: 12px !important; }
+        .coupon-strip span { font-size: 10px !important; }
+        .section-header { margin: 14px 12px 8px !important; gap: 8px !important; }
+        .section-header h3 { font-size: 16px !important; line-height: 1.2 !important; }
+        .categories-grid { padding-left: 12px !important; padding-right: 12px !important; gap: 8px !important; }
+        .product-grid { padding: 4px 12px 18px !important; gap: 10px !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+        .p-card { padding: 9px !important; border-radius: 12px !important; }
+        .p-card .product-image, .p-card img { max-height: 155px; object-fit: contain; }
+        .p-card h4, .p-card .product-name { font-size: 13px !important; line-height: 1.25 !important; }
+        .p-card .price, .p-card .product-price { font-size: 16px !important; font-weight: 800 !important; }
+        .p-card button { min-height: 35px !important; font-size: 11px !important; padding: 7px !important; }
+        .panel-card { padding: 12px !important; }
+        #view-tools > .section-header { margin: 14px 12px 8px !important; }
+        #view-tools > div[style*="grid-template-columns"] { padding: 0 12px !important; gap: 10px !important; }
+        #view-tools h4 { font-size: 15px !important; }
+        .bottom-nav { padding: 6px 0 max(5px,env(safe-area-inset-bottom)) !important; }
+        .bottom-nav button { font-size: 10px !important; padding: 4px 2px !important; }
+        @media (min-width: 760px) {
+          .navbar .container-max { max-width: 1180px; margin: auto; }
+          .product-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; gap: 16px !important; }
+          .p-card .product-image, .p-card img { max-height: 210px; }
+        }
+
     </style>
-</head>
-<body>
-
-    <!-- Toast Notifications -->
-    <div id="toast-container" class="toast-container"></div>
-
-    <!-- Prescription Image Lightbox Modal -->
-    <div id="rx-lightbox-modal" class="rx-modal-backdrop hidden" onclick="closeRxModal(event)">
-        <div class="rx-modal-box" onclick="event.stopPropagation()">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <strong style="font-size:14px;"><i class="ri-file-list-3-line"></i> Attached Doctor Prescription (Rx)</strong>
-                <button class="danger-btn" onclick="closeRxModal()">Close ✕</button>
-            </div>
-            <img id="rx-lightbox-img" src="" alt="Prescription Preview">
-            <div style="display:flex;justify-content:flex-end;gap:8px;">
-                <a id="rx-download-link" href="" download="Subha_Medical_Prescription.jpg" class="primary-btn" style="text-decoration:none;font-size:12px;padding:7px 12px;">
-                    <i class="ri-download-2-line"></i> Download Rx Image
-                </a>
-            </div>
-        </div>
+ </head>
+ <body>
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+  <!-- Prescription Image Lightbox Modal -->
+  <div id="rx-lightbox-modal" class="rx-modal-backdrop hidden" onclick="closeRxModal(event)">
+   <div class="rx-modal-box" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+     <strong style="font-size:14px;"><i class="ri-file-list-3-line"></i> Attached Doctor Prescription (Rx)</strong>
+     <button class="danger-btn" onclick="closeRxModal()">Close ✕</button>
     </div>
-
-    <!-- Top Moving Announcement Bar -->
-    <div class="moving-ticker-wrap">
-        <div class="moving-ticker-content" id="ticker-text">
-            💚 Welcome to Subha Medical | சுபா மருந்தகம் (வள்ளிபுரம், திருப்பூர்) — 100% Genuine Batch-Verified Medicines | Live Stock Tracking | Instant Prescription Upload & GST Billing | Use Code: SUBHA10 for 10% OFF!
-        </div>
+    <img id="rx-lightbox-img" src="" alt="Prescription Preview">
+    <div style="display:flex;justify-content:flex-end;gap:8px;">
+     <a id="rx-download-link" href="" download="Subha_Medical_Prescription.jpg" class="primary-btn" style="text-decoration:none;font-size:12px;padding:7px 12px;"> <i class="ri-download-2-line"></i> Download Rx Image </a>
     </div>
-
-    <!-- Sticky Tata 1mg Inspired Navigation -->
-    <header class="navbar">
-        <div class="container-max">
-            <div class="nav-top">
-                <div class="brand-box" onclick="switchView('home')">
-                    <div class="brand-logo-badge"><i class="ri-capsule-fill"></i></div>
-                    <div>
-                        <div class="brand-title-main" id="nav-store-name">Subha Medical</div>
-                        <div class="brand-title-sub">சுபா மருந்தகம் • Digital Pharmacy</div>
-                    </div>
-                </div>
-
-                <div class="nav-right">
-                    <button id="admin-nav-btn" class="nav-pill-btn admin-highlight hidden" onclick="switchView('admin')">
-                        <i class="ri-shield-keyhole-line"></i> Admin Panel
-                    </button>
-                    <button class="nav-pill-btn" onclick="switchView('account')">
-                        <i class="ri-user-3-line"></i> <span id="nav-user-label">Sign In</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="search-row">
-                <div class="loc-chip">
-                    <i class="ri-map-pin-2-fill"></i>
-                    <span id="nav-location-short">Vallipuram, Tiruppur</span>
-                </div>
-
-                <div class="search-bar">
-                    <i class="ri-search-line"></i>
-                    <input type="search" id="search-input" placeholder="Search for medicines, generic salt, brand, or batch..." oninput="renderStoreProducts()">
-                </div>
-
-                <select id="sort-select" class="sort-select" onchange="renderStoreProducts()">
-                    <option value="featured">Sort: Relevance</option>
-                    <option value="az">Name: A to Z</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                </select>
-            </div>
-
-            <div class="action-bar-row">
-                <button class="quick-action-btn rx-btn" onclick="jumpToCartRxUpload()">
-                    <i class="ri-camera-lens-line"></i> Upload Rx in Cart
-                </button>
-                <button class="quick-action-btn wa-btn" onclick="openDirectWhatsApp()">
-                    <i class="ri-whatsapp-line"></i> WhatsApp Pharmacist
-                </button>
-                <button class="quick-action-btn health-btn" onclick="switchView('tools')">
-                    <i class="ri-heart-pulse-line"></i> Health Tools & BMI
-                </button>
-            </div>
+   </div>
+  </div>
+  <!-- Top Moving Announcement Bar -->
+  <div class="moving-ticker-wrap">
+   <div class="moving-ticker-content" id="ticker-text">💚 Welcome to Subha Medical | சுபா மருந்தகம் (வள்ளிபுரம், திருப்பூர்) -- 100% Genuine Batch-Verified Medicines | Live Stock Tracking | Instant Prescription Upload &amp; GST Billing | Use Code: SUBHA10 for 10% OFF!</div>
+  </div>
+  <!-- Sticky Tata 1mg Inspired Navigation -->
+  <header class="navbar">
+   <div class="container-max">
+    <div class="nav-top">
+     <div class="brand-box" onclick="switchView('home')">
+      <div class="brand-logo-badge">
+       <i class="ri-capsule-fill"></i>
+      </div>
+      <div>
+       <div class="brand-title-main" id="nav-store-name">Subha Medical</div>
+       <div class="brand-title-sub">சுபா மருந்தகம் • Digital Pharmacy</div>
+      </div>
+     </div>
+     <div class="nav-right">
+      <button id="admin-nav-btn" class="nav-pill-btn admin-highlight hidden" onclick="switchView('admin')"><i class="ri-shield-keyhole-line"></i> Admin Panel</button>
+      <button class="nav-pill-btn" onclick="switchView('account')"><i class="ri-user-3-line"></i> <span id="nav-user-label">Sign In</span></button>
+     </div>
+    </div>
+    <div class="search-row">
+     <div class="loc-chip">
+      <i class="ri-map-pin-2-fill"></i> <span id="nav-location-short">Vallipuram, Tiruppur</span>
+     </div>
+     <div class="search-bar">
+      <i class="ri-search-line"></i> <input type="search" id="search-input" placeholder="Search for medicines, generic salt, brand, or batch..." oninput="renderStoreProducts()">
+     </div>
+     <select id="sort-select" class="sort-select" onchange="renderStoreProducts()"> <option value="featured">Sort: Relevance</option> <option value="az">Name: A to Z</option> <option value="price-asc">Price: Low to High</option> <option value="price-desc">Price: High to Low</option> </select>
+    </div>
+    <div class="action-bar-row">
+     <button class="quick-action-btn rx-btn" onclick="jumpToCartRxUpload()"><i class="ri-camera-lens-line"></i> Upload Rx in Cart</button>
+     <button class="quick-action-btn wa-btn" onclick="openDirectWhatsApp()"><i class="ri-whatsapp-line"></i> WhatsApp Pharmacist</button>
+     <button class="quick-action-btn health-btn" onclick="switchView('tools')"><i class="ri-heart-pulse-line"></i> Health Tools &amp; BMI</button>
+    </div>
+   </div>
+  </header>
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="container-max">
+   <!-- ==================== 1. HOME STORE VIEW ==================== -->
+   <section id="view-home" class="animate-up">
+    <!-- Promo Banner -->
+    <div class="promo-banner-wrap">
+     <div class="promo-banner-card">
+      <img id="hero-promo-img" src="https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Pharmacy Banner">
+      <div class="promo-banner-overlay">
+       <span class="promo-badge">LIVE HEALTHCARE PARTNER</span>
+       <h2 id="hero-promo-title">Your Trusted Neighbourhood Pharmacy</h2>
+       <p id="hero-promo-sub">பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103</p>
+      </div>
+     </div>
+    </div>
+    <!-- Coupon Offer Strip -->
+    <div class="coupon-strip">
+     <div>
+      <strong id="coupon-banner-title">Special Offer: Use Code SUBHA10</strong> <span>Flat 10% instant discount on OTC Healthcare &amp; Wellness essentials</span>
+     </div>
+     <button class="primary-btn" style="padding: 7px 12px; font-size: 11px;" onclick="copyCouponCode()">COPY CODE</button>
+    </div>
+    <!-- Shop by Category -->
+    <div class="section-header">
+     <h3>🛍️ Shop by Health Category</h3>
+     <span class="view-more" onclick="selectCategory('ALL')">Show All</span>
+    </div>
+    <div id="categories-container" class="categories-grid"></div>
+    <!-- Main Products Catalog -->
+    <div class="section-header">
+     <h3 id="catalog-heading">💊 All Medicines &amp; Healthcare Products</h3>
+     <span class="muted" id="product-count-label">0 items</span>
+    </div>
+    <div id="products-grid" class="product-grid"></div>
+    <div id="empty-catalog-box" class="empty-state hidden">
+     <i class="ri-medicine-bottle-line"></i>
+     <h4 style="margin: 4px 0;">No Medicines Listed Yet</h4>
+     <p class="muted">Sign in with your Admin Email in the Account tab to add products &amp; categories to your live catalog.</p>
+    </div>
+    <!-- Regulatory Notice -->
+    <div class="panel-card" style="border-left: 4px solid var(--brand);">
+     <h4 style="margin: 0 0 4px; font-size: 13px;"><i class="ri-shield-check-line"></i> Pharmacy Regulatory Notice</h4>
+     <p class="muted" style="margin: 0; line-height: 1.45;">Schedule H &amp; H1 prescription medicines (marked <strong>Rx Required</strong>) are dispensed strictly against a valid prescription uploaded during checkout with live Batch, Expiry &amp; Stock verification.</p>
+    </div>
+   </section>
+   <!-- ==================== 2. ADVANCED HEALTH TOOLS VIEW ==================== -->
+   <section id="view-tools" class="hidden animate-up">
+    <div class="section-header">
+     <h3>🩺 Advanced Clinical &amp; Wellness Tools</h3>
+     <button class="secondary-btn" onclick="switchView('home')">Back to Store</button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; padding: 0 16px;">
+     <!-- Tool 1: BMI & Ideal Weight Analyzer -->
+     <div class="panel-card" style="margin: 0;">
+      <h4 style="margin: 0 0 10px; color: var(--brand);"><i class="ri-scales-3-line"></i> 1. Instant BMI &amp; Ideal Weight Check</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+       <div>
+        <label class="form-label">Weight (kg)</label> <input type="number" id="bmi-weight" class="form-control" placeholder="e.g. 68">
+       </div>
+       <div>
+        <label class="form-label">Height (cm)</label> <input type="number" id="bmi-height" class="form-control" placeholder="e.g. 170">
+       </div>
+      </div>
+      <button class="primary-btn" style="width: 100%; margin-top: 12px;" onclick="calculateBMI()">Analyze BMI &amp; Ideal Weight</button>
+      <div id="bmi-result" class="muted" style="margin-top: 10px; font-weight: 600;"></div>
+     </div>
+     <!-- Tool 2: Daily Hydration & Water Intake Calculator -->
+     <div class="panel-card" style="margin: 0;">
+      <h4 style="margin: 0 0 10px; color: #0284c7;"><i class="ri-drop-line"></i> 2. Daily Water Requirement</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+       <div>
+        <label class="form-label">Body Weight (kg)</label> <input type="number" id="water-weight" class="form-control" placeholder="e.g. 65">
+       </div>
+       <div>
+        <label class="form-label">Activity Level</label> <select id="water-activity" class="form-control"> <option value="35">Normal / Indoor</option> <option value="42">Active / Outdoor</option> <option value="50">High Heat / Athletics</option> </select>
+       </div>
+      </div>
+      <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #0284c7;" onclick="calculateWater()">Calculate Daily Hydration</button>
+      <div id="water-result" class="muted" style="margin-top: 10px; font-weight: 600;"></div>
+     </div>
+     <!-- Tool 3: Blood Pressure Category Evaluator -->
+     <div class="panel-card" style="margin: 0;">
+      <h4 style="margin: 0 0 10px; color: #16a34a;"><i class="ri-heart-pulse-fill"></i> 3. Blood Pressure (BP) Screener</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+       <div>
+        <label class="form-label">Systolic (Upper mm Hg)</label> <input type="number" id="bp-sys" class="form-control" placeholder="e.g. 120">
+       </div>
+       <div>
+        <label class="form-label">Diastolic (Lower mm Hg)</label> <input type="number" id="bp-dia" class="form-control" placeholder="e.g. 80">
+       </div>
+      </div>
+      <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #16a34a;" onclick="checkBloodPressure()">Check BP Status</button>
+      <div id="bp-result" class="muted" style="margin-top: 10px; font-weight: 600;"></div>
+     </div>
+     <!-- Tool 4: Pill & Dose Schedule Tracker -->
+     <div class="panel-card" style="margin: 0;">
+      <h4 style="margin: 0 0 10px; color: #7c3aed;"><i class="ri-alarm-line"></i> 4. Medicine Dose Reminder</h4>
+      <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 8px;">
+       <div>
+        <label class="form-label">Medicine Name</label> <input type="text" id="rem-name" class="form-control" placeholder="e.g. Paracetamol 650">
+       </div>
+       <div>
+        <label class="form-label">Time</label> <input type="time" id="rem-time" class="form-control">
+       </div>
+      </div>
+      <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #7c3aed;" onclick="addDoseReminder()">Save Daily Reminder</button>
+      <div id="reminders-list" style="margin-top: 10px; font-size: 12px;"></div>
+     </div>
+    </div>
+   </section>
+   <!-- ==================== 3. WISHLIST VIEW ==================== -->
+   <section id="view-wishlist" class="hidden animate-up">
+    <div class="section-header">
+     <h3>❤️ Saved Medicines Wishlist</h3>
+     <button class="secondary-btn" onclick="switchView('home')">Continue Shopping</button>
+    </div>
+    <div id="wishlist-grid" class="product-grid"></div>
+    <div id="wishlist-empty" class="empty-state hidden">
+     <i class="ri-heart-add-line"></i>
+     <h4>Your Wishlist is Empty</h4>
+     <p class="muted">Tap the heart icon on any medicine to save it for quick monthly reordering.</p>
+    </div>
+   </section>
+   <!-- ==================== 4. SHOPPING CART & RX UPLOAD VIEW ==================== -->
+   <section id="view-cart" class="hidden animate-up">
+    <div class="section-header">
+     <h3>🛒 Your Medicine Cart &amp; Rx Checkout</h3>
+     <button class="danger-btn" onclick="clearCart()">Clear Cart</button>
+    </div>
+    <div id="cart-items-container"></div>
+    <div id="cart-summary-card" class="panel-card hidden">
+     <!-- PRESCRIPTION UPLOAD & INSTANT IMAGE PREVIEW -->
+     <div id="rx-upload-zone" class="rx-upload-zone">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+       <div>
+        <strong style="font-size:13.5px;display:flex;align-items:center;gap:5px;"> <i class="ri-file-shield-2-line" style="color:var(--brand);font-size:17px;"></i> Attach Doctor Prescription (Rx) <span id="rx-required-pill" class="rx-badge hidden">Required for Cart Items</span> </strong> <span class="muted" id="rx-helper-text">Upload a photo of your prescription from camera or gallery (Auto-compressed &amp; attached to order).</span>
+       </div>
+       <label class="primary-btn" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:8px 12px;"> <i class="ri-camera-fill"></i> Choose / Take Rx Photo <input type="file" id="cart-rx-file" accept="image/*" class="hidden" onchange="handleRxImageUpload(event)"> </label>
+      </div>
+      <!-- Instant Thumbnail Preview Box -->
+      <div id="rx-preview-container" class="rx-preview-card hidden">
+       <div style="display:flex;align-items:center;gap:10px;">
+        <img id="rx-preview-img" class="rx-preview-thumb" src="" alt="Rx Preview" onclick="openRxModal(currentRxImageData)">
+        <div>
+         <strong style="font-size:12.5px;color:var(--success);display:block;"> <i class="ri-checkbox-circle-fill"></i> Prescription Attached </strong> <span id="rx-file-meta" class="muted">Tap thumbnail to inspect full screen</span>
         </div>
-    </header>
-
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="container-max">
-
-        <!-- ==================== 1. HOME STORE VIEW ==================== -->
-        <section id="view-home" class="animate-up">
-
-            <!-- Promo Banner -->
-            <div class="promo-banner-wrap">
-                <div class="promo-banner-card">
-                    <img id="hero-promo-img" src="https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80" alt="Pharmacy Banner">
-                    <div class="promo-banner-overlay">
-                        <span class="promo-badge">LIVE HEALTHCARE PARTNER</span>
-                        <h2 id="hero-promo-title">Your Trusted Neighbourhood Pharmacy</h2>
-                        <p id="hero-promo-sub">பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Coupon Offer Strip -->
-            <div class="coupon-strip">
-                <div>
-                    <strong id="coupon-banner-title">Special Offer: Use Code SUBHA10</strong>
-                    <span>Flat 10% instant discount on OTC Healthcare & Wellness essentials</span>
-                </div>
-                <button class="primary-btn" style="padding: 7px 12px; font-size: 11px;" onclick="copyCouponCode()">COPY CODE</button>
-            </div>
-
-            <!-- Shop by Category -->
-            <div class="section-header">
-                <h3>🛍️ Shop by Health Category</h3>
-                <span class="view-more" onclick="selectCategory('ALL')">Show All</span>
-            </div>
-            <div id="categories-container" class="categories-grid"></div>
-
-            <!-- Main Products Catalog -->
-            <div class="section-header">
-                <h3 id="catalog-heading">💊 All Medicines & Healthcare Products</h3>
-                <span class="muted" id="product-count-label">0 items</span>
-            </div>
-
-            <div id="products-grid" class="product-grid"></div>
-
-            <div id="empty-catalog-box" class="empty-state hidden">
-                <i class="ri-medicine-bottle-line"></i>
-                <h4 style="margin: 4px 0;">No Medicines Listed Yet</h4>
-                <p class="muted">Sign in with your Admin Email in the Account tab to add products & categories to your live catalog.</p>
-            </div>
-
-            <!-- Regulatory Notice -->
-            <div class="panel-card" style="border-left: 4px solid var(--brand);">
-                <h4 style="margin: 0 0 4px; font-size: 13px;"><i class="ri-shield-check-line"></i> Pharmacy Regulatory Notice</h4>
-                <p class="muted" style="margin: 0; line-height: 1.45;">
-                    Schedule H & H1 prescription medicines (marked <strong>Rx Required</strong>) are dispensed strictly against a valid prescription uploaded during checkout with live Batch, Expiry & Stock verification.
-                </p>
-            </div>
-        </section>
-
-        <!-- ==================== 2. ADVANCED HEALTH TOOLS VIEW ==================== -->
-        <section id="view-tools" class="hidden animate-up">
-            <div class="section-header">
-                <h3>🩺 Advanced Clinical & Wellness Tools</h3>
-                <button class="secondary-btn" onclick="switchView('home')">Back to Store</button>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; padding: 0 16px;">
-                <!-- Tool 1: BMI & Ideal Weight Analyzer -->
-                <div class="panel-card" style="margin: 0;">
-                    <h4 style="margin: 0 0 10px; color: var(--brand);"><i class="ri-scales-3-line"></i> 1. Instant BMI & Ideal Weight Check</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <div>
-                            <label class="form-label">Weight (kg)</label>
-                            <input type="number" id="bmi-weight" class="form-control" placeholder="e.g. 68">
-                        </div>
-                        <div>
-                            <label class="form-label">Height (cm)</label>
-                            <input type="number" id="bmi-height" class="form-control" placeholder="e.g. 170">
-                        </div>
-                    </div>
-                    <button class="primary-btn" style="width: 100%; margin-top: 12px;" onclick="calculateBMI()">Analyze BMI & Ideal Weight</button>
-                    <div id="bmi-result" class="muted" style="margin-top: 10px; font-weight: 600;"></div>
-                </div>
-
-                <!-- Tool 2: Daily Hydration & Water Intake Calculator -->
-                <div class="panel-card" style="margin: 0;">
-                    <h4 style="margin: 0 0 10px; color: #0284c7;"><i class="ri-drop-line"></i> 2. Daily Water Requirement</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <div>
-                            <label class="form-label">Body Weight (kg)</label>
-                            <input type="number" id="water-weight" class="form-control" placeholder="e.g. 65">
-                        </div>
-                        <div>
-                            <label class="form-label">Activity Level</label>
-                            <select id="water-activity" class="form-control">
-                                <option value="35">Normal / Indoor</option>
-                                <option value="42">Active / Outdoor</option>
-                                <option value="50">High Heat / Athletics</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #0284c7;" onclick="calculateWater()">Calculate Daily Hydration</button>
-                    <div id="water-result" class="muted" style="margin-top: 10px; font-weight: 600;"></div>
-                </div>
-
-                <!-- Tool 3: Blood Pressure Category Evaluator -->
-                <div class="panel-card" style="margin: 0;">
-                    <h4 style="margin: 0 0 10px; color: #16a34a;"><i class="ri-heart-pulse-fill"></i> 3. Blood Pressure (BP) Screener</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <div>
-                            <label class="form-label">Systolic (Upper mm Hg)</label>
-                            <input type="number" id="bp-sys" class="form-control" placeholder="e.g. 120">
-                        </div>
-                        <div>
-                            <label class="form-label">Diastolic (Lower mm Hg)</label>
-                            <input type="number" id="bp-dia" class="form-control" placeholder="e.g. 80">
-                        </div>
-                    </div>
-                    <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #16a34a;" onclick="checkBloodPressure()">Check BP Status</button>
-                    <div id="bp-result" class="muted" style="margin-top: 10px; font-weight: 600;"></div>
-                </div>
-
-                <!-- Tool 4: Pill & Dose Schedule Tracker -->
-                <div class="panel-card" style="margin: 0;">
-                    <h4 style="margin: 0 0 10px; color: #7c3aed;"><i class="ri-alarm-line"></i> 4. Medicine Dose Reminder</h4>
-                    <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 8px;">
-                        <div>
-                            <label class="form-label">Medicine Name</label>
-                            <input type="text" id="rem-name" class="form-control" placeholder="e.g. Paracetamol 650">
-                        </div>
-                        <div>
-                            <label class="form-label">Time</label>
-                            <input type="time" id="rem-time" class="form-control">
-                        </div>
-                    </div>
-                    <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #7c3aed;" onclick="addDoseReminder()">Save Daily Reminder</button>
-                    <div id="reminders-list" style="margin-top: 10px; font-size: 12px;"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== 3. WISHLIST VIEW ==================== -->
-        <section id="view-wishlist" class="hidden animate-up">
-            <div class="section-header">
-                <h3>❤️ Saved Medicines Wishlist</h3>
-                <button class="secondary-btn" onclick="switchView('home')">Continue Shopping</button>
-            </div>
-            <div id="wishlist-grid" class="product-grid"></div>
-            <div id="wishlist-empty" class="empty-state hidden">
-                <i class="ri-heart-add-line"></i>
-                <h4>Your Wishlist is Empty</h4>
-                <p class="muted">Tap the heart icon on any medicine to save it for quick monthly reordering.</p>
-            </div>
-        </section>
-
-        <!-- ==================== 4. SHOPPING CART & RX UPLOAD VIEW ==================== -->
-        <section id="view-cart" class="hidden animate-up">
-            <div class="section-header">
-                <h3>🛒 Your Medicine Cart & Rx Checkout</h3>
-                <button class="danger-btn" onclick="clearCart()">Clear Cart</button>
-            </div>
-
-            <div id="cart-items-container"></div>
-
-            <div id="cart-summary-card" class="panel-card hidden">
-
-                <!-- PRESCRIPTION UPLOAD & INSTANT IMAGE PREVIEW -->
-                <div id="rx-upload-zone" class="rx-upload-zone">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <div>
-                            <strong style="font-size:13.5px;display:flex;align-items:center;gap:5px;">
-                                <i class="ri-file-shield-2-line" style="color:var(--brand);font-size:17px;"></i>
-                                Attach Doctor Prescription (Rx)
-                                <span id="rx-required-pill" class="rx-badge hidden">Required for Cart Items</span>
-                            </strong>
-                            <span class="muted" id="rx-helper-text">Upload a photo of your prescription from camera or gallery (Auto-compressed & attached to order).</span>
-                        </div>
-                        <label class="primary-btn" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:8px 12px;">
-                            <i class="ri-camera-fill"></i> Choose / Take Rx Photo
-                            <input type="file" id="cart-rx-file" accept="image/*" class="hidden" onchange="handleRxImageUpload(event)">
-                        </label>
-                    </div>
-
-                    <!-- Instant Thumbnail Preview Box -->
-                    <div id="rx-preview-container" class="rx-preview-card hidden">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <img id="rx-preview-img" class="rx-preview-thumb" src="" alt="Rx Preview" onclick="openRxModal(currentRxImageData)">
-                            <div>
-                                <strong style="font-size:12.5px;color:var(--success);display:block;">
-                                    <i class="ri-checkbox-circle-fill"></i> Prescription Attached
-                                </strong>
-                                <span id="rx-file-meta" class="muted">Tap thumbnail to inspect full screen</span>
-                            </div>
-                        </div>
-                        <button class="danger-btn" onclick="removeAttachedRx()">
-                            <i class="ri-delete-bin-line"></i> Remove
-                        </button>
-                    </div>
-                </div>
-
-                <h4 style="margin: 14px 0 10px;">Patient & Delivery Details</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-bottom: 12px;">
-                    <input type="text" id="chk-name" class="form-control" placeholder="Patient / Customer Name *">
-                    <input type="tel" id="chk-phone" class="form-control" placeholder="Mobile Number *">
-                    <input type="text" id="chk-address" class="form-control" placeholder="Delivery Address / Landmark *">
-                </div>
-
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <input type="text" id="coupon-input" class="form-control" placeholder="Enter Coupon (e.g. SUBHA10)">
-                    <button class="secondary-btn" onclick="applyCoupon()">Apply</button>
-                </div>
-
-                <div style="border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 13px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span>Items Subtotal:</span>
-                        <strong id="sum-subtotal">₹0.00</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--success);">
-                        <span>Coupon Discount:</span>
-                        <strong id="sum-discount">-₹0.00</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; margin-top: 8px;">
-                        <span>Total Payable (Incl. GST):</span>
-                        <span id="sum-total" style="color: var(--brand);">₹0.00</span>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;">
-                    <button class="primary-btn" onclick="placeOrder('StoreOrder')">
-                        <i class="ri-check-double-line"></i> Place Direct Order
-                    </button>
-                    <button class="primary-btn" style="background: #16a34a;" onclick="placeOrder('WhatsApp')">
-                        <i class="ri-whatsapp-line"></i> Order on WhatsApp
-                    </button>
-                </div>
-            </div>
-
-            <div id="cart-empty" class="empty-state">
-                <i class="ri-shopping-cart-2-line"></i>
-                <h4>Your Cart is Empty</h4>
-                <p class="muted">Search and add genuine medicines to place an order or attach a prescription.</p>
-                <button class="primary-btn" style="margin-top:8px;" onclick="switchView('home')">Browse Medicines</button>
-            </div>
-        </section>
-
-        <!-- ==================== 5. UNIFIED ACCOUNT & ADMIN LOGIN VIEW ==================== -->
-        <section id="view-account" class="hidden animate-up">
-            <div class="section-header">
-                <h3>👤 Account & Order Portal</h3>
-            </div>
-
-            <!-- Sign In Box -->
-            <div id="account-login-box" class="panel-card">
-                <h4 style="margin: 0 0 6px;">Sign In with Email</h4>
-                <p class="muted" style="margin: 0 0 12px;">
-                    Customers can sign in to view order history, prescriptions & GST bills. <strong>Store Owner:</strong> Enter your configured Admin Email (default: <code>admin@subhamedical.com</code>) to automatically unlock the full Admin Panel.
-                </p>
-                <label class="form-label">Your Full Name</label>
-                <input type="text" id="login-name" class="form-control" placeholder="Enter your name">
-
-                <label class="form-label">Email Address *</label>
-                <input type="email" id="login-email" class="form-control" placeholder="e.g. admin@subhamedical.com">
-
-                <label class="form-label">Admin Security PIN / Password (Only required if signing in as Admin)</label>
-                <input type="password" id="login-pass" class="form-control" placeholder="Default Admin PIN: admin123">
-
-                <button class="primary-btn" style="width: 100%; margin-top: 14px;" onclick="handleUnifiedSignIn()">
-                    Continue & Sign In
-                </button>
-            </div>
-
-            <!-- Logged In Profile Card -->
-            <div id="account-profile-box" class="panel-card hidden">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <h4 id="prof-name-display" style="margin: 0;">Customer</h4>
-                        <div id="prof-email-display" class="muted"></div>
-                        <span id="prof-role-badge" class="promo-badge" style="margin-top: 6px;">Customer Account</span>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button id="prof-admin-shortcut" class="primary-btn hidden" onclick="switchView('admin')">
-                            <i class="ri-settings-4-line"></i> Open Admin Panel
-                        </button>
-                        <button class="danger-btn" onclick="signOutAccount()">Sign Out</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Customer Order History -->
-            <div class="panel-card">
-                <h4 style="margin: 0 0 10px;">📦 My Recent Orders, Prescriptions & GST Bills</h4>
-                <div id="customer-orders-list" class="muted">No orders placed yet from this account.</div>
-            </div>
-        </section>
-
-        <!-- ==================== 6. FULL ADMIN CONTROL PANEL ==================== -->
-        <section id="view-admin" class="hidden animate-up">
-            <div class="section-header">
-                <h3>⚙️ Subha Medical Master Admin Panel</h3>
-                <button class="secondary-btn" onclick="switchView('home')">View Live Store</button>
-            </div>
-
-            <div class="admin-tabs">
-                <button class="admin-tab active" onclick="openAdminTab('tab-products', this)"><i class="ri-capsule-line"></i> Products & Stock</button>
-                <button class="admin-tab" onclick="openAdminTab('tab-categories', this)"><i class="ri-folders-line"></i> Categories & Images</button>
-                <button class="admin-tab" onclick="openAdminTab('tab-appearance', this)"><i class="ri-palette-line"></i> Theme, BG & Promo</button>
-                <button class="admin-tab" onclick="openAdminTab('tab-orders', this)"><i class="ri-file-list-3-line"></i> Orders, Rx & GST Bills</button>
-                <button class="admin-tab" onclick="openAdminTab('tab-sql', this)"><i class="ri-database-2-line"></i> Store, GST & SQL Config</button>
-            </div>
-
-            <!-- ADMIN TAB 1: PRODUCTS (WITH BATCH NO, EXPIRY & AUTO-DEDUCTING STOCK) -->
-            <div id="tab-products" class="admin-tab-pane">
-                <div class="panel-card">
-                    <h4 style="margin: 0 0 8px;">Add / Edit Medicine (With Batch No., Expiry & Live Stock)</h4>
-                    <input type="hidden" id="adm-prod-id">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-                        <div>
-                            <label class="form-label">Medicine / Product Name *</label>
-                            <input type="text" id="adm-prod-name" class="form-control" placeholder="e.g. Dolo 650 Tablet (15s)">
-                        </div>
-                        <div>
-                            <label class="form-label">Generic Salt Composition</label>
-                            <input type="text" id="adm-prod-salt" class="form-control" placeholder="e.g. Paracetamol (650mg)">
-                        </div>
-                        <div>
-                            <label class="form-label">Manufacturer / Brand Name</label>
-                            <input type="text" id="adm-prod-brand" class="form-control" placeholder="e.g. Micro Labs Ltd">
-                        </div>
-                        <div>
-                            <label class="form-label">Category *</label>
-                            <select id="adm-prod-cat" class="form-control"></select>
-                        </div>
-                        <div>
-                            <label class="form-label">Batch Number (Batch No.) *</label>
-                            <input type="text" id="adm-prod-batch" class="form-control" placeholder="e.g. BT2609A">
-                        </div>
-                        <div>
-                            <label class="form-label">Expiry Date (MM/YYYY) *</label>
-                            <input type="month" id="adm-prod-expiry" class="form-control">
-                        </div>
-                        <div>
-                            <label class="form-label">MRP (₹) *</label>
-                            <input type="number" step="0.01" id="adm-prod-mrp" class="form-control" placeholder="e.g. 33.00">
-                        </div>
-                        <div>
-                            <label class="form-label">Selling Price (₹) *</label>
-                            <input type="number" step="0.01" id="adm-prod-price" class="form-control" placeholder="e.g. 29.00">
-                        </div>
-                        <div>
-                            <label class="form-label">Stock Quantity *</label>
-                            <input type="number" id="adm-prod-stock" class="form-control" placeholder="e.g. 50">
-                        </div>
-                        <div>
-                            <label class="form-label">Product Image URL</label>
-                            <input type="url" id="adm-prod-img" class="form-control" placeholder="https://...">
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 18px; margin-top: 12px; font-size: 12.5px; font-weight: 700;">
-                        <label><input type="checkbox" id="adm-prod-rx"> Requires Prescription (Rx)</label>
-                        <label><input type="checkbox" id="adm-prod-featured" checked> Featured Priority</label>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 14px;">
-                        <button class="primary-btn" onclick="saveProductAdmin()"><i class="ri-save-line"></i> Save Product</button>
-                        <button class="secondary-btn" onclick="resetProductForm()">Clear Form</button>
-                    </div>
-                </div>
-
-                <div class="panel-card" style="overflow-x: auto;">
-                    <h4 style="margin: 0 0 10px;">Live Inventory (<span id="adm-inv-count">0</span> Products • Auto-Deducts on Order)</h4>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Medicine</th>
-                                <th>Batch & Expiry</th>
-                                <th>Category</th>
-                                <th>Price / MRP</th>
-                                <th>Available Stock</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adm-products-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- ADMIN TAB 2: CATEGORIES & IMAGES -->
-            <div id="tab-categories" class="admin-tab-pane hidden">
-                <div class="panel-card">
-                    <h4 style="margin: 0 0 8px;">Add / Update Category & Custom Image</h4>
-                    <input type="hidden" id="adm-cat-id">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
-                        <div>
-                            <label class="form-label">Category Name *</label>
-                            <input type="text" id="adm-cat-name" class="form-control" placeholder="e.g. Diabetes Care">
-                        </div>
-                        <div>
-                            <label class="form-label">Category Image URL (Optional)</label>
-                            <input type="url" id="adm-cat-img" class="form-control" placeholder="https://... (Leave blank for default medical icon)">
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-top: 12px;">
-                        <button class="primary-btn" onclick="saveCategoryAdmin()">Save Category</button>
-                        <button class="secondary-btn" onclick="document.getElementById('adm-cat-id').value='';document.getElementById('adm-cat-name').value='';document.getElementById('adm-cat-img').value='';">Clear</button>
-                    </div>
-                </div>
-
-                <div class="panel-card">
-                    <h4 style="margin: 0 0 10px;">Active Store Categories</h4>
-                    <div id="adm-categories-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;"></div>
-                </div>
-            </div>
-
-            <!-- ADMIN TAB 3: APPEARANCE, THEME, BG & PROMO BANNER -->
-            <div id="tab-appearance" class="admin-tab-pane hidden">
-                <div class="panel-card">
-                    <h4 style="margin: 0 0 6px;">🎨 Store Color Theme & Dark Mode (Admin-Only Control)</h4>
-                    <p class="muted" style="margin: 0 0 10px;">Select the primary brand color for all visitors:</p>
-
-                    <div class="swatch-grid">
-                        <button class="swatch-btn" onclick="updateThemeSettings('#ff6f61', false)">
-                            <span class="swatch-dot" style="background:#ff6f61;"></span> Tata 1mg Coral
-                        </button>
-                        <button class="swatch-btn" onclick="updateThemeSettings('#008b87', false)">
-                            <span class="swatch-dot" style="background:#008b87;"></span> Subha Medical Teal
-                        </button>
-                        <button class="swatch-btn" onclick="updateThemeSettings('#2563eb', false)">
-                            <span class="swatch-dot" style="background:#2563eb;"></span> Clinical Royal Blue
-                        </button>
-                        <button class="swatch-btn" onclick="updateThemeSettings('#16a34a', false)">
-                            <span class="swatch-dot" style="background:#16a34a;"></span> Herbal Emerald
-                        </button>
-                        <button class="swatch-btn" onclick="updateThemeSettings('#ff6f61', true)">
-                            <span class="swatch-dot" style="background:#0f172a;"></span> Night Dark Mode
-                        </button>
-                    </div>
-
-                    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
-
-                    <h4 style="margin: 0 0 8px;">🖼️ Global Background Image & Promotional Banner Setup</h4>
-                    <label class="form-label">Site Background Image URL (Leave empty for clean Tata 1mg clinical background)</label>
-                    <input type="url" id="adm-bg-image" class="form-control" placeholder="https://images.unsplash.com/...">
-
-                    <label class="form-label">Hero Promo Banner Image URL</label>
-                    <input type="url" id="adm-promo-image" class="form-control" placeholder="https://images.unsplash.com/...">
-
-                    <label class="form-label">Hero Promo Heading</label>
-                    <input type="text" id="adm-promo-title" class="form-control">
-
-                    <label class="form-label">Hero Promo Subtitle / Address</label>
-                    <input type="text" id="adm-promo-sub" class="form-control">
-
-                    <button class="primary-btn" style="margin-top: 14px;" onclick="saveAppearanceSettings()">
-                        <i class="ri-check-line"></i> Apply & Save Visual Settings
-                    </button>
-                </div>
-            </div>
-
-            <!-- ADMIN TAB 4: ORDERS, RX & GST BILLING -->
-            <div id="tab-orders" class="admin-tab-pane hidden">
-                <div class="panel-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-                        <h4 style="margin: 0;">📦 Customer Orders, Attached Rx & Printable GST Invoices</h4>
-                        <span class="muted">Changing status to "Cancelled" automatically restores deducted stock</span>
-                    </div>
-                    <div id="adm-orders-container"></div>
-                </div>
-            </div>
-
-            <!-- ADMIN TAB 5: STORE, GST & SQL CONFIG -->
-            <div id="tab-sql" class="admin-tab-pane hidden">
-                <div class="panel-card">
-                    <h4 style="margin: 0 0 8px;">🏪 Store Details, GSTIN, Drug License & Admin Email</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
-                        <div>
-                            <label class="form-label">Store Title</label>
-                            <input type="text" id="adm-store-name" class="form-control">
-                        </div>
-                        <div>
-                            <label class="form-label">WhatsApp Order Number (with 91)</label>
-                            <input type="text" id="adm-whatsapp" class="form-control">
-                        </div>
-                        <div>
-                            <label class="form-label">Pharmacy GSTIN Number</label>
-                            <input type="text" id="adm-gstin" class="form-control" placeholder="e.g. 33AAAAA0000A1Z5">
-                        </div>
-                        <div>
-                            <label class="form-label">Drug License No. (Form 20/21)</label>
-                            <input type="text" id="adm-dl-no" class="form-control" placeholder="e.g. TN-TPR-20/21-00000">
-                        </div>
-                        <div>
-                            <label class="form-label">Default Medicine GST % (CGST+SGST)</label>
-                            <input type="number" id="adm-gst-rate" class="form-control" placeholder="12">
-                        </div>
-                        <div>
-                            <label class="form-label">Authorized Admin Email *</label>
-                            <input type="email" id="adm-admin-email" class="form-control">
-                        </div>
-                        <div>
-                            <label class="form-label">Admin Security PIN *</label>
-                            <input type="text" id="adm-admin-pin" class="form-control" placeholder="admin123">
-                        </div>
-                    </div>
-                    <button class="primary-btn" style="margin-top: 12px;" onclick="saveCoreSettings()">Save Store & GST Config</button>
-                </div>
-
-                <div class="panel-card">
-                    <h4 style="margin: 0 0 6px;">🔗 Built-In Supabase SQL Cloud Connection</h4>
-                    <p class="muted" style="margin: 0 0 10px;">All additions, stock deductions, batch/expiry details, orders, and attached prescription photos sync automatically in the background.</p>
-                    <label class="form-label">Supabase Project URL</label>
-                    <input type="url" id="adm-sb-url" class="form-control" placeholder="https://xxxx.supabase.co">
-                    <label class="form-label">Supabase Anon Public Key</label>
-                    <input type="text" id="adm-sb-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI...">
-                    <button class="secondary-btn" style="margin-top: 10px;" onclick="saveSupabaseCredentials()">Update SQL Credentials</button>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Fixed Bottom Navigation -->
-    <nav class="bottom-nav">
-        <button id="bnav-home" class="active" onclick="switchView('home')">
-            <i class="ri-home-5-line"></i>
-            <span>Home</span>
-        </button>
-        <button id="bnav-tools" onclick="switchView('tools')">
-            <i class="ri-heart-pulse-line"></i>
-            <span>Health Tools</span>
-        </button>
-        <button id="bnav-wishlist" onclick="switchView('wishlist')">
-            <i class="ri-heart-3-line"></i>
-            <span>Wishlist</span>
-        </button>
-        <button id="bnav-cart" onclick="switchView('cart')">
-            <i class="ri-shopping-bag-3-line"></i>
-            <span>Cart</span>
-            <span id="nav-cart-count" class="cart-count">0</span>
-        </button>
-        <button id="bnav-account" onclick="switchView('account')">
-            <i class="ri-user-3-line"></i>
-            <span>Account</span>
-        </button>
-    </nav>
-
-    <script>
+       </div>
+       <button class="danger-btn" onclick="removeAttachedRx()"><i class="ri-delete-bin-line"></i> Remove</button>
+      </div>
+     </div>
+     <h4 style="margin: 14px 0 10px;">Patient &amp; Delivery Details</h4>
+     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-bottom: 12px;">
+      <input type="text" id="chk-name" class="form-control" placeholder="Patient / Customer Name *"> <input type="tel" id="chk-phone" class="form-control" placeholder="Mobile Number *"> <input type="text" id="chk-address" class="form-control" placeholder="Delivery Address / Landmark *">
+     </div>
+     <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+      <input type="text" id="coupon-input" class="form-control" placeholder="Enter Coupon (e.g. SUBHA10)">
+      <button class="secondary-btn" onclick="applyCoupon()">Apply</button>
+     </div>
+     <div style="border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 13px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+       <span>Items Subtotal:</span> <strong id="sum-subtotal">₹0.00</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--success);">
+       <span>Coupon Discount:</span> <strong id="sum-discount">-₹0.00</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; margin-top: 8px;">
+       <span>Total Payable (Incl. GST):</span> <span id="sum-total" style="color: var(--brand);">₹0.00</span>
+      </div>
+     </div>
+     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;">
+      <button class="primary-btn" onclick="placeOrder('StoreOrder')"><i class="ri-check-double-line"></i> Place Direct Order</button>
+      <button class="primary-btn" style="background: #16a34a;" onclick="placeOrder('WhatsApp')"><i class="ri-whatsapp-line"></i> Order on WhatsApp</button>
+     </div>
+    </div>
+    <div id="cart-empty" class="empty-state">
+     <i class="ri-shopping-cart-2-line"></i>
+     <h4>Your Cart is Empty</h4>
+     <p class="muted">Search and add genuine medicines to place an order or attach a prescription.</p>
+     <button class="primary-btn" style="margin-top:8px;" onclick="switchView('home')">Browse Medicines</button>
+    </div>
+   </section>
+   <!-- ==================== 5. UNIFIED ACCOUNT & ADMIN LOGIN VIEW ==================== -->
+   <section id="view-account" class="hidden animate-up">
+    <div class="section-header">
+     <h3>👤 Account &amp; Order Portal</h3>
+    </div>
+    <!-- Sign In Box -->
+    <div id="account-login-box" class="panel-card">
+     <h4 style="margin: 0 0 6px;">Sign In with Email</h4>
+     <p class="muted" style="margin: 0 0 12px;">Customers can sign in to view order history, prescriptions &amp; GST bills. <strong>Store Admin:</strong> Sign in with the authorized admin email and the password you created privately in Supabase. No default password is built into this public website.</p>
+     <label class="form-label">Your Full Name</label> <input type="text" id="login-name" class="form-control" placeholder="Enter your name"> <label class="form-label">Email Address *</label> <input type="email" id="login-email" class="form-control" placeholder="e.g. admin@subhamedical.com"> <label class="form-label">Password</label> <input type="password" id="login-pass" class="form-control" placeholder="Enter your account password" autocomplete="current-password">
+     <button class="primary-btn" style="width: 100%; margin-top: 14px;" onclick="handleUnifiedSignIn()">Continue &amp; Sign In</button>
+    </div>
+    <!-- Logged In Profile Card -->
+    <div id="account-profile-box" class="panel-card hidden">
+     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <div>
+       <h4 id="prof-name-display" style="margin: 0;">Customer</h4>
+       <div id="prof-email-display" class="muted"></div>
+       <span id="prof-role-badge" class="promo-badge" style="margin-top: 6px;">Customer Account</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+       <button id="prof-admin-shortcut" class="primary-btn hidden" onclick="switchView('admin')"><i class="ri-settings-4-line"></i> Open Admin Panel</button>
+       <button class="danger-btn" onclick="signOutAccount()">Sign Out</button>
+      </div>
+     </div>
+    </div>
+    <!-- Customer Order History -->
+    <div class="panel-card">
+     <h4 style="margin: 0 0 10px;">📦 My Recent Orders, Prescriptions &amp; GST Bills</h4>
+     <div id="customer-orders-list" class="muted">No orders placed yet from this account.</div>
+    </div>
+   </section>
+   <!-- ==================== 6. FULL ADMIN CONTROL PANEL ==================== -->
+   <section id="view-admin" class="hidden animate-up">
+    <div class="section-header">
+     <h3>⚙️ Subha Medical Master Admin Panel</h3>
+     <button class="secondary-btn" onclick="switchView('home')">View Live Store</button>
+    </div>
+    <div class="admin-tabs">
+     <button class="admin-tab active" onclick="openAdminTab('tab-products', this)"><i class="ri-capsule-line"></i> Products &amp; Stock</button>
+     <button class="admin-tab" onclick="openAdminTab('tab-categories', this)"><i class="ri-folders-line"></i> Categories &amp; Images</button>
+     <button class="admin-tab" onclick="openAdminTab('tab-appearance', this)"><i class="ri-palette-line"></i> Theme, BG &amp; Promo</button>
+     <button class="admin-tab" onclick="openAdminTab('tab-orders', this)"><i class="ri-file-list-3-line"></i> Orders, Rx &amp; GST Bills</button>
+     <button class="admin-tab" onclick="openAdminTab('tab-sql', this)"><i class="ri-database-2-line"></i> Store, GST &amp; SQL Config</button>
+    </div>
+    <!-- ADMIN TAB 1: PRODUCTS (WITH BATCH NO, EXPIRY & AUTO-DEDUCTING STOCK) -->
+    <div id="tab-products" class="admin-tab-pane">
+     <div class="panel-card">
+      <h4 style="margin: 0 0 8px;">Add / Edit Medicine (With Batch No., Expiry &amp; Live Stock)</h4>
+      <input type="hidden" id="adm-prod-id">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+       <div>
+        <label class="form-label">Medicine / Product Name *</label> <input type="text" id="adm-prod-name" class="form-control" placeholder="e.g. Dolo 650 Tablet (15s)">
+       </div>
+       <div>
+        <label class="form-label">Generic Salt Composition</label> <input type="text" id="adm-prod-salt" class="form-control" placeholder="e.g. Paracetamol (650mg)">
+       </div>
+       <div>
+        <label class="form-label">Manufacturer / Brand Name</label> <input type="text" id="adm-prod-brand" class="form-control" placeholder="e.g. Micro Labs Ltd">
+       </div>
+       <div>
+        <label class="form-label">Category *</label> <select id="adm-prod-cat" class="form-control"></select>
+       </div>
+       <div>
+        <label class="form-label">Batch Number (Batch No.) *</label> <input type="text" id="adm-prod-batch" class="form-control" placeholder="e.g. BT2609A">
+       </div>
+       <div>
+        <label class="form-label">Expiry Date (MM/YYYY) *</label> <input type="month" id="adm-prod-expiry" class="form-control">
+       </div>
+       <div>
+        <label class="form-label">MRP (₹) *</label> <input type="number" step="0.01" id="adm-prod-mrp" class="form-control" placeholder="e.g. 33.00">
+       </div>
+       <div>
+        <label class="form-label">Selling Price (₹) *</label> <input type="number" step="0.01" id="adm-prod-price" class="form-control" placeholder="e.g. 29.00">
+       </div>
+       <div>
+        <label class="form-label">Stock Quantity *</label> <input type="number" id="adm-prod-stock" class="form-control" placeholder="e.g. 50">
+       </div>
+       <div>
+        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">Image uploads securely to Supabase Storage. Leave empty to keep the existing image.</small> <input type="url" id="adm-prod-img" class="form-control hidden" aria-hidden="true" tabindex="-1">
+       </div>
+       <div>
+        <label class="form-label">Product Video (optional)</label> <input type="file" id="adm-prod-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime"> <small class="muted">MP4, WEBM or MOV video. Maximum 50 MB. Leave empty to keep the current video.</small> <input type="url" id="adm-prod-video" class="form-control hidden" aria-hidden="true" tabindex="-1">
+       </div>
+      </div>
+      <div style="display: flex; gap: 18px; margin-top: 12px; font-size: 12.5px; font-weight: 700;">
+       <label><input type="checkbox" id="adm-prod-rx"> Requires Prescription (Rx)</label> <label><input type="checkbox" id="adm-prod-featured" checked> Featured Priority</label>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 14px;">
+       <button class="primary-btn" onclick="saveProductAdmin()"><i class="ri-save-line"></i> Save Product</button>
+       <button class="secondary-btn" onclick="resetProductForm()">Clear Form</button>
+      </div>
+     </div>
+     <div class="panel-card" style="overflow-x: auto;">
+      <h4 style="margin: 0 0 10px;">Live Inventory (<span id="adm-inv-count">0</span> Products • Auto-Deducts on Order)</h4>
+      <table class="admin-table">
+       <thead>
+        <tr>
+         <th>Medicine</th>
+         <th>Batch &amp; Expiry</th>
+         <th>Category</th>
+         <th>Price / MRP</th>
+         <th>Available Stock</th>
+         <th>Actions</th>
+        </tr>
+       </thead>
+       <tbody id="adm-products-tbody"></tbody>
+      </table>
+     </div>
+    </div>
+    <!-- ADMIN TAB 2: CATEGORIES & IMAGES -->
+    <div id="tab-categories" class="admin-tab-pane hidden">
+     <div class="panel-card">
+      <h4 style="margin: 0 0 8px;">Add / Update Category &amp; Custom Image</h4>
+      <input type="hidden" id="adm-cat-id">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+       <div>
+        <label class="form-label">Category Name *</label> <input type="text" id="adm-cat-name" class="form-control" placeholder="e.g. Diabetes Care">
+       </div>
+       <div>
+        <label class="form-label">Category Image URL (Optional)</label> <input type="url" id="adm-cat-img" class="form-control" placeholder="https://... (Leave blank for default medical icon)">
+       </div>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 12px;">
+       <button class="primary-btn" onclick="saveCategoryAdmin()">Save Category</button>
+       <button class="secondary-btn" onclick="document.getElementById('adm-cat-id').value='';document.getElementById('adm-cat-name').value='';document.getElementById('adm-cat-img').value='';">Clear</button>
+      </div>
+     </div>
+     <div class="panel-card">
+      <h4 style="margin: 0 0 10px;">Active Store Categories</h4>
+      <div id="adm-categories-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;"></div>
+     </div>
+    </div>
+    <!-- ADMIN TAB 3: APPEARANCE, THEME, BG & PROMO BANNER -->
+    <div id="tab-appearance" class="admin-tab-pane hidden">
+     <div class="panel-card">
+      <h4 style="margin: 0 0 6px;">🎨 Store Color Theme &amp; Dark Mode (Admin-Only Control)</h4>
+      <p class="muted" style="margin: 0 0 10px;">Select the primary brand color for all visitors:</p>
+      <div class="swatch-grid">
+       <button class="swatch-btn" onclick="updateThemeSettings('#ff6f61', false)"><span class="swatch-dot" style="background:#ff6f61;"></span> Tata 1mg Coral</button>
+       <button class="swatch-btn" onclick="updateThemeSettings('#008b87', false)"><span class="swatch-dot" style="background:#008b87;"></span> Subha Medical Teal</button>
+       <button class="swatch-btn" onclick="updateThemeSettings('#2563eb', false)"><span class="swatch-dot" style="background:#2563eb;"></span> Clinical Royal Blue</button>
+       <button class="swatch-btn" onclick="updateThemeSettings('#16a34a', false)"><span class="swatch-dot" style="background:#16a34a;"></span> Herbal Emerald</button>
+       <button class="swatch-btn" onclick="updateThemeSettings('#ff6f61', true)"><span class="swatch-dot" style="background:#0f172a;"></span> Night Dark Mode</button>
+      </div>
+      <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
+      <h4 style="margin: 0 0 8px;">🖼️ Global Background Image &amp; Promotional Banner Setup</h4>
+      <label class="form-label">Site Background Image URL (Leave empty for clean Tata 1mg clinical background)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="https://images.unsplash.com/..."> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="https://images.unsplash.com/..."> <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
+      <button class="primary-btn" style="margin-top: 14px;" onclick="saveAppearanceSettings()"><i class="ri-check-line"></i> Apply &amp; Save Visual Settings</button>
+     </div>
+    </div>
+    <!-- ADMIN TAB 4: ORDERS, RX & GST BILLING -->
+    <div id="tab-orders" class="admin-tab-pane hidden">
+     <div class="panel-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+       <h4 style="margin: 0;">📦 Customer Orders, Attached Rx &amp; Printable GST Invoices</h4>
+       <span class="muted">Changing status to "Cancelled" automatically restores deducted stock</span>
+      </div>
+      <div id="adm-orders-container"></div>
+     </div>
+    </div>
+    <!-- ADMIN TAB 5: STORE, GST & SQL CONFIG -->
+    <div id="tab-sql" class="admin-tab-pane hidden">
+     <div class="panel-card">
+      <h4 style="margin: 0 0 8px;">🏪 Store Details, GSTIN, Drug License &amp; Admin Email</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+       <div>
+        <label class="form-label">Store Title</label> <input type="text" id="adm-store-name" class="form-control">
+       </div>
+       <div>
+        <label class="form-label">WhatsApp Order Number (with 91)</label> <input type="text" id="adm-whatsapp" class="form-control">
+       </div>
+       <div>
+        <label class="form-label">Pharmacy GSTIN Number</label> <input type="text" id="adm-gstin" class="form-control" placeholder="e.g. 33AAAAA0000A1Z5">
+       </div>
+       <div>
+        <label class="form-label">Drug License No. (Form 20/21)</label> <input type="text" id="adm-dl-no" class="form-control" placeholder="e.g. TN-TPR-20/21-00000">
+       </div>
+       <div>
+        <label class="form-label">Default Medicine GST % (CGST+SGST)</label> <input type="number" id="adm-gst-rate" class="form-control" placeholder="12">
+       </div>
+       <div>
+        <label class="form-label">Authorized Admin Email *</label> <input type="email" id="adm-admin-email" class="form-control">
+       </div>
+       <div>
+        <label class="form-label">Admin Security PIN *</label> <input type="text" id="adm-admin-pin" class="form-control" placeholder="admin123">
+       </div>
+      </div>
+      <button class="primary-btn" style="margin-top: 12px;" onclick="saveCoreSettings()">Save Store &amp; GST Config</button>
+     </div>
+     <div class="panel-card">
+      <h4 style="margin: 0 0 6px;">🔗 Built-In Supabase SQL Cloud Connection</h4>
+      <p class="muted" style="margin: 0 0 10px;">All additions, stock deductions, batch/expiry details, orders, and attached prescription photos sync automatically in the background.</p>
+      <label class="form-label">Supabase Project URL</label> <input type="url" id="adm-sb-url" class="form-control" placeholder="https://xxxx.supabase.co"> <label class="form-label">Supabase Anon Public Key</label> <input type="text" id="adm-sb-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI...">
+      <button class="secondary-btn" style="margin-top: 10px;" onclick="saveSupabaseCredentials()">Update SQL Credentials</button>
+     </div>
+    </div>
+   </section>
+  </main>
+  <!-- Fixed Bottom Navigation -->
+  <nav class="bottom-nav">
+   <button id="bnav-home" class="active" onclick="switchView('home')"><i class="ri-home-5-line"></i> <span>Home</span></button>
+   <button id="bnav-tools" onclick="switchView('tools')"><i class="ri-heart-pulse-line"></i> <span>Health Tools</span></button>
+   <button id="bnav-wishlist" onclick="switchView('wishlist')"><i class="ri-heart-3-line"></i> <span>Wishlist</span></button>
+   <button id="bnav-cart" onclick="switchView('cart')"><i class="ri-shopping-bag-3-line"></i> <span>Cart</span> <span id="nav-cart-count" class="cart-count">0</span></button>
+   <button id="bnav-account" onclick="switchView('account')"><i class="ri-user-3-line"></i> <span>Account</span></button>
+  </nav>
+  <script>
         /* =========================================================================
            1. BUILT-IN SUPABASE SQL AUTO-SYNC CONFIGURATION
         ========================================================================= */
-        const DEFAULT_SB_URL = localStorage.getItem('subha_sb_url') || 'YOUR_SUPABASE_URL';
-        const DEFAULT_SB_KEY = localStorage.getItem('subha_sb_key') || 'YOUR_SUPABASE_ANON_KEY';
+        // Configure once during deployment. Use Supabase Project URL + anon/public key only.
+        // NEVER put a service_role key or any secret/password in browser code.
+        const DEFAULT_SB_URL = 'https://ktqztbpmfxbbczojfdlr.supabase.co';
+        const DEFAULT_SB_KEY = 'sb_publishable_C0bpzdEEotuWH3UpLyB5Fw_dCb3IrJf';
+        const ADMIN_USER_ID = 'cda6104e-6b43-4a89-af93-631ae45cbc0e';
+        const ADMIN_EMAIL = 'subhamedical2325@gmail.com';
+        const PRODUCT_IMAGE_BUCKET = 'product-images';
+        const PRODUCT_VIDEO_BUCKET = 'product-videos';
         let supabaseClient = null;
 
-        function initSupabase() {
-            if (DEFAULT_SB_URL.startsWith('http') && DEFAULT_SB_KEY.length > 20 && window.supabase) {
+        async function initSupabase() {
+            // Try a fallback CDN if the primary Supabase SDK did not load.
+            if (!window.supabase || typeof window.supabase.createClient !== 'function') {
                 try {
-                    supabaseClient = window.supabase.createClient(DEFAULT_SB_URL, DEFAULT_SB_KEY);
-                    pullFromSupabaseSQL();
-                } catch (e) {
-                    console.warn('Supabase background init skipped:', e);
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://unpkg.com/@supabase/supabase-js@2';
+                        script.onload = resolve;
+                        script.onerror = () => reject(new Error('Could not load Supabase JavaScript SDK. Check internet access or CDN blocking.'));
+                        document.head.appendChild(script);
+                    });
+                } catch (sdkError) {
+                    console.error('Supabase SDK load failed:', sdkError);
+                    showToast('Server unavailable: Supabase library could not load. Check internet connection and reopen the page.', 'error');
+                    return;
                 }
+            }
+            if (!DEFAULT_SB_URL.startsWith('https://') || DEFAULT_SB_KEY.length < 20) {
+                showToast('Server unavailable: Supabase project URL or public key is missing.', 'error');
+                return;
+            }
+            try {
+                supabaseClient = window.supabase.createClient(DEFAULT_SB_URL, DEFAULT_SB_KEY, {
+                    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+                });
+                const { data, error } = await supabaseClient.auth.getSession();
+                if (error) throw error;
+                const user = data?.session?.user;
+                if (user) {
+                    currentUser = { id: user.id, name: user.user_metadata?.name || (user.email || '').split('@')[0], email: (user.email || '').toLowerCase(), isAdmin: user.id === ADMIN_USER_ID };
+                    localStorage.setItem('subha_user', JSON.stringify(currentUser));
+                } else {
+                    currentUser = null;
+                    localStorage.removeItem('subha_user');
+                }
+                updateUserAuthUI();
+                await pullFromSupabaseSQL();
+            } catch (e) {
+                console.error('Supabase initialization failed:', e);
+                supabaseClient = null;
+                showToast('Server unavailable: ' + (e.message || 'Could not connect to Supabase. Check project status, URL, key, and internet.'), 'error');
             }
         }
 
@@ -1664,8 +1586,7 @@
             gstin: '33AAAAA0000A1Z5',
             dl_no: 'TN-TPR-20/21-00000',
             gst_rate: 12,
-            admin_email: 'admin@subhamedical.com',
-            admin_pin: 'admin123',
+            admin_email: 'subhamedical2325@gmail.com',
             theme_color: '#ff6f61',
             dark_mode: false,
             bg_image: '',
@@ -1915,7 +1836,7 @@
 
             const rowsHtml = (ord.items || []).map((item, idx) => {
                 const liveProd = products.find(p => p.id === item.id) || {};
-                const batchNo = item.batch || liveProd.batch || '—';
+                const batchNo = item.batch || liveProd.batch || '--';
                 const expDate = formatExpiryDisplay(item.expiry || liveProd.expiry || '');
 
                 const unitPrice = Number(item.price) || 0;
@@ -2354,12 +2275,13 @@
                     <div class="p-img-box">
                         <img src="${p.image || fallbackImg}" alt="${p.name}" onerror="this.src='${fallbackImg}'">
                     </div>
+                    ${p.video ? `<div class="product-video-wrap" style="margin:8px 0;"><video controls playsinline preload="metadata" style="width:100%;max-height:180px;border-radius:10px;background:#111" aria-label="${p.name} product video"><source src="${p.video}">Your browser does not support video playback.</video></div>` : ''}
                     <div class="p-title">${p.name}</div>
                     <div class="p-salt">${p.salt || 'Standard Formulation'}</div>
                     <div class="p-brand-text">${p.brand || 'Subha Verified'} • ${p.category || 'Healthcare'}</div>
                     ${(p.batch || p.expiry) ? `
                         <div class="p-batch-meta">
-                            <span>Batch: <strong>${p.batch || '—'}</strong></span>
+                            <span>Batch: <strong>${p.batch || '--'}</strong></span>
                             <span>Exp: <strong>${formatExpiryDisplay(p.expiry)}</strong></span>
                         </div>
                     ` : ''}
@@ -2422,7 +2344,7 @@
                             <span class="muted">${p.salt || ''}</span>
                         </td>
                         <td>
-                            <span style="font-family:monospace;font-weight:700;">${p.batch || '—'}</span><br>
+                            <span style="font-family:monospace;font-weight:700;">${p.batch || '--'}</span><br>
                             <span class="muted">Exp: ${formatExpiryDisplay(p.expiry)}</span>
                         </td>
                         <td>${p.category || '-'}</td>
@@ -2443,37 +2365,32 @@
         /* =========================================================================
            8. UNIFIED ACCOUNT SIGN-IN
         ========================================================================= */
-        function handleUnifiedSignIn() {
+        async function handleUnifiedSignIn() {
             const name = document.getElementById('login-name').value.trim() || 'User';
             const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value.trim();
-
-            if (!email) return showToast('Please enter your email address', 'error');
-
-            const configuredAdminEmail = (storeSettings.admin_email || 'admin@subhamedical.com').toLowerCase();
-            const configuredPin = storeSettings.admin_pin || 'admin123';
-
-            let isAdmin = false;
-            if (email === configuredAdminEmail) {
-                if (pass !== configuredPin) {
-                    return showToast('Invalid Admin Security PIN for this Admin Email!', 'error');
-                }
-                isAdmin = true;
+            const pass = document.getElementById('login-pass').value;
+            if (!email || !pass) return showToast('Enter your email and password.', 'error');
+            if (!supabaseClient) {
+                await initSupabase();
+                if (!supabaseClient) return showToast('Cloud service unavailable. Check internet, Supabase project status, and public key.', 'error');
             }
-
-            currentUser = { name, email, isAdmin };
-            localStorage.setItem('subha_user', JSON.stringify(currentUser));
-            updateUserAuthUI();
-
-            if (isAdmin) {
-                showToast('Welcome Admin! Master Admin Panel unlocked.');
-                switchView('admin');
-            } else {
-                showToast(`Signed in as ${name}`);
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+                if (error) throw error;
+                const verifiedEmail = (data.user?.email || '').toLowerCase();
+                const isAdmin = data.user?.id === ADMIN_USER_ID;
+                currentUser = { id: data.user?.id || '', name: data.user?.user_metadata?.name || name, email: verifiedEmail, isAdmin };
+                localStorage.setItem('subha_user', JSON.stringify(currentUser));
+                updateUserAuthUI();
+                showToast(isAdmin ? 'Admin signed in securely.' : `Signed in as ${currentUser.name}`, 'success');
+                if (isAdmin) switchView('admin');
+            } catch (err) {
+                showToast(err.message || 'Sign-in failed. Check your credentials.', 'error');
             }
         }
 
-        function signOutAccount() {
+        async function signOutAccount() {
+            try { if (supabaseClient) await supabaseClient.auth.signOut(); } catch (e) { console.warn('Sign out warning', e); }
             currentUser = null;
             localStorage.removeItem('subha_user');
             updateUserAuthUI();
@@ -2516,6 +2433,33 @@
         /* =========================================================================
            9. ADMIN CRUD OPERATIONS
         ========================================================================= */
+        async function uploadProductImage(file) {
+            if (!file) return null;
+            if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) throw new Error('Choose a JPG, PNG, WEBP or AVIF image.');
+            if (file.size > 8 * 1024 * 1024) throw new Error('Image must be 8 MB or smaller.');
+            if (!supabaseClient) throw new Error('Cloud storage is not configured.');
+            const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+            const path = `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
+            const { error } = await supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
+            if (error) throw error;
+            const { data } = supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(path);
+            return data.publicUrl;
+        }
+
+        async function uploadProductVideo(file) {
+            if (!file) return null;
+            const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
+            if (!allowedTypes.includes(file.type)) throw new Error('Choose an MP4, WEBM or MOV video.');
+            if (file.size > 50 * 1024 * 1024) throw new Error('Video must be 50 MB or smaller.');
+            if (!supabaseClient) throw new Error('Cloud storage is not configured.');
+            const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+            const path = `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
+            const { error } = await supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
+            if (error) throw error;
+            const { data } = supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).getPublicUrl(path);
+            return data.publicUrl;
+        }
+
         async function saveProductAdmin() {
             const id = document.getElementById('adm-prod-id').value || ('med_' + Date.now());
             const name = document.getElementById('adm-prod-name').value.trim();
@@ -2527,13 +2471,24 @@
             const mrp = parseFloat(document.getElementById('adm-prod-mrp').value) || 0;
             const price = parseFloat(document.getElementById('adm-prod-price').value) || 0;
             const stock = parseInt(document.getElementById('adm-prod-stock').value) || 0;
-            const image = document.getElementById('adm-prod-img').value.trim();
+            let image = document.getElementById('adm-prod-img').value.trim();
+            let video = document.getElementById('adm-prod-video').value.trim();
+            const imageFile = document.getElementById('adm-prod-image-file')?.files?.[0];
+            const videoFile = document.getElementById('adm-prod-video-file')?.files?.[0];
+            if (imageFile) {
+                try { showToast('Uploading product image…'); image = await uploadProductImage(imageFile); }
+                catch (err) { return showToast(err.message || 'Image upload failed.', 'error'); }
+            }
+            if (videoFile) {
+                try { showToast('Uploading product video…'); video = await uploadProductVideo(videoFile); }
+                catch (err) { return showToast(err.message || 'Video upload failed.', 'error'); }
+            }
             const rx = document.getElementById('adm-prod-rx').checked;
             const featured = document.getElementById('adm-prod-featured').checked;
 
             if (!name || price <= 0) return showToast('Please enter Medicine Name and valid Price', 'error');
 
-            const item = { id, name, salt, brand, category, batch, expiry, mrp: mrp || price, price, stock, image, rx, featured };
+            const item = { id, name, salt, brand, category, batch, expiry, mrp: mrp || price, price, stock, image, video, rx, featured, updated_at: new Date().toISOString() };
             const idx = products.findIndex(p => p.id === id);
             if (idx >= 0) products[idx] = item;
             else products.unshift(item);
@@ -2544,7 +2499,11 @@
             showToast('Medicine (with Batch, Expiry & Stock) saved!');
 
             if (supabaseClient) {
-                await supabaseClient.from('subha_products').upsert(item);
+                const { error: saveError } = await supabaseClient.from('subha_products').upsert(item);
+                if (saveError) {
+                    console.error('Product SQL save failed:', saveError);
+                    showToast('Saved locally, but Supabase SQL save failed: ' + saveError.message, 'error');
+                }
             }
         }
 
@@ -2562,6 +2521,9 @@
             document.getElementById('adm-prod-price').value = p.price;
             document.getElementById('adm-prod-stock').value = p.stock;
             document.getElementById('adm-prod-img').value = p.image || '';
+            document.getElementById('adm-prod-video').value = p.video || '';
+            document.getElementById('adm-prod-image-file').value = '';
+            document.getElementById('adm-prod-video-file').value = '';
             document.getElementById('adm-prod-rx').checked = !!p.rx;
             document.getElementById('adm-prod-featured').checked = !!p.featured;
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2578,9 +2540,11 @@
         }
 
         function resetProductForm() {
-            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img'].forEach(k => {
+            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img', 'adm-prod-video'].forEach(k => {
                 document.getElementById(k).value = '';
             });
+            document.getElementById('adm-prod-image-file').value = '';
+            document.getElementById('adm-prod-video-file').value = '';
             document.getElementById('adm-prod-rx').checked = false;
             document.getElementById('adm-prod-featured').checked = true;
         }
@@ -2668,12 +2632,7 @@
         }
 
         function saveSupabaseCredentials() {
-            const url = document.getElementById('adm-sb-url').value.trim();
-            const key = document.getElementById('adm-sb-key').value.trim();
-            localStorage.setItem('subha_sb_url', url);
-            localStorage.setItem('subha_sb_key', key);
-            showToast('SQL Credentials saved! Reloading connection...');
-            setTimeout(() => location.reload(), 900);
+            showToast('Cloud settings are deployment-only. Configure the project URL and anon key in the code; never use a service-role key in the browser.', 'error');
         }
 
         /* =========================================================================
@@ -2773,9 +2732,9 @@
                 sub += line;
                 const prod = products.find(p => p.id === i.id) || {};
                 const isRx = prod.rx || i.rx;
-                const batchTxt = i.batch || prod.batch || '—';
+                const batchTxt = i.batch || prod.batch || '--';
                 const expTxt = formatExpiryDisplay(i.expiry || prod.expiry || '');
-                const maxStock = prod.stock !== undefined ? Number(prod.stock) : '—';
+                const maxStock = prod.stock !== undefined ? Number(prod.stock) : '--';
                 return `
                     <div class="panel-card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                         <div>
@@ -2892,7 +2851,7 @@
             custBox.innerHTML = myOrders.map(o => `
                 <div style="border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                        <strong>#${o.id} — ₹${Number(o.total).toFixed(2)}</strong>
+                        <strong>#${o.id} -- ₹${Number(o.total).toFixed(2)}</strong>
                         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                             ${o.rx_image ? `<button class="secondary-btn" style="padding:4px 8px;font-size:11px;border-color:var(--brand);color:var(--brand);" onclick="viewOrderRxById('${o.id}')"><i class="ri-image-line"></i> View Rx</button>` : ''}
                             <button class="invoice-btn" onclick="printOrderGSTBill('${o.id}')">
@@ -2914,7 +2873,7 @@
                                 <strong style="color:var(--brand)">₹${Number(o.total).toFixed(2)}</strong>
                             </div>
                             <div class="muted">Address: ${o.customer_address}</div>
-                            <div style="font-size:12px;margin-top:4px;">${(o.items || []).map(i => `${i.name} [B: ${i.batch || '—'}] (x${i.qty})`).join(', ')}</div>
+                            <div style="font-size:12px;margin-top:4px;">${(o.items || []).map(i => `${i.name} [B: ${i.batch || '--'}] (x${i.qty})`).join(', ')}</div>
                         </div>
 
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -3004,7 +2963,7 @@
 
             let cat = 'Normal BP';
             let col = '#16a34a';
-            if (sys >= 140 || dia >= 90) { cat = 'High BP (Stage 2 Hypertension) — Consult Doctor'; col = '#dc2626'; }
+            if (sys >= 140 || dia >= 90) { cat = 'High BP (Stage 2 Hypertension) -- Consult Doctor'; col = '#dc2626'; }
             else if (sys >= 130 || dia >= 80) { cat = 'Elevated / Stage 1 Hypertension'; col = '#ea580c'; }
             else if (sys < 90 || dia < 60) { cat = 'Low Blood Pressure (Hypotension)'; col = '#d97706'; }
 
@@ -3026,7 +2985,7 @@
             const box = document.getElementById('reminders-list');
             box.innerHTML = reminders.map(r => `
                 <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
-                    <span>⏰ <strong>${r.time}</strong> — ${r.name}</span>
+                    <span>⏰ <strong>${r.time}</strong> -- ${r.name}</span>
                     <span style="color:var(--danger);cursor:pointer;" onclick="reminders=reminders.filter(x=>x.id!==${r.id});localStorage.setItem('subha_reminders',JSON.stringify(reminders));renderReminders();">Remove</span>
                 </div>
             `).join('') || '<span class="muted">No active reminders set.</span>';
@@ -3081,6 +3040,5 @@
             initSupabase();
         });
     </script>
-</body>
+ </body>
 </html>
-
