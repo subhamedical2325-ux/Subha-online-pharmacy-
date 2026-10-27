@@ -1062,7 +1062,56 @@
           .p-card .product-image, .p-card img { max-height: 210px; }
         }
 
-    </style>
+    
+
+/* Mobile refinements: compact header/location and prominent medicine photography */
+.loc-chip { padding: 5px 9px !important; font-size: 11px !important; line-height: 1.2 !important; width: fit-content; max-width: 100%; }
+.loc-chip i { font-size: 12px !important; }
+.brand-title-main { font-size: clamp(17px, 4.5vw, 25px) !important; line-height: 1.15 !important; }
+.brand-title-sub { font-size: 11px !important; line-height: 1.2 !important; }
+@media (max-width: 600px) {
+  body { font-size: 13px; }
+  h1 { font-size: 22px !important; } h2 { font-size: 19px !important; } h3 { font-size: 17px !important; } h4 { font-size: 15px !important; }
+  .container-max { padding-left: 10px !important; padding-right: 10px !important; }
+  .product-card img, .product-image, .medicine-image { width: 100%; height: 220px !important; object-fit: contain !important; background: #fff; }
+  .product-card { font-size: 12px !important; }
+  .muted, small { font-size: 11px !important; }
+}
+
+/* Final mobile compactness + touch reliability fixes */
+@media (max-width: 600px) {
+  html { font-size: 13px !important; }
+  body { font-size: 12px !important; line-height: 1.35; }
+  .navbar { padding: 5px 0 7px !important; }
+  .brand-title-main { font-size: 17px !important; line-height: 1.1 !important; }
+  .brand-title-sub { font-size: 9px !important; }
+  .brand-logo-badge { width: 36px !important; height: 36px !important; }
+  .loc-chip.compact-location { display: inline-flex !important; width: max-content !important; max-width: max-content !important; grid-column: auto !important; padding: 2px 6px !important; min-height: 20px !important; font-size: 9px !important; font-weight: 500 !important; border-radius: 5px !important; }
+  .loc-chip.compact-location i { font-size: 9px !important; }
+  .search-row { display: flex !important; flex-wrap: wrap !important; gap: 5px !important; }
+  .search-bar { flex: 1 1 100% !important; min-width: 0 !important; min-height: 38px !important; }
+  .search-bar input { font-size: 12px !important; }
+  .sort-select { flex: 1 1 100% !important; max-width: none !important; min-height: 36px !important; font-size: 10px !important; }
+  .quick-action-btn { font-size: 9px !important; min-height: 34px !important; }
+  .section-header h3 { font-size: 14px !important; }
+  .p-card h4, .p-card .product-name { font-size: 11px !important; }
+  .p-card .price, .p-card .product-price { font-size: 14px !important; }
+  .panel-card, .p-card { padding: 8px !important; }
+  .p-card .product-image, .p-card img { max-height: 180px !important; }
+  .bottom-nav button { font-size: 9px !important; }
+}
+/* Make mobile taps register reliably without changing desktop click behaviour. */
+*, *::before, *::after { -webkit-tap-highlight-color: transparent; }
+button, a, input, select, textarea, [onclick], .brand-box, .cat-card, .wish-icon, .add-cart-btn {
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+button, a, [onclick] { cursor: pointer; }
+.navbar { z-index: 1000; }
+.bottom-nav { z-index: 1100; }
+.hidden { pointer-events: none !important; }
+
+</style>
  </head>
  <body>
   <!-- Toast Notifications -->
@@ -1082,7 +1131,7 @@
   </div>
   <!-- Top Moving Announcement Bar -->
   <div class="moving-ticker-wrap">
-   <div class="moving-ticker-content" id="ticker-text">💚 Welcome to Subha Medical | சுபா மருந்தகம் (வள்ளிபுரம், திருப்பூர்) -- 100% Genuine Batch-Verified Medicines | Live Stock Tracking | Instant Prescription Upload &amp; GST Billing | Use Code: SUBHA10 for 10% OFF!</div>
+   <div class="moving-ticker-content" id="ticker-text">💚 Subha Medical • Genuine Medicines • Easy Ordering</div>
   </div>
   <!-- Sticky Tata 1mg Inspired Navigation -->
   <header class="navbar">
@@ -1103,8 +1152,8 @@
      </div>
     </div>
     <div class="search-row">
-     <div class="loc-chip">
-      <i class="ri-map-pin-2-fill"></i> <span id="nav-location-short">Vallipuram, Tiruppur</span>
+     <div class="loc-chip compact-location" aria-label="Store location">
+      <i class="ri-map-pin-2-fill"></i><span id="nav-location-short">Vallipuram, Tiruppur</span>
      </div>
      <div class="search-bar">
       <i class="ri-search-line"></i> <input type="search" id="search-input" placeholder="Search for medicines, generic salt, brand, or batch..." oninput="renderStoreProducts()">
@@ -1326,9 +1375,9 @@
      </div>
     </div>
     <!-- Customer Order History -->
-    <div class="panel-card">
-     <h4 style="margin: 0 0 10px;">📦 My Recent Orders, Prescriptions &amp; GST Bills</h4>
-     <div id="customer-orders-list" class="muted">No orders placed yet from this account.</div>
+    <div id="customer-orders-panel" class="panel-card hidden">
+     <h4 style="margin: 0 0 10px;">📦 My Recent Orders &amp; GST Bills</h4>
+     <div id="customer-orders-list" class="muted">Sign in to view your orders.</div>
     </div>
    </section>
    <!-- ==================== 6. FULL ADMIN CONTROL PANEL ==================== -->
@@ -1378,7 +1427,7 @@
         <label class="form-label">Stock Quantity *</label> <input type="number" id="adm-prod-stock" class="form-control" placeholder="e.g. 50">
        </div>
        <div>
-        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">Image uploads securely to Supabase Storage. Leave empty to keep the existing image.</small> <input type="url" id="adm-prod-img" class="form-control hidden" aria-hidden="true" tabindex="-1">
+        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" multiple> <small class="muted">Select multiple medicine photos from your device. First photo is the main product photo; other photos are saved in the gallery when the database has an images column.</small> <input type="url" id="adm-prod-img" class="form-control hidden" aria-hidden="true" tabindex="-1">
        </div>
        <div>
         <label class="form-label">Product Video (optional)</label> <input type="file" id="adm-prod-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime"> <small class="muted">MP4, WEBM or MOV video. Maximum 50 MB. Leave empty to keep the current video.</small> <input type="url" id="adm-prod-video" class="form-control hidden" aria-hidden="true" tabindex="-1">
@@ -2272,9 +2321,10 @@
                     <button class="wish-icon ${wished ? 'active' : ''}" onclick="toggleWishlist('${p.id}')">
                         <i class="${wished ? 'ri-heart-3-fill' : 'ri-heart-3-line'}"></i>
                     </button>
-                    <div class="p-img-box">
-                        <img src="${p.image || fallbackImg}" alt="${p.name}" onerror="this.src='${fallbackImg}'">
+                    <div class="p-img-box" style="height:250px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;">
+                        <img src="${p.image || fallbackImg}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;" onerror="this.src='${fallbackImg}'">
                     </div>
+                    ${(Array.isArray(p.images) && p.images.length > 1) ? `<div class="medicine-gallery-thumbs" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0;">${p.images.map((src,ix)=>`<img src="${src}" alt="${p.name} photo ${ix+1}" onclick="this.closest('.p-card').querySelector('.p-img-box img').src=this.src" style="width:48px;height:48px;object-fit:contain;border:1px solid var(--border-color);border-radius:6px;cursor:pointer;background:#fff;">`).join('')}</div>` : ''}
                     ${p.video ? `<div class="product-video-wrap" style="margin:8px 0;"><video controls playsinline preload="metadata" style="width:100%;max-height:180px;border-radius:10px;background:#111" aria-label="${p.name} product video"><source src="${p.video}">Your browser does not support video playback.</video></div>` : ''}
                     <div class="p-title">${p.name}</div>
                     <div class="p-salt">${p.salt || 'Standard Formulation'}</div>
@@ -2473,7 +2523,7 @@
             const stock = parseInt(document.getElementById('adm-prod-stock').value) || 0;
             let image = document.getElementById('adm-prod-img').value.trim();
             let video = document.getElementById('adm-prod-video').value.trim();
-            const imageFile = document.getElementById('adm-prod-image-file')?.files?.[0];
+            const imageFiles = Array.from(document.getElementById('adm-prod-image-file')?.files || []);\n            const imageFile = imageFiles[0] || null;\n            let images = [];
             const videoFile = document.getElementById('adm-prod-video-file')?.files?.[0];
             if (imageFile) {
                 try { showToast('Uploading product image…'); image = await uploadProductImage(imageFile); }
@@ -2488,7 +2538,7 @@
 
             if (!name || price <= 0) return showToast('Please enter Medicine Name and valid Price', 'error');
 
-            const item = { id, name, salt, brand, category, batch, expiry, mrp: mrp || price, price, stock, image, video, rx, featured, updated_at: new Date().toISOString() };
+            const item = { id, name, salt, brand, category, batch, expiry, mrp: mrp || price, price, stock, image, images: images.length ? images : (products.find(p => p.id === id)?.images || (image ? [image] : [])), video, rx, featured, updated_at: new Date().toISOString() };
             const idx = products.findIndex(p => p.id === id);
             if (idx >= 0) products[idx] = item;
             else products.unshift(item);
@@ -2840,23 +2890,44 @@
             }
         }
 
+        async function cancelMyOrder(orderId) {
+            if (!currentUser) return showToast('Please sign in to cancel an order.', 'error');
+            const order = orders.find(o => String(o.id) === String(orderId));
+            if (!order || (order.customer_email || '').toLowerCase() !== (currentUser.email || '').toLowerCase()) {
+                return showToast('Order not found for your account.', 'error');
+            }
+            if (['Delivered', 'Cancelled'].includes(order.status)) return showToast('This order can no longer be cancelled.', 'error');
+            if (!confirm('Cancel this order?')) return;
+            order.status = 'Cancelled';
+            saveStateLocal();
+            if (supabaseClient) {
+                const { error } = await supabaseClient.from('subha_orders').update({ status: 'Cancelled' }).eq('id', orderId).eq('customer_email', currentUser.email);
+                if (error) { console.error(error); showToast('Updated locally, but cloud cancellation failed: ' + error.message, 'error'); }
+            }
+            renderOrders();
+            showToast('Order cancelled.');
+        }
+
         function renderOrders() {
             const custBox = document.getElementById('customer-orders-list');
             const admBox = document.getElementById('adm-orders-container');
 
+            const ordersPanel = document.getElementById('customer-orders-panel');
+            if (ordersPanel) ordersPanel.classList.toggle('hidden', !currentUser);
             const myOrders = currentUser
-                ? orders.filter(o => o.customer_email === currentUser.email)
-                : orders;
+                ? orders.filter(o => (o.customer_email || '').toLowerCase() === (currentUser.email || '').toLowerCase())
+                : [];
 
-            custBox.innerHTML = myOrders.map(o => `
+            if (!currentUser) {
+                custBox.innerHTML = 'Sign in to securely view your own orders and bills.';
+            } else custBox.innerHTML = myOrders.map(o => `
                 <div style="border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
                         <strong>#${o.id} -- ₹${Number(o.total).toFixed(2)}</strong>
                         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                             ${o.rx_image ? `<button class="secondary-btn" style="padding:4px 8px;font-size:11px;border-color:var(--brand);color:var(--brand);" onclick="viewOrderRxById('${o.id}')"><i class="ri-image-line"></i> View Rx</button>` : ''}
-                            <button class="invoice-btn" onclick="printOrderGSTBill('${o.id}')">
-                                <i class="ri-printer-line"></i> GST Bill
-                            </button>
+                            ${o.status !== 'Delivered' && o.status !== 'Cancelled' ? `<button class="danger-btn" style="padding:5px 8px;font-size:11px;" onclick="cancelMyOrder('${o.id}')">Cancel Order</button>` : ''}
+                            ${o.status === 'Delivered' ? `<button class="invoice-btn" onclick="printOrderGSTBill('${o.id}')"><i class="ri-printer-line"></i> GST Bill</button>` : ''}
                             <span class="promo-badge">${o.status}</span>
                         </div>
                     </div>
