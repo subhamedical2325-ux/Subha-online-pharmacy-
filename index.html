@@ -1013,7 +1013,8 @@
         .bottom-nav button.active i { transform:translateY(-2px); }
         @media (min-width:760px) { .promo-banner-wrap { margin-top:22px; } .promo-banner-card { min-height:300px; } .product-grid { gap:18px; } }
         @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; } }
-\n    
+
+    
         /* Premium compact mobile storefront: keep the medicine catalogue prominent. */
         .navbar { padding: 8px 0 10px !important; }
         .navbar .container-max { padding-left: 12px; padding-right: 12px; }
@@ -1107,6 +1108,16 @@ button, a, input, select, textarea, [onclick], .brand-box, .cat-card, .wish-icon
   pointer-events: auto;
 }
 button, a, [onclick] { cursor: pointer; }
+/* Reliable mobile touch handling */
+button, a, input, select, textarea, label, [role="button"], [onclick] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation !important;
+}
+button, a, [role="button"] { position: relative; }
+img { -webkit-user-drag: none; }
+
 .navbar { z-index: 1000; }
 .bottom-nav { z-index: 1100; }
 .hidden { pointer-events: none !important; }
@@ -1568,6 +1579,8 @@ button, a, [onclick] { cursor: pointer; }
         const PRODUCT_IMAGE_BUCKET = 'product-images';
         const PRODUCT_VIDEO_BUCKET = 'product-videos';
         let supabaseClient = null;
+        // Initialize auth state before Supabase startup can access it.
+        var appCurrentUser = JSON.parse(localStorage.getItem('subha_user') || 'null');
 
         async function initSupabase() {
             // Try a fallback CDN if the primary Supabase SDK did not load.
@@ -1598,10 +1611,10 @@ button, a, [onclick] { cursor: pointer; }
                 if (error) throw error;
                 const user = data?.session?.user;
                 if (user) {
-                    currentUser = { id: user.id, name: user.user_metadata?.name || (user.email || '').split('@')[0], email: (user.email || '').toLowerCase(), isAdmin: user.id === ADMIN_USER_ID };
-                    localStorage.setItem('subha_user', JSON.stringify(currentUser));
+                    appCurrentUser = { id: user.id, name: user.user_metadata?.name || (user.email || '').split('@')[0], email: (user.email || '').toLowerCase(), isAdmin: user.id === ADMIN_USER_ID };
+                    localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                 } else {
-                    currentUser = null;
+                    appCurrentUser = null;
                     localStorage.removeItem('subha_user');
                 }
                 updateUserAuthUI();
@@ -1622,7 +1635,6 @@ button, a, [onclick] { cursor: pointer; }
         let wishlist = JSON.parse(localStorage.getItem('subha_wishlist') || '[]');
         let orders = JSON.parse(localStorage.getItem('subha_orders') || '[]');
         let reminders = JSON.parse(localStorage.getItem('subha_reminders') || '[]');
-        let currentUser = JSON.parse(localStorage.getItem('subha_user') || 'null');
         let activeCategory = 'ALL';
         let appliedCouponDiscount = 0;
 
@@ -2429,10 +2441,10 @@ button, a, [onclick] { cursor: pointer; }
                 if (error) throw error;
                 const verifiedEmail = (data.user?.email || '').toLowerCase();
                 const isAdmin = data.user?.id === ADMIN_USER_ID;
-                currentUser = { id: data.user?.id || '', name: data.user?.user_metadata?.name || name, email: verifiedEmail, isAdmin };
-                localStorage.setItem('subha_user', JSON.stringify(currentUser));
+                appCurrentUser = { id: data.user?.id || '', name: data.user?.user_metadata?.name || name, email: verifiedEmail, isAdmin };
+                localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                 updateUserAuthUI();
-                showToast(isAdmin ? 'Admin signed in securely.' : `Signed in as ${currentUser.name}`, 'success');
+                showToast(isAdmin ? 'Admin signed in securely.' : `Signed in as ${appCurrentUser.name}`, 'success');
                 if (isAdmin) switchView('admin');
             } catch (err) {
                 showToast(err.message || 'Sign-in failed. Check your credentials.', 'error');
@@ -2441,7 +2453,7 @@ button, a, [onclick] { cursor: pointer; }
 
         async function signOutAccount() {
             try { if (supabaseClient) await supabaseClient.auth.signOut(); } catch (e) { console.warn('Sign out warning', e); }
-            currentUser = null;
+            appCurrentUser = null;
             localStorage.removeItem('subha_user');
             updateUserAuthUI();
             switchView('home');
@@ -2455,14 +2467,14 @@ button, a, [onclick] { cursor: pointer; }
             const profBox = document.getElementById('account-profile-box');
             const adminShortcut = document.getElementById('prof-admin-shortcut');
 
-            if (currentUser) {
-                userLabel.textContent = currentUser.name.split(' ')[0];
+            if (appCurrentUser) {
+                userLabel.textContent = appCurrentUser.name.split(' ')[0];
                 loginBox.classList.add('hidden');
                 profBox.classList.remove('hidden');
-                document.getElementById('prof-name-display').textContent = currentUser.name;
-                document.getElementById('prof-email-display').textContent = currentUser.email;
+                document.getElementById('prof-name-display').textContent = appCurrentUser.name;
+                document.getElementById('prof-email-display').textContent = appCurrentUser.email;
 
-                if (currentUser.isAdmin) {
+                if (appCurrentUser.isAdmin) {
                     adminBtn.classList.remove('hidden');
                     adminShortcut.classList.remove('hidden');
                     document.getElementById('prof-role-badge').textContent = 'Store Administrator';
@@ -2523,7 +2535,9 @@ button, a, [onclick] { cursor: pointer; }
             const stock = parseInt(document.getElementById('adm-prod-stock').value) || 0;
             let image = document.getElementById('adm-prod-img').value.trim();
             let video = document.getElementById('adm-prod-video').value.trim();
-            const imageFiles = Array.from(document.getElementById('adm-prod-image-file')?.files || []);\n            const imageFile = imageFiles[0] || null;\n            let images = [];
+            const imageFiles = Array.from(document.getElementById('adm-prod-image-file')?.files || []);
+            const imageFile = imageFiles[0] || null;
+            let images = [];
             const videoFile = document.getElementById('adm-prod-video-file')?.files?.[0];
             if (imageFile) {
                 try { showToast('Uploading product image…'); image = await uploadProductImage(imageFile); }
@@ -2845,10 +2859,12 @@ button, a, [onclick] { cursor: pointer; }
             const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
             const total = Math.max(0, sub - (sub * appliedCouponDiscount) / 100);
             const orderedItemsSnapshot = [...cart];
+            // Open a tab during the original tap so mobile browsers do not block WhatsApp after async saves.
+            const whatsappTab = channel === 'WhatsApp' ? window.open('about:blank', '_blank') : null;
 
             const orderObj = {
                 id: 'ORD' + Date.now().toString().slice(-6),
-                customer_email: currentUser ? currentUser.email : 'guest',
+                customer_email: appCurrentUser ? appCurrentUser.email : 'guest',
                 customer_name: name,
                 customer_phone: phone,
                 customer_address: address,
@@ -2873,10 +2889,13 @@ button, a, [onclick] { cursor: pointer; }
             await deductInventoryStockForOrder(orderedItemsSnapshot);
 
             if (channel === 'WhatsApp') {
-                const lines = orderedItemsSnapshot.map(i => `• ${i.name} [Batch: ${i.batch || 'N/A'}] (x${i.qty}) - ₹${(i.price * i.qty).toFixed(2)}`).join('%0A');
-                const rxNote = orderObj.rx_image ? `%0A📄 *Prescription:* Attached in Store Order #${orderObj.id}` : '';
-                const msg = `*New Medicine Order - ${storeSettings.store_name}*%0AOrder ID: ${orderObj.id}%0APatient: ${name}%0APhone: ${phone}%0AAddress: ${address}%0A%0A*Items:*%0A${lines}${rxNote}%0A%0A*Total Payable: ₹${total.toFixed(2)}*`;
-                window.open(`https://wa.me/${storeSettings.whatsapp}?text=${msg}`, '_blank');
+                const lines = orderedItemsSnapshot.map(i => `• ${i.name} [Batch: ${i.batch || 'N/A'}] (x${i.qty}) - ₹${(i.price * i.qty).toFixed(2)}`).join('\n');
+                const rxNote = orderObj.rx_image ? `\n📄 Prescription: Attached in Store Order #${orderObj.id}` : '';
+                const msg = `New Medicine Order - ${storeSettings.store_name}\nOrder ID: ${orderObj.id}\nPatient: ${name}\nPhone: ${phone}\nAddress: ${address}\n\nItems:\n${lines}${rxNote}\n\nTotal Payable: ₹${total.toFixed(2)}`;
+                const number = String(storeSettings.whatsapp || '919487165045').replace(/[^0-9]/g, '');
+                const waUrl = `https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
+                if (whatsappTab && !whatsappTab.closed) whatsappTab.location.href = waUrl;
+                else window.location.href = waUrl;
             }
 
             clearCart();
@@ -2891,9 +2910,9 @@ button, a, [onclick] { cursor: pointer; }
         }
 
         async function cancelMyOrder(orderId) {
-            if (!currentUser) return showToast('Please sign in to cancel an order.', 'error');
+            if (!appCurrentUser) return showToast('Please sign in to cancel an order.', 'error');
             const order = orders.find(o => String(o.id) === String(orderId));
-            if (!order || (order.customer_email || '').toLowerCase() !== (currentUser.email || '').toLowerCase()) {
+            if (!order || (order.customer_email || '').toLowerCase() !== (appCurrentUser.email || '').toLowerCase()) {
                 return showToast('Order not found for your account.', 'error');
             }
             if (['Delivered', 'Cancelled'].includes(order.status)) return showToast('This order can no longer be cancelled.', 'error');
@@ -2901,7 +2920,7 @@ button, a, [onclick] { cursor: pointer; }
             order.status = 'Cancelled';
             saveStateLocal();
             if (supabaseClient) {
-                const { error } = await supabaseClient.from('subha_orders').update({ status: 'Cancelled' }).eq('id', orderId).eq('customer_email', currentUser.email);
+                const { error } = await supabaseClient.from('subha_orders').update({ status: 'Cancelled' }).eq('id', orderId).eq('customer_email', appCurrentUser.email);
                 if (error) { console.error(error); showToast('Updated locally, but cloud cancellation failed: ' + error.message, 'error'); }
             }
             renderOrders();
@@ -2913,12 +2932,12 @@ button, a, [onclick] { cursor: pointer; }
             const admBox = document.getElementById('adm-orders-container');
 
             const ordersPanel = document.getElementById('customer-orders-panel');
-            if (ordersPanel) ordersPanel.classList.toggle('hidden', !currentUser);
-            const myOrders = currentUser
-                ? orders.filter(o => (o.customer_email || '').toLowerCase() === (currentUser.email || '').toLowerCase())
+            if (ordersPanel) ordersPanel.classList.toggle('hidden', !appCurrentUser);
+            const myOrders = appCurrentUser
+                ? orders.filter(o => (o.customer_email || '').toLowerCase() === (appCurrentUser.email || '').toLowerCase())
                 : [];
 
-            if (!currentUser) {
+            if (!appCurrentUser) {
                 custBox.innerHTML = 'Sign in to securely view your own orders and bills.';
             } else custBox.innerHTML = myOrders.map(o => `
                 <div style="border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:8px;">
@@ -3066,7 +3085,7 @@ button, a, [onclick] { cursor: pointer; }
            12. NAVIGATION & HELPERS
         ========================================================================= */
         function switchView(view) {
-            if (view === 'admin' && (!currentUser || !currentUser.isAdmin)) {
+            if (view === 'admin' && (!appCurrentUser || !appCurrentUser.isAdmin)) {
                 showToast('Sign in with your Admin Email first to open Admin Panel', 'error');
                 view = 'account';
             }
@@ -3093,7 +3112,21 @@ button, a, [onclick] { cursor: pointer; }
         }
 
         function openDirectWhatsApp() {
-            window.open(`https://wa.me/${storeSettings.whatsapp}?text=Hello%20Subha%20Medical,%20I%20need%20assistance%20ordering%20medicines.`, '_blank');
+            try {
+                const configured = (storeSettings && storeSettings.whatsapp) || '919487165045';
+                const number = String(configured).replace(/[^0-9]/g, '');
+                if (!number || number.length < 10) {
+                    showToast('WhatsApp number is not configured correctly. Please contact the store.', 'error');
+                    return;
+                }
+                const message = 'Hello Subha Medical, I need assistance ordering medicines.';
+                const waUrl = 'https://wa.me/' + number + '?text=' + encodeURIComponent(message);
+                // Direct navigation from the tap works better on mobile than opening a delayed popup.
+                window.location.assign(waUrl);
+            } catch (err) {
+                console.error('WhatsApp launch failed:', err);
+                showToast('Could not open WhatsApp. Please check your internet connection.', 'error');
+            }
         }
 
         function renderAll() {
