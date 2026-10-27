@@ -1437,6 +1437,12 @@ img { -webkit-user-drag: none; }
         <label class="form-label">Stock Quantity *</label> <input type="number" id="adm-prod-stock" class="form-control" placeholder="e.g. 50">
        </div>
        <div>
+        <label class="form-label">Coupon Code (this product only)</label> <input type="text" id="adm-prod-coupon-code" class="form-control" placeholder="e.g. SUBHA10">
+       </div>
+       <div>
+        <label class="form-label">Coupon Discount (%)</label> <input type="number" min="0" max="100" step="0.01" id="adm-prod-coupon-discount" class="form-control" placeholder="e.g. 10">
+       </div>
+       <div>
         <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" multiple> <small class="muted">Select multiple medicine photos from your device. First photo is the main product photo; other photos are saved in the gallery when the database has an images column.</small> <input type="url" id="adm-prod-img" class="form-control hidden" aria-hidden="true" tabindex="-1">
        </div>
        <div>
@@ -1638,7 +1644,7 @@ img { -webkit-user-drag: none; }
         let orders = JSON.parse(localStorage.getItem('subha_orders') || '[]');
         let reminders = JSON.parse(localStorage.getItem('subha_reminders') || '[]');
         let activeCategory = 'ALL';
-        let appliedCouponDiscount = 0;
+        let appliedCouponCode = '';
  
         let currentRxImageData = localStorage.getItem('subha_cart_rx') || '';
  
@@ -2557,6 +2563,8 @@ img { -webkit-user-drag: none; }
             const mrp = parseFloat(document.getElementById('adm-prod-mrp').value) || 0;
             const price = parseFloat(document.getElementById('adm-prod-price').value) || 0;
             const stock = parseInt(document.getElementById('adm-prod-stock').value) || 0;
+            const coupon_code = document.getElementById('adm-prod-coupon-code').value.trim().toUpperCase();
+            const coupon_discount = Math.max(0, Math.min(100, parseFloat(document.getElementById('adm-prod-coupon-discount').value) || 0));
             let image = document.getElementById('adm-prod-img').value.trim();
             let video = document.getElementById('adm-prod-video').value.trim();
             const imageFiles = Array.from(document.getElementById('adm-prod-image-file')?.files || []);
@@ -2576,7 +2584,7 @@ img { -webkit-user-drag: none; }
  
             if (!name || price <= 0) return showToast('Please enter Medicine Name and valid Price', 'error');
  
-            const item = { id, name, salt, brand, category, batch, expiry, mrp: mrp || price, price, stock, image, images: images.length ? images : (products.find(p => p.id === id)?.images || (image ? [image] : [])), video, rx, featured, updated_at: new Date().toISOString() };
+            const item = { id, name, salt, brand, category, batch, expiry, mrp: mrp || price, price, stock, coupon_code, coupon_discount, image, images: images.length ? images : (products.find(p => p.id === id)?.images || (image ? [image] : [])), video, rx, featured, updated_at: new Date().toISOString() };
             const idx = products.findIndex(p => p.id === id);
             if (idx >= 0) products[idx] = item;
             else products.unshift(item);
@@ -2608,6 +2616,8 @@ img { -webkit-user-drag: none; }
             document.getElementById('adm-prod-mrp').value = p.mrp;
             document.getElementById('adm-prod-price').value = p.price;
             document.getElementById('adm-prod-stock').value = p.stock;
+            document.getElementById('adm-prod-coupon-code').value = p.coupon_code || '';
+            document.getElementById('adm-prod-coupon-discount').value = p.coupon_discount || '';
             document.getElementById('adm-prod-img').value = p.image || '';
             document.getElementById('adm-prod-video').value = p.video || '';
             document.getElementById('adm-prod-image-file').value = '';
@@ -2628,7 +2638,7 @@ img { -webkit-user-drag: none; }
         }
  
         function resetProductForm() {
-            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img', 'adm-prod-video'].forEach(k => {
+            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-coupon-code', 'adm-prod-coupon-discount', 'adm-prod-img', 'adm-prod-video'].forEach(k => {
                 document.getElementById(k).value = '';
             });
             document.getElementById('adm-prod-image-file').value = '';
@@ -2792,7 +2802,7 @@ img { -webkit-user-drag: none; }
  
         function clearCart() {
             cart = [];
-            appliedCouponDiscount = 0;
+            appliedCouponCode = '';
             currentRxImageData = '';
             saveStateLocal();
             renderCart();
@@ -2800,14 +2810,37 @@ img { -webkit-user-drag: none; }
  
         function applyCoupon() {
             const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-            if (code === 'SUBHA10') {
-                appliedCouponDiscount = 10;
-                showToast('10% Coupon SUBHA10 applied!');
+            if (!code) {
+                appliedCouponCode = '';
+                renderCart();
+                return showToast('Enter a coupon code', 'error');
+            }
+            const eligible = cart.filter(item => {
+                const product = products.find(p => String(p.id) === String(item.id)) || {};
+                return String(product.coupon_code || '').trim().toUpperCase() === code && Number(product.coupon_discount) > 0;
+            });
+            if (eligible.length) {
+                appliedCouponCode = code;
+                const eligibleNames = eligible.map(item => item.name).join(', ');
+                showToast('Coupon applied only to eligible product(s): ' + eligibleNames);
             } else {
-                appliedCouponDiscount = 0;
-                showToast('Invalid coupon code', 'error');
+                appliedCouponCode = '';
+                showToast('This coupon is not configured for any item in your cart.', 'error');
             }
             renderCart();
+        }
+ 
+        function getItemCouponDiscount(item) {
+            if (!appliedCouponCode) return 0;
+            const product = products.find(p => String(p.id) === String(item.id)) || {};
+            const configuredCode = String(product.coupon_code || '').trim().toUpperCase();
+            const percent = Number(product.coupon_discount) || 0;
+            if (configuredCode !== appliedCouponCode || percent <= 0) return 0;
+            return Math.min(100, percent) / 100 * Number(item.price || 0) * Number(item.qty || 0);
+        }
+ 
+        function getCartCouponDiscount() {
+            return cart.reduce((sum, item) => sum + getItemCouponDiscount(item), 0);
         }
  
         function renderCart() {
@@ -2854,7 +2887,7 @@ img { -webkit-user-drag: none; }
                 `;
             }).join('');
  
-            const discAmt = (sub * appliedCouponDiscount) / 100;
+            const discAmt = getCartCouponDiscount();
             const finalTotal = Math.max(0, sub - discAmt);
  
             document.getElementById('sum-subtotal').textContent = `₹${sub.toFixed(2)}`;
@@ -2895,7 +2928,7 @@ img { -webkit-user-drag: none; }
             }
  
             const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            const total = Math.max(0, sub - (sub * appliedCouponDiscount) / 100);
+            const total = Math.max(0, sub - getCartCouponDiscount());
             const orderedItemsSnapshot = [...cart];
             // Open a tab during the original tap so mobile browsers do not block WhatsApp after async saves.
             const whatsappTab = channel === 'WhatsApp' ? window.open('about:blank', '_blank') : null;
