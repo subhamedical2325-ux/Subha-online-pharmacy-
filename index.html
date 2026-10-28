@@ -1377,23 +1377,9 @@ img { -webkit-user-drag: none; }
      <div class="account-auth-actions" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
       <button class="secondary-btn" onclick="handleCustomerSignUp()">Create Account</button>
       <button class="secondary-btn" onclick="sendPasswordReset()">Reset Password</button>
-      <button class="secondary-btn" onclick="sendLoginOtp()">Send Email OTP</button>
-      <button class="secondary-btn" onclick="showPhoneOtpBox()">Mobile OTP</button>
+      <button class="secondary-btn" onclick="sendLoginLink()">Send Email Login Link</button>
      </div>
-     <div id="email-otp-box" class="panel-card hidden" style="margin-top:10px;padding:12px;">
-      <strong>Verify Email OTP</strong>
-      <p class="muted" style="font-size:12px">Enter the code from your email. The Supabase email OTP template must contain {{ .Token }}.</p>
-      <label class="form-label" for="login-email-otp">Email OTP</label> <input id="login-email-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter email code">
-      <button class="primary-btn" style="width:100%;margin-top:8px" onclick="verifyLoginEmailOtp()">Verify OTP &amp; Sign In</button>
-     </div>
-     <div id="phone-otp-box" class="panel-card hidden" style="margin-top:10px;padding:12px;">
-      <strong>Sign in with Mobile OTP</strong> <label class="form-label" for="login-phone">Mobile number (with country code)</label> <input id="login-phone" class="form-control" type="tel" autocomplete="tel" placeholder="e.g. +919876543210">
-      <button class="secondary-btn" style="width:100%;margin-top:8px" onclick="sendPhoneLoginOtp()">Send SMS OTP</button>
-      <label class="form-label" for="login-phone-otp" style="margin-top:8px">SMS OTP</label> <input id="login-phone-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter SMS code">
-      <button class="primary-btn" style="width:100%;margin-top:8px" onclick="verifyPhoneLoginOtp()">Verify Mobile OTP</button>
-      <p class="muted" style="font-size:12px;margin-top:8px">Mobile OTP works only after enabling Phone Auth and configuring an SMS provider in Supabase.</p>
-     </div>
-     <p class="muted" style="font-size:12px;margin:10px 0 0;">Use your email and password, or choose an OTP option. Email confirmation may be required for new accounts.</p>
+     <p class="muted" style="font-size:12px;margin:10px 0 0;">You can sign in with your email and password, or request a secure sign-in link by email. No OTP code is required.</p>
     </div>
     <div id="password-recovery-box" class="panel-card hidden">
      <h4>Choose a New Password</h4>
@@ -1732,15 +1718,12 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         async function pullFromSupabaseSQL() {
             if (!supabaseClient) return;
             try {
-                const tasks = [
+                const results = await Promise.all([
                     supabaseClient.from('subha_products').select('*').order('name', { ascending: true }),
                     supabaseClient.from('subha_categories').select('*'),
-                    appCurrentUser?.isAdmin
-                        ? supabaseClient.from('subha_orders').select('*').order('created_at', { ascending: false })
-                        : Promise.resolve({ data: null, error: null }),
+                    supabaseClient.from('subha_orders').select('*').order('created_at', { ascending: false }),
                     supabaseClient.from('subha_settings').select('*').eq('id', 1).maybeSingle()
-                ];
-                const results = await Promise.all(tasks);
+                ]);
                 const [pResult, cResult, oResult, sResult] = results;
                 // Product and category reads are public storefront data; report RLS/schema errors clearly.
                 if (pResult.error) console.error('Product list load failed:', pResult.error);
@@ -2582,52 +2565,17 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             showToast('Password reset email sent. Check your inbox.', 'success');
         }
  
-        async function sendLoginOtp() {
+        async function sendLoginLink() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             if (!email) return showToast('Enter your email address first.', 'error');
             if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
-            if (error) return showToast(error.message || 'Could not send email OTP.', 'error');
-            document.getElementById('email-otp-box')?.classList.remove('hidden');
-            showToast('OTP email sent. Enter the code from your email below.', 'success');
-        }
- 
-        async function verifyLoginEmailOtp() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const token = document.getElementById('login-email-otp').value.trim();
-            if (!email || !token) return showToast('Enter your email and OTP code.', 'error');
-            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            const { data, error } = await supabaseClient.auth.verifyOtp({ email, token, type: 'email' });
-            if (error) return showToast(error.message || 'OTP verification failed.', 'error');
-            appCurrentUser = data.user || data.session?.user || null;
-            if (appCurrentUser) { document.getElementById('account-login-box')?.classList.add('hidden'); document.getElementById('account-profile-box')?.classList.remove('hidden'); }
-            showToast('Email OTP verified.', 'success');
-            if (typeof pullFromSupabaseSQL === 'function') await pullFromSupabaseSQL();
-        }
- 
-        function showPhoneOtpBox() { document.getElementById('phone-otp-box')?.classList.remove('hidden'); }
- 
-        async function sendPhoneLoginOtp() {
-            const phone = document.getElementById('login-phone').value.trim();
-            if (!/^\+[1-9]\d{7,14}$/.test(phone)) return showToast('Enter a valid phone number with country code, e.g. +919876543210.', 'error');
-            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            const { error } = await supabaseClient.auth.signInWithOtp({ phone, options: { shouldCreateUser: false } });
-            if (error) return showToast(error.message || 'Could not send SMS OTP. Check Supabase Phone Auth and SMS provider.', 'error');
-            showToast('SMS OTP sent. Enter the code below.', 'success');
-        }
- 
-        async function verifyPhoneLoginOtp() {
-            const phone = document.getElementById('login-phone').value.trim();
-            const token = document.getElementById('login-phone-otp').value.trim();
-            if (!phone || !token) return showToast('Enter your mobile number and SMS OTP.', 'error');
-            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            const { data, error } = await supabaseClient.auth.verifyOtp({ phone, token, type: 'sms' });
-            if (error) return showToast(error.message || 'Mobile OTP verification failed.', 'error');
-            appCurrentUser = data.user || data.session?.user || null;
-            document.getElementById('account-login-box')?.classList.add('hidden');
-            document.getElementById('account-profile-box')?.classList.remove('hidden');
-            showToast('Mobile OTP verified.', 'success');
-            if (typeof pullFromSupabaseSQL === 'function') await pullFromSupabaseSQL();
+            const redirectTo = 'https://subhamedical2325-ux.github.io/Subha-online-pharmacy-/';
+            const { error } = await supabaseClient.auth.signInWithOtp({
+                email,
+                options: { shouldCreateUser: false, emailRedirectTo: redirectTo }
+            });
+            if (error) return showToast(error.message || 'Could not send email sign-in link.', 'error');
+            showToast('Sign-in link requested. Check your inbox and spam folder.', 'success');
         }
  
         function showChangePasswordForm() {
@@ -2943,19 +2891,10 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             if (document.getElementById('adm-logo-file')) document.getElementById('adm-logo-file').value = '';
             if (document.getElementById('adm-brand-image-file')) document.getElementById('adm-brand-image-file').value = '';
             if (document.getElementById('adm-bg-file')) document.getElementById('adm-bg-file').value = '';
-            if (!supabaseClient || !appCurrentUser?.isAdmin) {
-                showToast('Sign in with the authorized admin account before saving store branding.', 'error');
-                return;
+            showToast('Logo, brand image, background & promotional banner saved!');
+            if (supabaseClient) {
+                await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
             }
-            const { error: settingsError } = await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
-            if (settingsError) {
-                console.error('Branding settings save failed:', settingsError);
-                showToast('Branding upload succeeded, but settings could not be saved: ' + settingsError.message + '. Run the supplied SQL migration.', 'error');
-                return;
-            }
-            saveStateLocal();
-            applyStoreBranding();
-            showToast('Logo, background & promotional banner saved for customers!', 'success');
         }
  
         async function saveCoreSettings() {
@@ -2968,19 +2907,10 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             storeSettings.admin_pin = document.getElementById('adm-admin-pin').value.trim() || 'admin123';
             saveStateLocal();
             applyStoreBranding();
-            if (!supabaseClient || !appCurrentUser?.isAdmin) {
-                showToast('Sign in with the authorized admin account before saving store settings.', 'error');
-                return;
+            showToast('Store, GSTIN & Drug License settings saved!');
+            if (supabaseClient) {
+                await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
             }
-            const { error: settingsError } = await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
-            if (settingsError) {
-                console.error('Core settings save failed:', settingsError);
-                showToast('Settings could not be saved: ' + settingsError.message + '. Run the supplied SQL migration.', 'error');
-                return;
-            }
-            saveStateLocal();
-            applyStoreBranding();
-            showToast('Store, GSTIN & Drug License settings saved!', 'success');
         }
  
         function saveSupabaseCredentials() {
