@@ -1520,10 +1520,14 @@ img { -webkit-user-drag: none; }
       <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">The uploaded logo appears in the website header.</small> <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif">
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Global Background Image &amp; Promotional Banner Setup</h4>
-      <label class="form-label">Site Background Image URL (Leave empty for clean Tata 1mg clinical background)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="https://images.unsplash.com/..."> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="https://images.unsplash.com/..."> <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
+      <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="https://images.unsplash.com/..."> <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
-      <h4>🎟️ Coupon Code Controls</h4>
-      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled"> Enable coupon banner on main store</label> <label class="form-label">Coupon code</label> <input type="text" id="adm-coupon-code" class="form-control" placeholder="Enter coupon code"> <label class="form-label">Discount percentage</label> <input type="number" id="adm-coupon-discount" class="form-control" min="1" max="90" value="10"> <small class="muted">The banner appears on the main store only when enabled and saved.</small>
+      <h4>🎟️ Multiple Coupon Codes</h4>
+      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled"> Enable coupon banner on main store</label> <label class="form-label">Coupons (one per line: CODE,DISCOUNT%,ENABLED)</label> <textarea id="adm-coupons-list" class="form-control" rows="5" placeholder="SUBHA10,10,true
+WELCOME15,15,true
+HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use true or false to enable/disable each code. Only enabled codes can be applied.</small>
+      <div id="adm-coupons-preview" class="muted" style="margin-top:6px;"></div>
+      <label class="form-label" style="margin-top:10px;">Legacy / default coupon code</label> <input type="text" id="adm-coupon-code" class="form-control" placeholder="Default coupon code"> <label class="form-label">Default discount percentage</label> <input type="number" id="adm-coupon-discount" class="form-control" min="1" max="90" value="10"> <small class="muted">Save settings to publish enabled coupons to the customer store.</small>
       <button class="primary-btn" style="margin-top: 14px;" onclick="saveAppearanceSettings()"><i class="ri-check-line"></i> Apply &amp; Save Visual Settings</button>
      </div>
     </div>
@@ -2266,6 +2270,11 @@ img { -webkit-user-drag: none; }
             if (heroPromoImg) { heroPromoImg.style.display = 'block'; heroPromoImg.style.width = '100%'; heroPromoImg.style.height = '100%'; heroPromoImg.style.minHeight = '120px'; heroPromoImg.style.objectFit = 'cover'; heroPromoImg.src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80'; heroPromoImg.onerror = () => { heroPromoImg.onerror = null; heroPromoImg.src = 'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=1200&q=80'; }; }
             document.getElementById('hero-promo-title').textContent = storeSettings.promo_title;
             document.getElementById('hero-promo-sub').textContent = storeSettings.promo_sub;
+            const bgInput = document.getElementById('adm-bg-image'); if (bgInput && !bgInput.value) bgInput.value = storeSettings.bg_image || '';
+            const couponEnableInput = document.getElementById('adm-coupon-enabled'); if (couponEnableInput) couponEnableInput.checked = !!storeSettings.coupon_enabled;
+            const couponCodeInput = document.getElementById('adm-coupon-code'); if (couponCodeInput && !couponCodeInput.value) couponCodeInput.value = storeSettings.coupon_code || 'SUBHA10';
+            const couponDiscountInput = document.getElementById('adm-coupon-discount'); if (couponDiscountInput) couponDiscountInput.value = storeSettings.coupon_discount || 10;
+            const couponsInput = document.getElementById('adm-coupons-list'); if (couponsInput && !couponsInput.value && Array.isArray(storeSettings.coupons)) couponsInput.value = storeSettings.coupons.map(c => `${c.code},${c.discount},${!!c.enabled}`).join('\n');
             const couponStrip = document.querySelector('.coupon-strip');
             if (couponStrip) {
                 couponStrip.classList.toggle('hidden', !storeSettings.coupon_enabled);
@@ -2404,16 +2413,15 @@ img { -webkit-user-drag: none; }
         }
  
         function renderStoreProducts() {
-            const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
-            const sortBy = document.getElementById('sort-select').value;
- 
+            const q = (document.getElementById('search-input')?.value || '').toLocaleLowerCase().trim().replace(/\s+/g, ' ');
+            const sortBy = document.getElementById('sort-select')?.value || 'featured';
+            const norm = value => String(value ?? '').toLocaleLowerCase().trim().replace(/\s+/g, ' ');
             let list = products.filter(p => {
-                const matchCat = activeCategory === 'ALL' || p.category === activeCategory;
-                const matchQ = !q ||
-                    (p.name && p.name.toLowerCase().includes(q)) ||
-                    (p.salt && p.salt.toLowerCase().includes(q)) ||
-                    (p.brand && p.brand.toLowerCase().includes(q)) ||
-                    (p.batch && p.batch.toLowerCase().includes(q));
+                const matchCat = activeCategory === 'ALL' || norm(p.category) === norm(activeCategory);
+                // Search all useful catalog fields, including category, expiry and alternate DB column names.
+                const searchable = [p.name, p.salt, p.brand, p.batch, p.category, p.expiry, p.generic_name, p.description, p.manufacturer, p.medicine_name]
+                    .map(norm).filter(Boolean).join(' ');
+                const matchQ = !q || searchable.includes(q) || q.split(' ').every(part => searchable.includes(part));
                 return matchCat && matchQ;
             });
  
@@ -2797,23 +2805,29 @@ img { -webkit-user-drag: none; }
         async function saveAppearanceSettings() {
             const logoFile = document.getElementById('adm-logo-file')?.files?.[0];
             const brandImageFile = document.getElementById('adm-brand-image-file')?.files?.[0];
+            const bgFile = document.getElementById('adm-bg-file')?.files?.[0];
             try {
+                if (bgFile) storeSettings.bg_image = await uploadAdminImage(bgFile, 'brand-images');
                 if (logoFile) storeSettings.logo_image = await uploadAdminImage(logoFile, 'store-logo');
                 if (brandImageFile) { storeSettings.promo_image = await uploadAdminImage(brandImageFile, 'brand-images'); document.getElementById('adm-promo-image').value = storeSettings.promo_image; }
             } catch (err) {
                 return showToast(err.message || 'Logo / brand image upload failed.', 'error');
             }
-            storeSettings.bg_image = document.getElementById('adm-bg-image').value.trim();
+            storeSettings.bg_image = document.getElementById('adm-bg-image').value.trim() || storeSettings.bg_image || '';
             storeSettings.promo_image = document.getElementById('adm-promo-image').value.trim() || storeSettings.promo_image || '';
             storeSettings.promo_title = document.getElementById('adm-promo-title').value.trim();
             storeSettings.promo_sub = document.getElementById('adm-promo-sub').value.trim();
             storeSettings.coupon_enabled = !!document.getElementById('adm-coupon-enabled')?.checked;
             storeSettings.coupon_code = (document.getElementById('adm-coupon-code')?.value || 'SUBHA10').trim().toUpperCase();
             storeSettings.coupon_discount = Math.min(90, Math.max(1, Number(document.getElementById('adm-coupon-discount')?.value) || 10));
+            const couponText = document.getElementById('adm-coupons-list')?.value || '';
+            const parsedCoupons = couponText.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => { const parts = line.split(',').map(v => v.trim()); return { code: (parts[0] || '').toUpperCase(), discount: Math.min(90, Math.max(1, Number(parts[1]) || 10)), enabled: !['false','no','0','off'].includes((parts[2] || 'true').toLowerCase()) }; }).filter(c => /^[A-Z0-9_-]{3,32}$/.test(c.code));
+            storeSettings.coupons = parsedCoupons.length ? parsedCoupons : [{ code: storeSettings.coupon_code, discount: storeSettings.coupon_discount, enabled: storeSettings.coupon_enabled }];
             saveStateLocal();
             applyStoreBranding();
             if (document.getElementById('adm-logo-file')) document.getElementById('adm-logo-file').value = '';
             if (document.getElementById('adm-brand-image-file')) document.getElementById('adm-brand-image-file').value = '';
+            if (document.getElementById('adm-bg-file')) document.getElementById('adm-bg-file').value = '';
             showToast('Logo, brand image, background & promotional banner saved!');
             if (supabaseClient) {
                 await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
@@ -2902,13 +2916,16 @@ img { -webkit-user-drag: none; }
         }
  
         function applyCoupon() {
-            const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-            if (storeSettings.coupon_enabled && code === String(storeSettings.coupon_code || '').toUpperCase()) {
-                appliedCouponDiscount = Number(storeSettings.coupon_discount) || 10;
-                showToast(`${appliedCouponDiscount}% Coupon ${storeSettings.coupon_code} applied!`);
+            const code = (document.getElementById('coupon-input')?.value || '').trim().toUpperCase();
+            const coupons = Array.isArray(storeSettings.coupons) ? storeSettings.coupons : [];
+            const match = coupons.find(c => c && c.enabled && String(c.code || '').toUpperCase() === code) ||
+                (storeSettings.coupon_enabled && code === String(storeSettings.coupon_code || '').toUpperCase() ? { code: storeSettings.coupon_code, discount: storeSettings.coupon_discount, enabled: true } : null);
+            if (match) {
+                appliedCouponDiscount = Math.min(90, Math.max(1, Number(match.discount) || 10));
+                showToast(`${appliedCouponDiscount}% coupon ${match.code} applied!`);
             } else {
                 appliedCouponDiscount = 0;
-                showToast('Invalid coupon code', 'error');
+                showToast('Invalid or disabled coupon code', 'error');
             }
             renderCart();
         }
