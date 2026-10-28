@@ -1799,36 +1799,32 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         }
  
         async function restoreInventoryStockForCancelledOrder(orderItems) {
-            const supabaseUpdates = [];
- 
-            (orderItems || []).forEach(cartItem => {
-                const prodIndex = products.findIndex(p => p.id === cartItem.id);
-                if (prodIndex !== -1) {
-                    const currentStock = Number(products[prodIndex].stock) || 0;
-                    const restoredStock = currentStock + (Number(cartItem.qty) || 1);
-                    products[prodIndex].stock = restoredStock;
- 
+            try {
+                for (const item of (orderItems || [])) {
+                    const productId = item.id;
+                    const qty = Number(item.qty) || 1;
+                    const product = products.find(p => String(p.id) === String(productId));
+                    if (!product) { console.warn('Cannot restore stock; product missing:', productId); continue; }
+                    let currentStock = Number(product.stock) || 0;
                     if (supabaseClient) {
-                        supabaseUpdates.push(
-                            supabaseClient
-                                .from('subha_products')
-                                .update({ stock: restoredStock, updated_at: new Date().toISOString() })
-                                .eq('id', cartItem.id)
-                        );
+                        const { data, error: readError } = await supabaseClient.from('subha_products').select('stock').eq('id', productId).maybeSingle();
+                        if (readError) throw readError;
+                        if (data) currentStock = Number(data.stock) || 0;
                     }
+                    const restoredStock = currentStock + qty;
+                    if (supabaseClient) {
+                        const { error: updateError } = await supabaseClient.from('subha_products').update({ stock: restoredStock, updated_at: new Date().toISOString() }).eq('id', productId);
+                        if (updateError) throw updateError;
+                    }
+                    product.stock = restoredStock;
                 }
-            });
- 
-            saveStateLocal();
-            renderStoreProducts();
-            renderWishlist();
- 
-            if (supabaseUpdates.length > 0) {
-                try {
-                    await Promise.all(supabaseUpdates);
-                } catch (err) {
-                    console.warn('Supabase stock restore sync warning:', err);
-                }
+                saveStateLocal();
+                renderStoreProducts();
+                renderWishlist();
+                return true;
+            } catch (err) {
+                console.error('Stock restoration failed:', err);
+                return false;
             }
         }
  
@@ -2130,7 +2126,54 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                             .no-print-bar { display: none !important; }
                             .invoice-sheet { border: none; padding: 10px; max-width: 100%; }
                         }
-                    </style>
+                    
+ 
+/* Subha Medical premium compact storefront refresh */
+:root { --brand:#c91f45; --brand-dark:#9f1239; --brand-light:#fff1f4; --brand-border:#fecdd8; }
+body { background-color:#f7f8fb; }
+.navbar { box-shadow:0 3px 18px rgba(15,23,42,.06); }
+.promo-banner-wrap { margin:14px 12px 10px !important; }
+.promo-banner-card { min-height:250px !important; height:clamp(190px,27vw,300px) !important; border-radius:18px !important; overflow:hidden; }
+.promo-banner-card > img { height:100% !important; object-fit:cover !important; }
+.promo-banner-overlay { padding:clamp(14px,3vw,28px) !important; }
+.promo-banner-overlay h2 { font-size:clamp(22px,3.4vw,34px) !important; max-width:720px; }
+.promo-banner-overlay p { font-size:clamp(11px,1.5vw,14px) !important; }
+.coupon-strip { margin:10px 12px 12px !important; padding:14px 16px !important; border:1px solid #f7b7c5; background:linear-gradient(115deg,#fff1f4,#fff7ed); border-radius:14px !important; box-shadow:0 5px 18px rgba(190,24,93,.07); }
+.coupon-strip strong { color:#9f1239; font-size:clamp(15px,2vw,21px) !important; }
+.coupon-strip span { font-size:12px !important; }
+.section-header { margin-top:12px !important; margin-bottom:7px !important; }
+.p-card { padding:9px !important; border:1px solid #e9edf3; border-radius:13px !important; box-shadow:0 3px 12px rgba(15,23,42,.045) !important; }
+.p-card:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(15,23,42,.09) !important; }
+.p-card .p-img-box { height:145px !important; border-radius:9px; background:#fff; }
+.p-card .p-img-box img { object-fit:contain !important; }
+.p-card .p-title { font-size:12px !important; line-height:1.3 !important; font-weight:750 !important; margin-top:7px; }
+.p-card .p-salt, .p-card .p-brand-text, .p-card .p-batch-meta { font-size:10px !important; line-height:1.3 !important; }
+.p-card .p-price-row { margin-top:7px !important; align-items:center; gap:5px; }
+.p-card .p-price { font-size:16px !important; font-weight:850 !important; color:#be123c; }
+.p-card .p-mrp { font-size:10px !important; }
+.p-card .p-price-row > span { font-size:9px !important; font-weight:600 !important; color:#64748b !important; white-space:nowrap; }
+.discount-badge { font-size:11px !important; font-weight:900 !important; padding:4px 7px !important; border-radius:7px !important; }
+.add-cart-btn { margin-top:7px !important; min-height:33px !important; border-radius:8px !important; font-size:10px !important; }
+.panel-card { border:1px solid #e9edf3; box-shadow:0 4px 16px rgba(15,23,42,.035); }
+.form-control { min-height:38px !important; font-size:13px !important; }
+@media(max-width:600px) {
+ .promo-banner-wrap { margin:9px 10px 8px !important; }
+ .promo-banner-card { min-height:170px !important; height:170px !important; border-radius:13px !important; }
+ .promo-banner-overlay { padding:12px !important; }
+ .promo-banner-overlay h2 { font-size:20px !important; }
+ .promo-banner-overlay p { font-size:10px !important; }
+ .coupon-strip { margin:8px 10px !important; padding:12px !important; }
+ .coupon-strip strong { font-size:15px !important; }
+ .product-grid { gap:8px !important; padding:3px 10px 16px !important; }
+ .p-card { padding:7px !important; }
+ .p-card .p-img-box { height:125px !important; }
+ .p-card .p-title { font-size:11px !important; }
+ .p-card .p-price { font-size:14px !important; }
+ .p-card .p-batch-meta { display:none !important; }
+ .p-card .p-price-row > span { font-size:8px !important; }
+ .quick-action-btn { font-size:9px !important; padding:6px 3px !important; }
+}
+</style>
                 </head>
                 <body>
                     <div class="no-print-bar">
@@ -2248,30 +2291,38 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
  
         async function updateOrderStatusAdmin(orderId, newStatus) {
             const ord = orders.find(o => String(o.id) === String(orderId));
-            if (!ord) return;
+            if (!ord) return showToast('Order not found. Refresh orders and try again.', 'error');
             const previousStatus = ord.status || 'Confirmed';
             if (previousStatus === newStatus) return;
+            if (!supabaseClient) return showToast('Cloud is not connected; order status was not changed.', 'error');
  
-            // Persist first so the UI never falsely reports a cloud update as successful.
-            if (supabaseClient) {
-                const cloudUpdate = { status: newStatus };
-                if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) cloudUpdate.stock_restored = true;
-                const { error } = await supabaseClient.from('subha_orders').update(cloudUpdate).eq('id', orderId);
-                if (error) {
-                    console.error('Order status update failed:', error);
-                    showToast('Could not update order in cloud: ' + error.message, 'error');
-                    renderOrders();
-                    return;
-                }
+            // Save the status first. If Supabase rejects the change, keep the previous status visible.
+            const { error } = await supabaseClient.from('subha_orders').update({ status: newStatus }).eq('id', orderId);
+            if (error) {
+                console.error('Order status update failed:', error);
+                showToast('Status not saved: ' + error.message, 'error');
+                await pullFromSupabaseSQL();
+                return;
             }
- 
             ord.status = newStatus;
+            saveStateLocal();
+ 
             if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) {
-                await restoreInventoryStockForCancelledOrder(ord.items);
-                ord.stock_restored = true;
-                showToast(`Order #${orderId} cancelled. Stock restoration was requested.`);
+                const restored = await restoreInventoryStockForCancelledOrder(ord.items);
+                if (restored) {
+                    const { error: flagError } = await supabaseClient.from('subha_orders').update({ stock_restored: true }).eq('id', orderId);
+                    if (flagError) {
+                        console.error('Could not save stock-restored flag:', flagError);
+                        showToast('Order cancelled, but stock-restored flag failed: ' + flagError.message, 'error');
+                    } else {
+                        ord.stock_restored = true;
+                        showToast('Order cancelled and stock restored.', 'success');
+                    }
+                } else {
+                    showToast('Order cancelled, but stock restore failed. Check product update permissions.', 'error');
+                }
             } else {
-                showToast(`Order #${orderId} marked as ${newStatus}`);
+                showToast('Order #' + orderId + ' marked as ' + newStatus, 'success');
             }
             saveStateLocal();
             renderOrders();
@@ -2300,8 +2351,13 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             document.getElementById('nav-store-name').textContent = storeSettings.store_name;
             const logoBadge = document.getElementById('nav-logo-badge');
             if (logoBadge) {
-                if (storeSettings.logo_image) {
-                    logoBadge.innerHTML = `<img src="${storeSettings.logo_image}" alt="Subha Medical logo" style="display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:inherit;" onerror="this.onerror=null;this.remove();this.parentElement.innerHTML='<i class=\'ri-capsule-fill\'></i>'">`;
+                if (storeSettings.logo_image && String(storeSettings.logo_image).trim()) {
+                    const logo = document.createElement('img');
+                    logo.alt = 'Subha Medical logo';
+                    logo.src = String(storeSettings.logo_image).trim();
+                    logo.style.cssText = 'display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:inherit';
+                    logo.onerror = () => { logoBadge.innerHTML = '<i class="ri-capsule-fill"></i>'; console.warn('Store logo could not load. Check that the saved logo URL is publicly accessible.'); };
+                    logoBadge.replaceChildren(logo);
                 } else {
                     logoBadge.innerHTML = '<i class="ri-capsule-fill"></i>';
                 }
@@ -2575,10 +2631,16 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             if (!email) return showToast('Enter your account email first.', 'error');
             if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            const redirectTo = 'https://subhamedical2325-ux.github.io/Subha-online-pharmacy-/';
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
-            if (error) return showToast(error.message || 'Could not send reset email.', 'error');
-            showToast('Password reset email sent. Check your inbox.', 'success');
+            // This must exactly match the GitHub Pages project path and be allow-listed in Supabase.
+            const redirectTo = window.location.origin + '/Subha-online-pharmacy-/';
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+                if (error) throw error;
+                showToast('Password reset email requested. If the link opens 404, add this exact URL to Supabase Auth → URL Configuration → Redirect URLs: ' + redirectTo, 'success');
+            } catch (err) {
+                console.error('Password reset request failed:', err);
+                showToast(err?.message || 'Could not send password reset email.', 'error');
+            }
         }
  
         async function sendLoginLink() {
@@ -2877,7 +2939,8 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             applyStoreBranding();
             showToast('Store theme updated!');
             if (supabaseClient) {
-                await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
+                const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
+                if (error) showToast('Theme changed on this device, but cloud save failed: ' + error.message, 'error');
             }
         }
  
@@ -3386,14 +3449,32 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             updateUserAuthUI();
         }
  
+        function showPasswordRecoveryPanel() {
+            document.getElementById('password-recovery-box')?.classList.remove('hidden');
+            switchView('account');
+            showToast('Recovery link verified. Enter and save your new password below.', 'success');
+        }
+ 
         window.addEventListener('DOMContentLoaded', () => {
+            // Supabase can return a recovery session in the URL hash; the auth event is the reliable signal.
             if (window.location.hash.includes('type=recovery')) {
                 document.getElementById('password-recovery-box')?.classList.remove('hidden');
                 switchView('account');
             }
             applyStoreBranding();
             renderAll();
-            initSupabase();
+            initSupabase().then(() => {
+                if (supabaseClient?.auth?.onAuthStateChange) {
+                    supabaseClient.auth.onAuthStateChange((event, session) => {
+                        if (event === 'PASSWORD_RECOVERY' && session) showPasswordRecoveryPanel();
+                        if (event === 'SIGNED_IN' && session?.user) {
+                            appCurrentUser = { id: session.user.id, name: session.user.user_metadata?.name || (session.user.email || '').split('@')[0], email: (session.user.email || '').toLowerCase(), isAdmin: session.user.id === ADMIN_USER_ID };
+                            localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
+                            updateUserAuthUI();
+                        }
+                    });
+                }
+            });
             // Refresh order list periodically so new customer orders appear in the admin panel.
             window.setInterval(() => { if (supabaseClient && document.visibilityState !== 'hidden') pullFromSupabaseSQL(); }, 30000);
         });
