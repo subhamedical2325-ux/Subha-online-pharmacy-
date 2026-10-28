@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Subha Medical | சுபா மருந்தகம் - Tata 1mg Style Online Pharmacy</title>
+  <title>Subha Medical | சுபா மருந்தகம் - Online Pharmacy</title>
   <!-- RemixIcon & Google Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -1392,8 +1392,18 @@ img { -webkit-user-drag: none; }
       <div style="display: flex; gap: 8px;">
        <button id="prof-admin-shortcut" class="primary-btn hidden" onclick="switchView('admin')"><i class="ri-settings-4-line"></i> Open Admin Panel</button>
        <button class="secondary-btn" onclick="changeAccountEmail()">Change Email</button>
+       <button class="secondary-btn" onclick="showChangePasswordForm()">Change Password</button>
        <button class="danger-btn" onclick="signOutAccount()">Sign Out</button>
       </div>
+     </div>
+    </div>
+    <div id="account-change-password-box" class="panel-card hidden">
+     <h4>Change Account Password</h4>
+     <p class="muted">Enter your current password and choose a new password.</p>
+     <label class="form-label" for="account-current-password">Current password</label> <input type="password" id="account-current-password" class="form-control" autocomplete="current-password"> <label class="form-label" for="account-new-password">New password</label> <input type="password" id="account-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="account-confirm-password">Confirm new password</label> <input type="password" id="account-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+      <button class="primary-btn" onclick="changeSignedInPassword('customer')">Save New Password</button>
+      <button class="secondary-btn" onclick="hideChangePasswordForm()">Cancel</button>
      </div>
     </div>
     <!-- Customer Order History -->
@@ -1414,6 +1424,7 @@ img { -webkit-user-drag: none; }
      <button class="admin-tab" onclick="openAdminTab('tab-appearance', this)"><i class="ri-palette-line"></i> Theme, BG &amp; Promo</button>
      <button class="admin-tab" onclick="openAdminTab('tab-orders', this)"><i class="ri-file-list-3-line"></i> Orders, Rx &amp; GST Bills</button>
      <button class="admin-tab" onclick="openAdminTab('tab-sql', this)"><i class="ri-database-2-line"></i> Store, GST &amp; SQL Config</button>
+     <button class="admin-tab" onclick="openAdminTab('tab-security', this)"><i class="ri-lock-password-line"></i> Security &amp; Password</button>
     </div>
     <!-- ADMIN TAB 1: PRODUCTS (WITH BATCH NO, EXPIRY & AUTO-DEDUCTING STOCK) -->
     <div id="tab-products" class="admin-tab-pane">
@@ -1542,6 +1553,14 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
      </div>
     </div>
     <!-- ADMIN TAB 5: STORE, GST & SQL CONFIG -->
+    <div id="tab-security" class="admin-tab-pane hidden">
+     <div class="panel-card">
+      <h4>Admin Account Password</h4>
+      <p class="muted">Change the password for the currently signed-in administrator account. This updates the Supabase Auth password, not a local website setting.</p>
+      <label class="form-label" for="admin-current-password">Current password</label> <input type="password" id="admin-current-password" class="form-control" autocomplete="current-password"> <label class="form-label" for="admin-new-password">New password</label> <input type="password" id="admin-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="admin-confirm-password">Confirm new password</label> <input type="password" id="admin-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+      <button class="primary-btn" style="margin-top:12px;" onclick="changeSignedInPassword('admin')">Update Admin Password</button>
+     </div>
+    </div>
     <div id="tab-sql" class="admin-tab-pane hidden">
      <div class="panel-card">
       <h4 style="margin: 0 0 8px;">🏪 Store Details, GSTIN, Drug License &amp; Admin Email</h4>
@@ -2548,6 +2567,41 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { emailRedirectTo: 'https://subhamedical2325-ux.github.io/Subha-online-pharmacy-/' } });
             if (error) return showToast(error.message || 'Could not send OTP/sign-in link.', 'error');
             showToast('Sign-in email sent. Follow the email instructions.', 'success');
+        }
+ 
+        function showChangePasswordForm() {
+            if (!appCurrentUser) return showToast('Sign in first to change your password.', 'error');
+            document.getElementById('account-change-password-box')?.classList.remove('hidden');
+        }
+ 
+        function hideChangePasswordForm() {
+            document.getElementById('account-change-password-box')?.classList.add('hidden');
+            ['account-current-password','account-new-password','account-confirm-password'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        }
+ 
+        async function changeSignedInPassword(mode) {
+            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
+            const prefix = mode === 'admin' ? 'admin-' : 'account-';
+            const current = document.getElementById(prefix + 'current-password')?.value || '';
+            const next = document.getElementById(prefix + 'new-password')?.value || '';
+            const confirm = document.getElementById(prefix + 'confirm-password')?.value || '';
+            if (!appCurrentUser?.email) return showToast('Please sign in again before changing your password.', 'error');
+            if (!current) return showToast('Enter your current password.', 'error');
+            if (next.length < 6) return showToast('New password must be at least 6 characters.', 'error');
+            if (next !== confirm) return showToast('New passwords do not match.', 'error');
+            if (current === next) return showToast('Choose a different password.', 'error');
+            try {
+                const { error: signInError } = await supabaseClient.auth.signInWithPassword({ email: appCurrentUser.email, password: current });
+                if (signInError) return showToast('Current password is incorrect. Please try again.', 'error');
+                const { error } = await supabaseClient.auth.updateUser({ password: next });
+                if (error) return showToast(error.message || 'Could not update password.', 'error');
+                if (mode === 'admin') {
+                    ['admin-current-password','admin-new-password','admin-confirm-password'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                } else hideChangePasswordForm();
+                showToast(mode === 'admin' ? 'Admin password updated successfully.' : 'Your password has been updated successfully.', 'success');
+            } catch (err) {
+                showToast(err?.message || 'Password update failed. Please try again.', 'error');
+            }
         }
  
         async function changeAccountEmail() {
