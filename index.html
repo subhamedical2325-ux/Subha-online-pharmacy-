@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Subha Medical | சுபா மருந்தகம் - Online Pharmacy</title>
+  <title>Subha Medical | சுபா மருந்தகம் - Tata 1mg Style Online Pharmacy</title>
   <!-- RemixIcon & Google Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -1742,6 +1742,15 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             }
         }
  
+        // Only these columns are written to the public store-settings table.
+        // Never send admin_pin or other local-only fields to Supabase.
+        function cloudSettingsPayload() {
+            const allowed = ['store_name','whatsapp','address','gstin','dl_no','gst_rate','admin_email','theme_color','dark_mode','bg_image','logo_image','promo_image','promo_title','promo_sub','coupon_enabled','coupon_code','coupon_discount','coupons'];
+            const payload = { id: 1 };
+            allowed.forEach(key => { if (Object.prototype.hasOwnProperty.call(storeSettings, key)) payload[key] = storeSettings[key]; });
+            return payload;
+        }
+ 
         function saveStateLocal() {
             localStorage.setItem('subha_products', JSON.stringify(products));
             localStorage.setItem('subha_categories', JSON.stringify(categories));
@@ -2238,27 +2247,34 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         }
  
         async function updateOrderStatusAdmin(orderId, newStatus) {
-            const ord = orders.find(o => o.id === orderId);
+            const ord = orders.find(o => String(o.id) === String(orderId));
             if (!ord) return;
+            const previousStatus = ord.status || 'Confirmed';
+            if (previousStatus === newStatus) return;
  
-            const previousStatus = ord.status;
+            // Persist first so the UI never falsely reports a cloud update as successful.
+            if (supabaseClient) {
+                const cloudUpdate = { status: newStatus };
+                if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) cloudUpdate.stock_restored = true;
+                const { error } = await supabaseClient.from('subha_orders').update(cloudUpdate).eq('id', orderId);
+                if (error) {
+                    console.error('Order status update failed:', error);
+                    showToast('Could not update order in cloud: ' + error.message, 'error');
+                    renderOrders();
+                    return;
+                }
+            }
+ 
             ord.status = newStatus;
- 
-            // Automatically restore stock if order is marked Cancelled for the first time
             if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) {
-                ord.stock_restored = true;
                 await restoreInventoryStockForCancelledOrder(ord.items);
-                showToast(`Order #${orderId} cancelled & stock restored to inventory!`);
+                ord.stock_restored = true;
+                showToast(`Order #${orderId} cancelled. Stock restoration was requested.`);
             } else {
                 showToast(`Order #${orderId} marked as ${newStatus}`);
             }
- 
             saveStateLocal();
             renderOrders();
- 
-            if (supabaseClient) {
-                await supabaseClient.from('subha_orders').update({ status: newStatus }).eq('id', orderId);
-            }
         }
  
         /* =========================================================================
@@ -2574,8 +2590,8 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                 email,
                 options: { shouldCreateUser: false, emailRedirectTo: redirectTo }
             });
-            if (error) return showToast(error.message || 'Could not send email sign-in link.', 'error');
-            showToast('Sign-in link requested. Check your inbox and spam folder.', 'success');
+            if (error) { console.error('Email magic-link request failed:', error); return showToast('Email link error: ' + (error.message || 'Could not send sign-in link.'), 'error'); }
+            showToast('Sign-in link requested. If it opens a 404 page, fix Supabase URL Configuration and the email template as described in the setup notes.', 'success');
         }
  
         function showChangePasswordForm() {
@@ -2891,10 +2907,14 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             if (document.getElementById('adm-logo-file')) document.getElementById('adm-logo-file').value = '';
             if (document.getElementById('adm-brand-image-file')) document.getElementById('adm-brand-image-file').value = '';
             if (document.getElementById('adm-bg-file')) document.getElementById('adm-bg-file').value = '';
-            showToast('Logo, brand image, background & promotional banner saved!');
             if (supabaseClient) {
-                await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
+                const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
+                if (error) {
+                    console.error('Appearance settings cloud save failed:', error);
+                    return showToast('Saved on this device only. Cloud save failed: ' + error.message + '. Run the supplied SQL migration in Supabase.', 'error');
+                }
             }
+            showToast('Logo, background and promotional banner saved successfully.', 'success');
         }
  
         async function saveCoreSettings() {
@@ -2907,10 +2927,14 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             storeSettings.admin_pin = document.getElementById('adm-admin-pin').value.trim() || 'admin123';
             saveStateLocal();
             applyStoreBranding();
-            showToast('Store, GSTIN & Drug License settings saved!');
             if (supabaseClient) {
-                await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
+                const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
+                if (error) {
+                    console.error('Core settings cloud save failed:', error);
+                    return showToast('Saved on this device only. Cloud save failed: ' + error.message + '. Run the supplied SQL migration in Supabase.', 'error');
+                }
             }
+            showToast('Store, GSTIN & Drug License settings saved successfully.', 'success');
         }
  
         function saveSupabaseCredentials() {
