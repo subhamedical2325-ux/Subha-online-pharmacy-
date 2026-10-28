@@ -1376,10 +1376,10 @@ img { -webkit-user-drag: none; }
      <button class="primary-btn" style="width: 100%; margin-top: 14px;" onclick="handleUnifiedSignIn()">Continue &amp; Sign In</button>
      <div class="account-auth-actions" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
       <button class="secondary-btn" onclick="handleCustomerSignUp()">Create Account</button>
-      <button class="secondary-btn" onclick="sendPasswordReset()">Reset Password</button>
-      <button class="secondary-btn" onclick="sendLoginLink()">Send Email Login Link</button>
+      <button class="secondary-btn" onclick="sendPasswordReset()">Forgot Password?</button>
+      <button class="secondary-btn" onclick="resendVerificationEmail()">Resend Verification Email</button>
      </div>
-     <p class="muted" style="font-size:12px;margin:10px 0 0;">You can sign in with your email and password, or request a secure sign-in link by email. No OTP code is required.</p>
+     <p class="muted" style="font-size:12px;margin:10px 0 0;">Email/password sign-in only. OTP codes and email sign-in links are disabled. Use Create Account to register, then confirm your email from your inbox.</p>
     </div>
     <div id="password-recovery-box" class="panel-card hidden">
      <h4>Choose a New Password</h4>
@@ -1621,6 +1621,8 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         const DEFAULT_SB_KEY = 'sb_publishable_C0bpzdEEotuWH3UpLyB5Fw_dCb3IrJf';
         const ADMIN_USER_ID = 'cda6104e-6b43-4a89-af93-631ae45cbc0e';
         const ADMIN_EMAIL = 'subhamedical2325@gmail.com';
+        // Keep this exact GitHub Pages URL in Supabase Auth > URL Configuration > Redirect URLs.
+        const APP_AUTH_REDIRECT_URL = 'https://subhamedical2325-ux.github.io/Subha-online-pharmacy-/';
         const PRODUCT_IMAGE_BUCKET = 'product-images';
         const PRODUCT_VIDEO_BUCKET = 'product-videos';
         let supabaseClient = null;
@@ -1718,27 +1720,43 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         async function pullFromSupabaseSQL() {
             if (!supabaseClient) return;
             try {
-                const results = await Promise.all([
+                const [pResult, cResult, sResult] = await Promise.all([
                     supabaseClient.from('subha_products').select('*').order('name', { ascending: true }),
                     supabaseClient.from('subha_categories').select('*'),
-                    supabaseClient.from('subha_orders').select('*').order('created_at', { ascending: false }),
-                    supabaseClient.from('subha_settings').select('*').eq('id', 1).maybeSingle()
+                    supabaseClient.from('subha_settings').select('*').eq('id', '1').maybeSingle()
                 ]);
-                const [pResult, cResult, oResult, sResult] = results;
-                // Product and category reads are public storefront data; report RLS/schema errors clearly.
                 if (pResult.error) console.error('Product list load failed:', pResult.error);
                 else { products = pResult.data || []; localStorage.setItem('subha_products', JSON.stringify(products)); }
                 if (cResult.error) console.warn('Category list load failed:', cResult.error);
                 else { categories = cResult.data || []; localStorage.setItem('subha_categories', JSON.stringify(categories)); }
-                if (!oResult.error && oResult.data) { orders = oResult.data; localStorage.setItem('subha_orders', JSON.stringify(orders)); }
                 if (!sResult.error && sResult.data) {
                     storeSettings = { ...storeSettings, ...sResult.data };
                     localStorage.setItem('subha_settings', JSON.stringify(storeSettings));
                 }
+ 
+                // Orders are private: admins fetch all orders; customers fetch only their own.
+                // Do not silently keep stale local orders when the cloud request fails.
+                if (appCurrentUser?.id) {
+                    let orderQuery = supabaseClient.from('subha_orders').select('*').order('created_at', { ascending: false });
+                    if (!appCurrentUser.isAdmin) orderQuery = orderQuery.eq('customer_email', appCurrentUser.email || '');
+                    const oResult = await orderQuery;
+                    if (oResult.error) {
+                        console.error('Order list load failed:', oResult.error);
+                        const admBox = document.getElementById('adm-orders-container');
+                        if (appCurrentUser.isAdmin && admBox) admBox.innerHTML = `<div class="error-message" style="padding:12px;border:1px solid #dc2626;border-radius:8px;">Could not load orders from Supabase: ${String(oResult.error.message || 'Unknown database error').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','\"':'&quot;',"'":'&#39;'}[c]))}. Check the subha_orders SELECT policy and admin user ID.</div>`;
+                    } else {
+                        orders = oResult.data || [];
+                        localStorage.setItem('subha_orders', JSON.stringify(orders));
+                    }
+                } else {
+                    orders = [];
+                }
                 applyStoreBranding();
                 renderAll();
             } catch (err) {
-                console.warn('Silent SQL pull error:', err);
+                console.error('Supabase sync failed:', err);
+                const admBox = document.getElementById('adm-orders-container');
+                if (appCurrentUser?.isAdmin && admBox) admBox.innerHTML = `<div style="padding:12px;border:1px solid #dc2626;border-radius:8px;">Supabase sync failed: ${String(err?.message || err).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>`;
             }
         }
  
@@ -1799,32 +1817,36 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         }
  
         async function restoreInventoryStockForCancelledOrder(orderItems) {
-            try {
-                for (const item of (orderItems || [])) {
-                    const productId = item.id;
-                    const qty = Number(item.qty) || 1;
-                    const product = products.find(p => String(p.id) === String(productId));
-                    if (!product) { console.warn('Cannot restore stock; product missing:', productId); continue; }
-                    let currentStock = Number(product.stock) || 0;
+            const supabaseUpdates = [];
+ 
+            (orderItems || []).forEach(cartItem => {
+                const prodIndex = products.findIndex(p => p.id === cartItem.id);
+                if (prodIndex !== -1) {
+                    const currentStock = Number(products[prodIndex].stock) || 0;
+                    const restoredStock = currentStock + (Number(cartItem.qty) || 1);
+                    products[prodIndex].stock = restoredStock;
+ 
                     if (supabaseClient) {
-                        const { data, error: readError } = await supabaseClient.from('subha_products').select('stock').eq('id', productId).maybeSingle();
-                        if (readError) throw readError;
-                        if (data) currentStock = Number(data.stock) || 0;
+                        supabaseUpdates.push(
+                            supabaseClient
+                                .from('subha_products')
+                                .update({ stock: restoredStock, updated_at: new Date().toISOString() })
+                                .eq('id', cartItem.id)
+                        );
                     }
-                    const restoredStock = currentStock + qty;
-                    if (supabaseClient) {
-                        const { error: updateError } = await supabaseClient.from('subha_products').update({ stock: restoredStock, updated_at: new Date().toISOString() }).eq('id', productId);
-                        if (updateError) throw updateError;
-                    }
-                    product.stock = restoredStock;
                 }
-                saveStateLocal();
-                renderStoreProducts();
-                renderWishlist();
-                return true;
-            } catch (err) {
-                console.error('Stock restoration failed:', err);
-                return false;
+            });
+ 
+            saveStateLocal();
+            renderStoreProducts();
+            renderWishlist();
+ 
+            if (supabaseUpdates.length > 0) {
+                try {
+                    await Promise.all(supabaseUpdates);
+                } catch (err) {
+                    console.warn('Supabase stock restore sync warning:', err);
+                }
             }
         }
  
@@ -2291,38 +2313,30 @@ body { background-color:#f7f8fb; }
  
         async function updateOrderStatusAdmin(orderId, newStatus) {
             const ord = orders.find(o => String(o.id) === String(orderId));
-            if (!ord) return showToast('Order not found. Refresh orders and try again.', 'error');
+            if (!ord) return;
             const previousStatus = ord.status || 'Confirmed';
             if (previousStatus === newStatus) return;
-            if (!supabaseClient) return showToast('Cloud is not connected; order status was not changed.', 'error');
  
-            // Save the status first. If Supabase rejects the change, keep the previous status visible.
-            const { error } = await supabaseClient.from('subha_orders').update({ status: newStatus }).eq('id', orderId);
-            if (error) {
-                console.error('Order status update failed:', error);
-                showToast('Status not saved: ' + error.message, 'error');
-                await pullFromSupabaseSQL();
-                return;
-            }
-            ord.status = newStatus;
-            saveStateLocal();
- 
-            if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) {
-                const restored = await restoreInventoryStockForCancelledOrder(ord.items);
-                if (restored) {
-                    const { error: flagError } = await supabaseClient.from('subha_orders').update({ stock_restored: true }).eq('id', orderId);
-                    if (flagError) {
-                        console.error('Could not save stock-restored flag:', flagError);
-                        showToast('Order cancelled, but stock-restored flag failed: ' + flagError.message, 'error');
-                    } else {
-                        ord.stock_restored = true;
-                        showToast('Order cancelled and stock restored.', 'success');
-                    }
-                } else {
-                    showToast('Order cancelled, but stock restore failed. Check product update permissions.', 'error');
+            // Persist first so the UI never falsely reports a cloud update as successful.
+            if (supabaseClient) {
+                const cloudUpdate = { status: newStatus };
+                if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) cloudUpdate.stock_restored = true;
+                const { error } = await supabaseClient.from('subha_orders').update(cloudUpdate).eq('id', orderId);
+                if (error) {
+                    console.error('Order status update failed:', error);
+                    showToast('Could not update order in cloud: ' + error.message, 'error');
+                    renderOrders();
+                    return;
                 }
+            }
+ 
+            ord.status = newStatus;
+            if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) {
+                await restoreInventoryStockForCancelledOrder(ord.items);
+                ord.stock_restored = true;
+                showToast(`Order #${orderId} cancelled. Stock restoration was requested.`);
             } else {
-                showToast('Order #' + orderId + ' marked as ' + newStatus, 'success');
+                showToast(`Order #${orderId} marked as ${newStatus}`);
             }
             saveStateLocal();
             renderOrders();
@@ -2351,13 +2365,8 @@ body { background-color:#f7f8fb; }
             document.getElementById('nav-store-name').textContent = storeSettings.store_name;
             const logoBadge = document.getElementById('nav-logo-badge');
             if (logoBadge) {
-                if (storeSettings.logo_image && String(storeSettings.logo_image).trim()) {
-                    const logo = document.createElement('img');
-                    logo.alt = 'Subha Medical logo';
-                    logo.src = String(storeSettings.logo_image).trim();
-                    logo.style.cssText = 'display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:inherit';
-                    logo.onerror = () => { logoBadge.innerHTML = '<i class="ri-capsule-fill"></i>'; console.warn('Store logo could not load. Check that the saved logo URL is publicly accessible.'); };
-                    logoBadge.replaceChildren(logo);
+                if (storeSettings.logo_image) {
+                    logoBadge.innerHTML = `<img src="${storeSettings.logo_image}" alt="Subha Medical logo" style="display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:inherit;" onerror="this.onerror=null;this.remove();this.parentElement.innerHTML='<i class=\'ri-capsule-fill\'></i>'">`;
                 } else {
                     logoBadge.innerHTML = '<i class="ri-capsule-fill"></i>';
                 }
@@ -2588,6 +2597,7 @@ body { background-color:#f7f8fb; }
                 appCurrentUser = { id: data.user?.id || '', name: data.user?.user_metadata?.name || name, email: verifiedEmail, isAdmin };
                 localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                 updateUserAuthUI();
+                await pullFromSupabaseSQL();
                 showToast(isAdmin ? 'Admin signed in securely.' : `Signed in as ${appCurrentUser.name}`, 'success');
                 if (isAdmin) switchView('admin');
             } catch (err) {
@@ -2610,7 +2620,7 @@ body { background-color:#f7f8fb; }
             }
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
-                    email, password: pass, options: { data: { name } }
+                    email, password: pass, options: { data: { name }, emailRedirectTo: APP_AUTH_REDIRECT_URL }
                 });
                 if (error) throw error;
                 if (data?.session && data?.user) {
@@ -2619,7 +2629,7 @@ body { background-color:#f7f8fb; }
                     updateUserAuthUI();
                     showToast('Customer account created successfully.', 'success');
                 } else {
-                    showToast('Account created. Check your email for the confirmation link, then sign in.', 'success');
+                    showToast('Account created. Open the confirmation email and tap its link, then return here and sign in with your email and password.', 'success');
                 }
             } catch (err) {
                 const msg = String(err?.message || 'Account creation failed.');
@@ -2631,30 +2641,32 @@ body { background-color:#f7f8fb; }
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             if (!email) return showToast('Enter your account email first.', 'error');
             if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            // This must exactly match the GitHub Pages project path and be allow-listed in Supabase.
-            const redirectTo = window.location.origin + '/Subha-online-pharmacy-/';
+            // Fixed GitHub Pages base URL avoids accidentally duplicating the repository path.
+            const redirectTo = APP_AUTH_REDIRECT_URL;
             try {
                 const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
                 if (error) throw error;
-                showToast('Password reset email requested. If the link opens 404, add this exact URL to Supabase Auth → URL Configuration → Redirect URLs: ' + redirectTo, 'success');
+                showToast('Password reset email requested. Check Inbox and Spam. If the link fails, verify the Supabase URL Configuration and email template.', 'success');
             } catch (err) {
                 console.error('Password reset request failed:', err);
                 showToast(err?.message || 'Could not send password reset email.', 'error');
             }
         }
  
-        async function sendLoginLink() {
+        async function resendVerificationEmail() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
-            if (!email) return showToast('Enter your email address first.', 'error');
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter a valid account email first.', 'error');
             if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            const redirectTo = 'https://subhamedical2325-ux.github.io/Subha-online-pharmacy-/';
-            const { error } = await supabaseClient.auth.signInWithOtp({
-                email,
-                options: { shouldCreateUser: false, emailRedirectTo: redirectTo }
-            });
-            if (error) { console.error('Email magic-link request failed:', error); return showToast('Email link error: ' + (error.message || 'Could not send sign-in link.'), 'error'); }
-            showToast('Sign-in link requested. If it opens a 404 page, fix Supabase URL Configuration and the email template as described in the setup notes.', 'success');
+            try {
+                const { error } = await supabaseClient.auth.resend({ type: 'signup', email, options: { emailRedirectTo: APP_AUTH_REDIRECT_URL } });
+                if (error) throw error;
+                showToast('If this account needs verification, a new confirmation email has been requested. Check Inbox and Spam.', 'success');
+            } catch (err) {
+                console.error('Resend verification failed:', err);
+                showToast(err?.message || 'Could not resend verification email.', 'error');
+            }
         }
+ 
  
         function showChangePasswordForm() {
             if (!appCurrentUser) return showToast('Sign in first to change your password.', 'error');
@@ -2939,8 +2951,7 @@ body { background-color:#f7f8fb; }
             applyStoreBranding();
             showToast('Store theme updated!');
             if (supabaseClient) {
-                const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
-                if (error) showToast('Theme changed on this device, but cloud save failed: ' + error.message, 'error');
+                await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
             }
         }
  
@@ -3456,7 +3467,14 @@ body { background-color:#f7f8fb; }
         }
  
         window.addEventListener('DOMContentLoaded', () => {
-            // Supabase can return a recovery session in the URL hash; the auth event is the reliable signal.
+            // Surface Supabase callback errors instead of leaving a blank/404-looking screen.
+            const authParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+            const callbackError = authParams.get('error_description') || authParams.get('error');
+            if (callbackError) {
+                console.error('Supabase auth callback error:', callbackError);
+                setTimeout(() => showToast('Email link error: ' + callbackError.replace(/\+/g, ' '), 'error'), 500);
+            }
+            // Supabase returns recovery tokens in the URL hash.
             if (window.location.hash.includes('type=recovery')) {
                 document.getElementById('password-recovery-box')?.classList.remove('hidden');
                 switchView('account');
@@ -3468,9 +3486,13 @@ body { background-color:#f7f8fb; }
                     supabaseClient.auth.onAuthStateChange((event, session) => {
                         if (event === 'PASSWORD_RECOVERY' && session) showPasswordRecoveryPanel();
                         if (event === 'SIGNED_IN' && session?.user) {
+                            if (window.location.hash.includes('access_token=') && !window.location.hash.includes('type=recovery')) {
+                                setTimeout(() => showToast('Email confirmed or sign-in completed. You are signed in.', 'success'), 300);
+                            }
                             appCurrentUser = { id: session.user.id, name: session.user.user_metadata?.name || (session.user.email || '').split('@')[0], email: (session.user.email || '').toLowerCase(), isAdmin: session.user.id === ADMIN_USER_ID };
                             localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                             updateUserAuthUI();
+                            setTimeout(() => pullFromSupabaseSQL(), 0);
                         }
                     });
                 }
