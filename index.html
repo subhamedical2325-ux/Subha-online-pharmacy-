@@ -1034,7 +1034,9 @@
         .quick-action-btn i { font-size: 14px !important; }
         .moving-ticker-wrap { padding: 4px 0 !important; font-size: 10px !important; }
         .promo-banner-wrap { margin: 10px 12px 8px !important; }
-        .promo-banner-card { min-height: 120px !important; max-height: 150px !important; border-radius: 12px !important; }
+        .promo-banner-card { display:flex !important; position:relative !important; min-height:140px !important; height:140px !important; max-height:none !important; overflow:hidden !important; border-radius:12px !important; }
+        .brand-logo-badge img { display:block !important; width:100% !important; height:100% !important; object-fit:contain !important; }
+        .promo-banner-card > img { display:block !important; position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; min-height:140px !important; max-height:none !important; object-fit:cover !important; }
         .promo-banner-card img { max-height: 150px !important; object-fit: cover !important; }
         .promo-banner-overlay { padding: 12px !important; }
         .promo-banner-overlay h2 { font-size: 18px !important; line-height: 1.15 !important; margin: 5px 0 !important; }
@@ -2255,12 +2257,13 @@ img { -webkit-user-drag: none; }
             const logoBadge = document.getElementById('nav-logo-badge');
             if (logoBadge) {
                 if (storeSettings.logo_image) {
-                    logoBadge.innerHTML = `<img src="${storeSettings.logo_image}" alt="Subha Medical logo" style="width:100%;height:100%;object-fit:contain;border-radius:inherit;" onerror="this.remove();this.parentElement.innerHTML='<i class=\'ri-capsule-fill\'></i>'">`;
+                    logoBadge.innerHTML = `<img src="${storeSettings.logo_image}" alt="Subha Medical logo" style="display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:inherit;" onerror="this.onerror=null;this.remove();this.parentElement.innerHTML='<i class=\'ri-capsule-fill\'></i>'">`;
                 } else {
                     logoBadge.innerHTML = '<i class="ri-capsule-fill"></i>';
                 }
             }
-            document.getElementById('hero-promo-img').src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80';
+            const heroPromoImg = document.getElementById('hero-promo-img');
+            if (heroPromoImg) { heroPromoImg.style.display = 'block'; heroPromoImg.style.width = '100%'; heroPromoImg.style.height = '100%'; heroPromoImg.style.minHeight = '120px'; heroPromoImg.style.objectFit = 'cover'; heroPromoImg.src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80'; heroPromoImg.onerror = () => { heroPromoImg.onerror = null; heroPromoImg.src = 'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=1200&q=80'; }; }
             document.getElementById('hero-promo-title').textContent = storeSettings.promo_title;
             document.getElementById('hero-promo-sub').textContent = storeSettings.promo_sub;
             const couponStrip = document.querySelector('.coupon-strip');
@@ -3093,7 +3096,8 @@ img { -webkit-user-drag: none; }
             `).join('') || 'No orders recorded yet.';
  
             if (admBox) {
-                admBox.innerHTML = orders.map(o => `
+                const activeOrderCount = orders.filter(o => !['Delivered', 'Cancelled'].includes(o.status)).length;
+                admBox.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--surface-secondary,#fff7f5);border:1px solid var(--border-color);border-radius:10px;padding:11px 12px;margin-bottom:12px;"><strong><i class="ri-notification-3-line"></i> Order Notifications</strong><span style="background:var(--brand);color:#fff;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;">${activeOrderCount} active</span><button type="button" class="secondary-btn" onclick="pullFromSupabaseSQL()" style="padding:6px 10px;font-size:12px;"><i class="ri-refresh-line"></i> Refresh</button></div>` + (orders.map(o => `
                     <div style="border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
                         <div style="flex:1;min-width:220px;">
                             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -3125,7 +3129,7 @@ img { -webkit-user-drag: none; }
                             </button>
                         </div>
                     </div>
-                `).join('') || '<div class="muted">No customer orders yet.</div>';
+                `).join('') || '<div class="muted">No customer orders yet.</div>');
             }
         }
  
@@ -3286,6 +3290,8 @@ img { -webkit-user-drag: none; }
             applyStoreBranding();
             renderAll();
             initSupabase();
+            // Refresh order list periodically so new customer orders appear in the admin panel.
+            window.setInterval(() => { if (supabaseClient && document.visibilityState !== 'hidden') pullFromSupabaseSQL(); }, 30000);
         });
     </script>
  </body>
