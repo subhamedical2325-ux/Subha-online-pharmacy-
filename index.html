@@ -3422,6 +3422,8 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             // Refresh order list periodically so new customer orders appear in the admin panel.
             window.setInterval(() => { if (supabaseClient && document.visibilityState !== 'hidden') pullFromSupabaseSQL(); }, 30000);
         });
+   <h2>Your Subha Medical OTP</h2>
+<p>Your verification code is: {{ .Token }}</p>
     </script>
- </body>
+   </body>
 </html>
