@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Subha Medical | சுபா மருந்தகம் - Tata 1mg Style Online Pharmacy</title>
+  <title>Subha Medical | சுபா மருந்தகம்  Style Online Pharmacy</title>
   <!-- RemixIcon & Google Fonts -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
@@ -1376,15 +1376,9 @@ img { -webkit-user-drag: none; }
      <button class="primary-btn" style="width: 100%; margin-top: 14px;" onclick="handleUnifiedSignIn()">Continue &amp; Sign In</button>
      <div class="account-auth-actions" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
       <button class="secondary-btn" onclick="handleCustomerSignUp()">Create Account</button>
-      <button class="secondary-btn" onclick="sendPasswordReset()">Forgot Password?</button>
       <button class="secondary-btn" onclick="resendVerificationEmail()">Resend Verification Email</button>
      </div>
-     <p class="muted" style="font-size:12px;margin:10px 0 0;">Email/password sign-in only. OTP codes and email sign-in links are disabled. Use Create Account to register, then confirm your email from your inbox.</p>
-    </div>
-    <div id="password-recovery-box" class="panel-card hidden">
-     <h4>Choose a New Password</h4>
-     <label class="form-label" for="recovery-new-password">New password</label> <input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" placeholder="At least 6 characters">
-     <button class="primary-btn" style="width:100%;margin-top:10px;" onclick="saveRecoveredPassword()">Save New Password</button>
+     <p class="muted" style="font-size:12px;margin:10px 0 0;">Sign in with your registered email and password. Admin access requires the authorized administrator account. Password reset and OTP sign-in are disabled.</p>
     </div>
     <!-- Logged In Profile Card -->
     <div id="account-profile-box" class="panel-card hidden">
@@ -2602,7 +2596,7 @@ body { background-color:#f7f8fb; }
                 if (isAdmin) switchView('admin');
             } catch (err) {
                 const msg = String(err?.message || 'Sign-in failed. Check your credentials.');
-                showToast(/invalid login credentials/i.test(msg) ? 'Email or password is incorrect, or this customer has not created an account yet. New customers should tap Create New Customer Account.' : msg, 'error');
+                showToast(/invalid login credentials/i.test(msg) ? 'Email or password is incorrect, or this account has not been created yet. New customers can use Create Account.' : msg, 'error');
             }
         }
  
@@ -2633,25 +2627,10 @@ body { background-color:#f7f8fb; }
                 }
             } catch (err) {
                 const msg = String(err?.message || 'Account creation failed.');
-                showToast(msg.includes('already registered') ? 'This email already has an account. Use Sign In or reset your password in Supabase.' : msg, 'error');
+                showToast(msg.includes('already registered') ? 'This email already has an account. Use Sign In with your registered email and password.' : msg, 'error');
             }
         }
  
-        async function sendPasswordReset() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            if (!email) return showToast('Enter your account email first.', 'error');
-            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            // Fixed GitHub Pages base URL avoids accidentally duplicating the repository path.
-            const redirectTo = APP_AUTH_REDIRECT_URL;
-            try {
-                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
-                if (error) throw error;
-                showToast('Password reset email requested. Check Inbox and Spam. If the link fails, verify the Supabase URL Configuration and email template.', 'success');
-            } catch (err) {
-                console.error('Password reset request failed:', err);
-                showToast(err?.message || 'Could not send password reset email.', 'error');
-            }
-        }
  
         async function resendVerificationEmail() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -2712,16 +2691,6 @@ body { background-color:#f7f8fb; }
             showToast('Verification email sent to your new address. Confirm it to finish changing email.', 'success');
         }
  
-        async function saveRecoveredPassword() {
-            const password = document.getElementById('recovery-new-password').value;
-            if (!password || password.length < 6) return showToast('Use at least 6 characters for the new password.', 'error');
-            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
-            const { error } = await supabaseClient.auth.updateUser({ password });
-            if (error) return showToast(error.message || 'Could not update password.', 'error');
-            document.getElementById('password-recovery-box').classList.add('hidden');
-            document.getElementById('recovery-new-password').value = '';
-            showToast('Password updated successfully. You can now sign in.', 'success');
-        }
  
         async function signOutAccount() {
             try { if (supabaseClient) await supabaseClient.auth.signOut(); } catch (e) { console.warn('Sign out warning', e); }
