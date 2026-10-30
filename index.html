@@ -1134,7 +1134,14 @@ img { -webkit-user-drag: none; }
 .hidden { pointer-events: none !important; }
  
  
-.password-visibility-btn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;min-height:32px;vertical-align:middle;}
+        .login-settings-compact details,.login-settings-inline details{border:1px solid var(--brand-border,#dbe4ee);border-radius:12px;background:var(--card,#fff);}
+        .login-settings-compact summary,.login-settings-inline summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;padding:12px 14px;font-weight:700;color:var(--text,#172033);}
+        .login-settings-compact summary::-webkit-details-marker,.login-settings-inline summary::-webkit-details-marker{display:none;}
+        .login-settings-compact details[open] summary,.login-settings-inline details[open] summary{border-bottom:1px solid var(--brand-border,#dbe4ee);}
+        .login-settings-content{padding:12px 14px;}
+        .login-settings-inline{grid-column:1/-1;}
+        .login-settings-inline summary{justify-content:flex-start;}
+        .login-settings-inline-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding:10px 14px 14px;}
 </style>
  </head>
  <body>
@@ -1381,7 +1388,6 @@ img { -webkit-user-drag: none; }
      <h4 style="margin: 0 0 6px;">Sign In with Email</h4>
      <p class="muted" style="margin: 0 0 12px;">Customers can sign in to view order history, prescriptions &amp; GST bills. Store administrators should use their authorized account credentials.</p>
      <label class="form-label">Your Full Name</label> <input type="text" id="login-name" class="form-control" placeholder="Enter your name"> <label class="form-label">Email Address *</label> <input type="email" id="login-email" class="form-control" placeholder="Enter your email address"> <label class="form-label">Password</label> <input type="password" id="login-pass" class="form-control" placeholder="Enter your account password" autocomplete="current-password">
-     <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('login-pass', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
      <button class="primary-btn" style="width: 100%; margin-top: 10px;" onclick="handleUnifiedSignIn()">Sign In</button>
      <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="showForgotPasswordOtp()">Forgot Password?</button>
      <div class="account-auth-actions" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
@@ -1398,10 +1404,7 @@ img { -webkit-user-drag: none; }
       <strong>Reset password with email OTP</strong>
       <p class="muted" style="margin:5px 0 8px;">We will send a verification code to the email above.</p>
       <button class="secondary-btn" type="button" style="width:100%;" onclick="sendPasswordRecoveryOtp()">Send Password Reset OTP</button>
-      <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters">
-      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('recovery-new-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
-      <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
-      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('recovery-confirm-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
+      <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="verifyRecoveryOtpAndSetPassword()">Verify OTP &amp; Reset Password</button>
      </div>
      <p class="muted" style="font-size:11px;margin:8px 0 0;">Customer registration uses email OTP. Admin access remains password-protected.</p>
@@ -1425,12 +1428,7 @@ img { -webkit-user-drag: none; }
     <div id="account-change-password-box" class="panel-card hidden">
      <h4>Change Account Password</h4>
      <p class="muted">Enter your current password and choose a new password.</p>
-     <label class="form-label" for="account-current-password">Current password</label> <input type="password" id="account-current-password" class="form-control" autocomplete="current-password">
-     <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('account-current-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
-     <label class="form-label" for="account-new-password">New password</label> <input type="password" id="account-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters">
-     <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('account-new-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
-     <label class="form-label" for="account-confirm-password">Confirm new password</label> <input type="password" id="account-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
-     <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('account-confirm-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
+     <label class="form-label" for="account-current-password">Current password</label> <input type="password" id="account-current-password" class="form-control" autocomplete="current-password"> <label class="form-label" for="account-new-password">New password</label> <input type="password" id="account-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="account-confirm-password">Confirm new password</label> <input type="password" id="account-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
       <button class="primary-btn" onclick="changeSignedInPassword('customer')">Save New Password</button>
       <button class="secondary-btn" onclick="hideChangePasswordForm()">Cancel</button>
@@ -1584,16 +1582,15 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
     </div>
     <!-- ADMIN TAB 5: STORE, GST & SQL CONFIG -->
     <div id="tab-security" class="admin-tab-pane hidden">
-     <div class="panel-card">
-      <h4>Admin Account Password</h4>
-      <p class="muted">Change the password for the currently signed-in administrator account. This updates the Supabase Auth password, not a local website setting.</p>
-      <label class="form-label" for="admin-current-password">Current password</label> <input type="password" id="admin-current-password" class="form-control" autocomplete="current-password">
-      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('admin-current-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
-      <label class="form-label" for="admin-new-password">New password</label> <input type="password" id="admin-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters">
-      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('admin-new-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
-      <label class="form-label" for="admin-confirm-password">Confirm new password</label> <input type="password" id="admin-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
-      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('admin-confirm-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
-      <button class="primary-btn" style="margin-top:12px;" onclick="changeSignedInPassword('admin')">Update Admin Password</button>
+     <div class="panel-card login-settings-compact">
+      <details>
+       <summary><span><i class="ri-shield-keyhole-line"></i> Admin Login &amp; Password Settings</span><i class="ri-arrow-down-s-line"></i></summary>
+       <div class="login-settings-content">
+        <p class="muted">Change the password for the currently signed-in administrator account. This updates the Supabase Auth password, not a local website setting.</p>
+        <label class="form-label" for="admin-current-password">Current password</label> <input type="password" id="admin-current-password" class="form-control" autocomplete="current-password"> <label class="form-label" for="admin-new-password">New password</label> <input type="password" id="admin-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="admin-confirm-password">Confirm new password</label> <input type="password" id="admin-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+        <button class="primary-btn" style="margin-top:12px;" onclick="changeSignedInPassword('admin')">Update Admin Password</button>
+       </div>
+      </details>
      </div>
     </div>
     <div id="tab-sql" class="admin-tab-pane hidden">
@@ -1604,7 +1601,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         <label class="form-label">Store Title</label> <input type="text" id="adm-store-name" class="form-control">
        </div>
        <div>
-        <label class="form-label">Admin / WhatsApp Phone Number (with 91)</label> <input type="text" id="adm-whatsapp" class="form-control">
+        <label class="form-label">WhatsApp Order Number (with 91)</label> <input type="text" id="adm-whatsapp" class="form-control">
        </div>
        <div>
         <label class="form-label">Pharmacy GSTIN Number</label> <input type="text" id="adm-gstin" class="form-control" placeholder="e.g. 33AAAAA0000A1Z5">
@@ -1615,11 +1612,18 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
        <div>
         <label class="form-label">Default Medicine GST % (CGST+SGST)</label> <input type="number" id="adm-gst-rate" class="form-control" placeholder="12">
        </div>
-       <div>
-        <label class="form-label">Authorized Admin Email *</label> <input type="email" id="adm-admin-email" class="form-control">
-       </div>
-       <div>
-        <label class="form-label">Admin Security PIN *</label> <input type="text" id="adm-admin-pin" class="form-control" placeholder="admin123">
+       <div class="login-settings-inline">
+        <details>
+         <summary><i class="ri-user-settings-line"></i> Login Settings <span class="muted">(Admin email &amp; security PIN)</span></summary>
+         <div class="login-settings-inline-fields">
+          <div>
+           <label class="form-label">Authorized Admin Email *</label> <input type="email" id="adm-admin-email" class="form-control">
+          </div>
+          <div>
+           <label class="form-label">Admin Security PIN *</label> <input type="text" id="adm-admin-pin" class="form-control" placeholder="admin123">
+          </div>
+         </div>
+        </details>
        </div>
       </div>
       <button class="primary-btn" style="margin-top: 12px;" onclick="saveCoreSettings()">Save Store &amp; GST Config</button>
@@ -1719,7 +1723,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
  
         let storeSettings = JSON.parse(localStorage.getItem('subha_settings') || JSON.stringify({
             store_name: 'Subha Medical | சுபா மருந்தகம்',
-            whatsapp: '918072956113',
+            whatsapp: '919487165045',
             address: 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103',
             gstin: '33AAAAA0000A1Z5',
             dl_no: 'TN-TPR-20/21-00000',
@@ -2236,7 +2240,7 @@ body { background-color:#f7f8fb; }
                                 <h1 class="store-title">${storeSettings.store_name || 'Subha Medical | சுபா மருந்தகம்'}</h1>
                                 <div class="store-sub">
                                     ${storeSettings.address || 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103'}<br>
-                                    <strong>Phone / WhatsApp:</strong> +${storeSettings.whatsapp || '918072956113'}<br>
+                                    <strong>Phone / WhatsApp:</strong> +${storeSettings.whatsapp || '919487165045'}<br>
                                     <strong>GSTIN:</strong> ${storeSettings.gstin || '33AAAAA0000A1Z5'} &nbsp;|&nbsp;
                                     <strong>D.L. No:</strong> ${storeSettings.dl_no || 'TN-TPR-20/21-00000'}
                                 </div>
@@ -2418,7 +2422,7 @@ body { background-color:#f7f8fb; }
             const cd = document.getElementById('adm-coupon-discount'); if (cd) cd.value = Number(storeSettings.coupon_discount) || 10;
  
             document.getElementById('adm-store-name').value = storeSettings.store_name || '';
-            document.getElementById('adm-whatsapp').value = storeSettings.whatsapp || '918072956113';
+            document.getElementById('adm-whatsapp').value = storeSettings.whatsapp || '';
             document.getElementById('adm-gstin').value = storeSettings.gstin || '33AAAAA0000A1Z5';
             document.getElementById('adm-dl-no').value = storeSettings.dl_no || 'TN-TPR-20/21-00000';
             document.getElementById('adm-gst-rate').value = storeSettings.gst_rate || 12;
@@ -2517,7 +2521,7 @@ body { background-color:#f7f8fb; }
                     <div class="p-img-box" style="height:250px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;">
                         <img src="${p.image || fallbackImg}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;" onerror="this.src='${fallbackImg}'">
                     </div>
-                    ${(Array.isArray(p.images) && p.images.length > 1) ? `<div class="medicine-gallery-thumbs" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0;">${p.images.map((src,ix)=>`<img src="${src}" alt="${p.name} photo ${ix+1}" onclick="this.closest('.p-card').querySelector('.p-img-box img').src=this.src" style="width:48px;height:48px;object-fit:contain;border:1px solid var(--border-color);border-radius:6px;cursor:pointer;background:#fff;">`).join('')}</div>` : ''}
+                    ${(Array.isArray(p.images) && p.images.filter(Boolean).length > 1) ? `<div class="medicine-gallery-thumbs" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0;">${p.images.map((src,ix)=>`<img src="${src}" alt="${p.name} photo ${ix+1}" onclick="this.closest('.p-card').querySelector('.p-img-box img').src=this.src" style="width:48px;height:48px;object-fit:contain;border:1px solid var(--border-color);border-radius:6px;cursor:pointer;background:#fff;">`).join('')}</div>` : ''}
                     ${p.video ? `<div class="product-video-wrap" style="margin:8px 0;"><video controls playsinline preload="metadata" style="width:100%;max-height:180px;border-radius:10px;background:#111" aria-label="${p.name} product video"><source src="${p.video}">Your browser does not support video playback.</video></div>` : ''}
                     <div class="p-title">${p.name}</div>
                     <div class="p-salt">${p.salt || 'Standard Formulation'}</div>
@@ -2695,18 +2699,6 @@ body { background-color:#f7f8fb; }
                 showToast('Email verified. Your Subha Medical account is active.', 'success');
                 if (appCurrentUser.isAdmin) switchView('admin');
             } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'OTP verification failed. Check the code and try again.', 'error'); }
-        }
- 
-        function togglePasswordVisibility(inputId, button) {
-            const input = document.getElementById(inputId);
-            if (!input) return;
-            const show = input.type === 'password';
-            input.type = show ? 'text' : 'password';
-            if (button) {
-                button.innerHTML = show ? '<i class="ri-eye-off-line"></i>' : '<i class="ri-eye-line"></i>';
-                button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
-                button.title = show ? 'Hide password' : 'Show password';
-            }
         }
  
         function showForgotPasswordOtp() {
@@ -2893,13 +2885,18 @@ body { background-color:#f7f8fb; }
             let image = document.getElementById('adm-prod-img').value.trim();
             let video = document.getElementById('adm-prod-video').value.trim();
             const imageFiles = Array.from(document.getElementById('adm-prod-image-file')?.files || []);
-            const imageFile = imageFiles[0] || null;
-            let images = [];
+            const existingProduct = products.find(p => String(p.id) === String(id));
+            let images = Array.isArray(existingProduct?.images) ? [...existingProduct.images] : (existingProduct?.image ? [existingProduct.image] : (image ? [image] : []));
             const videoFile = document.getElementById('adm-prod-video-file')?.files?.[0];
-            if (imageFile) {
-                try { showToast('Uploading product image…'); image = await uploadProductImage(imageFile); }
-                catch (err) { return showToast(err.message || 'Image upload failed.', 'error'); }
+            if (imageFiles.length) {
+                try {
+                    showToast(`Uploading ${imageFiles.length} product photo(s)…`);
+                    const uploadedImages = await Promise.all(imageFiles.map(file => uploadProductImage(file)));
+                    images = uploadedImages;
+                    image = uploadedImages[0] || image;
+                } catch (err) { return showToast(err.message || 'One or more image uploads failed. Product was not saved.', 'error'); }
             }
+            if (!images.length && image) images = [image];
             if (videoFile) {
                 try { showToast('Uploading product video…'); video = await uploadProductVideo(videoFile); }
                 catch (err) { return showToast(err.message || 'Video upload failed.', 'error'); }
@@ -2920,7 +2917,15 @@ body { background-color:#f7f8fb; }
             showToast('Medicine (with Batch, Expiry & Stock) saved!');
  
             if (supabaseClient) {
-                const { error: saveError } = await supabaseClient.from('subha_products').upsert(item);
+                let { error: saveError } = await supabaseClient.from('subha_products').upsert(item);
+                // Older databases may not yet have the optional images JSON/array column.
+                // Retry the legacy-compatible product fields so existing inventory still saves.
+                if (saveError && /images|column/i.test(saveError.message || '')) {
+                    const legacyItem = { ...item }; delete legacyItem.images;
+                    const retry = await supabaseClient.from('subha_products').upsert(legacyItem);
+                    saveError = retry.error;
+                    if (!saveError) showToast('Product saved. Multiple-photo gallery needs the optional images column in subha_products.', 'error');
+                }
                 if (saveError) {
                     console.error('Product SQL save failed:', saveError);
                     showToast('Saved locally, but Supabase SQL save failed: ' + saveError.message, 'error');
@@ -3021,10 +3026,14 @@ body { background-color:#f7f8fb; }
             storeSettings.dark_mode = dark;
             saveStateLocal();
             applyStoreBranding();
-            showToast('Store theme updated!');
             if (supabaseClient) {
-                await supabaseClient.from('subha_settings').upsert({ id: 1, ...storeSettings });
+                const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
+                if (error) {
+                    console.error('Theme cloud save failed:', error);
+                    return showToast('Theme changed on this device, but cloud save failed: ' + error.message, 'error');
+                }
             }
+            showToast('Store theme saved successfully!');
         }
  
         async function saveAppearanceSettings() {
@@ -3065,7 +3074,7 @@ body { background-color:#f7f8fb; }
  
         async function saveCoreSettings() {
             storeSettings.store_name = document.getElementById('adm-store-name').value.trim() || 'Subha Medical';
-            storeSettings.whatsapp = document.getElementById('adm-whatsapp').value.trim() || '918072956113';
+            storeSettings.whatsapp = document.getElementById('adm-whatsapp').value.trim() || '919487165045';
             storeSettings.gstin = document.getElementById('adm-gstin').value.trim() || '33AAAAA0000A1Z5';
             storeSettings.dl_no = document.getElementById('adm-dl-no').value.trim() || 'TN-TPR-20/21-00000';
             storeSettings.gst_rate = parseFloat(document.getElementById('adm-gst-rate').value) || 12;
@@ -3301,7 +3310,7 @@ body { background-color:#f7f8fb; }
                 const lines = orderedItemsSnapshot.map(i => `• ${i.name} [Batch: ${i.batch || 'N/A'}] (x${i.qty}) - ₹${(i.price * i.qty).toFixed(2)}`).join('\\n');
                 const rxNote = orderObj.rx_image ? `\\n📄 Prescription: Attached in Store Order #${orderObj.id}` : '';
                 const msg = `New Medicine Order - ${storeSettings.store_name}\\nOrder ID: ${orderObj.id}\\nPatient: ${name}\\nPhone: ${phone}\\nAddress: ${address}\\n\\nItems:\\n${lines}${rxNote}\\n\\nTotal Payable: ₹${total.toFixed(2)}`;
-                const number = String(storeSettings.whatsapp || '918072956113').replace(/[^0-9]/g, '');
+                const number = String(storeSettings.whatsapp || '919487165045').replace(/[^0-9]/g, '');
                 const waUrl = `https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
                 if (whatsappTab && !whatsappTab.closed) whatsappTab.location.href = waUrl;
                 else window.location.href = waUrl;
@@ -3529,7 +3538,7 @@ body { background-color:#f7f8fb; }
  
         function openDirectWhatsApp() {
             try {
-                const configured = (storeSettings && storeSettings.whatsapp) || '918072956113';
+                const configured = (storeSettings && storeSettings.whatsapp) || '919487165045';
                 const number = String(configured).replace(/[^0-9]/g, '');
                 if (!number || number.length < 10) {
                     showToast('WhatsApp number is not configured correctly. Please contact the store.', 'error');
