@@ -1037,7 +1037,13 @@
         .promo-banner-card { display:flex !important; position:relative !important; min-height:140px !important; height:140px !important; max-height:none !important; overflow:hidden !important; border-radius:12px !important; }
         .brand-logo-badge img { display:block !important; width:100% !important; height:100% !important; object-fit:contain !important; }
         .brand-logo-badge { overflow:hidden !important; flex-shrink:0 !important; }
-        .account-auth-actions button { min-width:0; white-space:normal; line-height:1.25; padding:10px 6px; }
+        #view-account .section-header { margin:10px 12px 7px !important; }
+        #account-login-box { padding:14px !important; max-width:560px; margin:0 auto 12px; }
+        #account-login-box h4 { font-size:16px; }
+        #account-login-box .muted { font-size:12px; line-height:1.4; }
+        #account-login-box .form-control { min-height:38px; padding:8px 10px; margin-bottom:5px; }
+        #account-login-box .form-label { margin:5px 0 3px; font-size:12px; }
+        .account-auth-actions button { min-width:0; white-space:normal; line-height:1.2; padding:8px 6px; font-size:12px; }
         @media(max-width:420px){ .account-auth-actions { grid-template-columns:1fr !important; } }
         .promo-banner-card > img { display:block !important; position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; min-height:140px !important; max-height:none !important; object-fit:cover !important; }
         .promo-banner-card img { max-height: 150px !important; object-fit: cover !important; }
@@ -1373,12 +1379,26 @@ img { -webkit-user-drag: none; }
      <h4 style="margin: 0 0 6px;">Sign In with Email</h4>
      <p class="muted" style="margin: 0 0 12px;">Customers can sign in to view order history, prescriptions &amp; GST bills. Store administrators should use their authorized account credentials.</p>
      <label class="form-label">Your Full Name</label> <input type="text" id="login-name" class="form-control" placeholder="Enter your name"> <label class="form-label">Email Address *</label> <input type="email" id="login-email" class="form-control" placeholder="Enter your email address"> <label class="form-label">Password</label> <input type="password" id="login-pass" class="form-control" placeholder="Enter your account password" autocomplete="current-password">
-     <button class="primary-btn" style="width: 100%; margin-top: 14px;" onclick="handleUnifiedSignIn()">Continue &amp; Sign In</button>
+     <button class="primary-btn" style="width: 100%; margin-top: 10px;" onclick="handleUnifiedSignIn()">Sign In</button>
+     <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="showForgotPasswordOtp()">Forgot Password?</button>
      <div class="account-auth-actions" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
-      <button class="secondary-btn" onclick="handleCustomerSignUp()">Create Account</button>
-      <button class="secondary-btn" onclick="resendVerificationEmail()">Resend Verification Email</button>
+      <button class="secondary-btn" onclick="handleCustomerSignUp()">Create Account &amp; Send OTP</button>
+      <button class="secondary-btn" onclick="resendVerificationEmail()">Resend OTP</button>
      </div>
-     <p class="muted" style="font-size:12px;margin:10px 0 0;">Sign in with your registered email and password. Admin access requires the authorized administrator account. Password reset and OTP sign-in are disabled.</p>
+     <div id="signup-otp-box" class="hidden" style="margin-top:14px;padding:12px;border:1px solid var(--brand-border);border-radius:10px;background:var(--brand-light);">
+      <strong>Verify your email with OTP</strong>
+      <p class="muted" style="margin:5px 0 8px;">Enter the numeric code sent to your email address.</p>
+      <label class="form-label" for="signup-otp">Email OTP</label> <input type="text" id="signup-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter OTP">
+      <button class="primary-btn" style="width:100%;margin-top:10px;" onclick="verifyCustomerSignupOtp()">Verify OTP &amp; Activate Account</button>
+     </div>
+     <div id="forgot-password-otp-box" class="hidden" style="margin-top:12px;padding:12px;border:1px solid var(--brand-border);border-radius:10px;background:var(--brand-light);">
+      <strong>Reset password with email OTP</strong>
+      <p class="muted" style="margin:5px 0 8px;">We will send a verification code to the email above.</p>
+      <button class="secondary-btn" type="button" style="width:100%;" onclick="sendPasswordRecoveryOtp()">Send Password Reset OTP</button>
+      <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+      <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="verifyRecoveryOtpAndSetPassword()">Verify OTP &amp; Reset Password</button>
+     </div>
+     <p class="muted" style="font-size:11px;margin:8px 0 0;">Customer registration uses email OTP. Admin access remains password-protected.</p>
     </div>
     <!-- Logged In Profile Card -->
     <div id="account-profile-box" class="panel-card hidden">
@@ -2605,44 +2625,102 @@ body { background-color:#f7f8fb; }
             if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter a valid email address.', 'error');
             if (!pass || pass.length < 6) return showToast('Create a password with at least 6 characters.', 'error');
             if (email === ADMIN_EMAIL) return showToast('The store admin account must sign in; customer registration is not allowed for this email.', 'error');
-            if (!supabaseClient) {
-                await initSupabase();
-                if (!supabaseClient) return showToast('Cloud service unavailable. Check internet and Supabase configuration.', 'error');
-            }
+            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable. Check internet and Supabase configuration.', 'error'); }
             try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email, password: pass, options: { data: { name }, emailRedirectTo: APP_AUTH_REDIRECT_URL }
-                });
-                if (error) throw error;
+                const { data, error } = await supabaseClient.auth.signUp({ email, password: pass, options: { data: { name }, emailRedirectTo: APP_AUTH_REDIRECT_URL } });
+                if (error) {
+                    if (/already registered|already been registered|user already registered/i.test(error.message || '')) {
+                        document.getElementById('signup-otp-box')?.classList.remove('hidden');
+                        return showToast('This email already has an account. If it is not verified, tap Resend OTP. Otherwise sign in.', 'error');
+                    }
+                    throw error;
+                }
                 if (data?.session && data?.user) {
                     appCurrentUser = { id: data.user.id, name: data.user.user_metadata?.name || name, email: (data.user.email || email).toLowerCase(), isAdmin: false };
                     localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
-                    updateUserAuthUI();
-                    showToast('Customer account created successfully.', 'success');
-                } else {
-                    showToast("Account created. Supabase accepted the confirmation request. If no email arrives, check Spam or ask the administrator to configure Supabase SMTP.", "success");
+                    updateUserAuthUI(); await pullFromSupabaseSQL();
+                    return showToast('Account created and email verified.', 'success');
                 }
-            } catch (err) {
-                const msg = String(err?.message || 'Account creation failed.');
-                showToast(msg.includes('already registered') ? 'This email already has an account. Use Sign In with your registered email and password.' : msg, 'error');
-            }
+                document.getElementById('signup-otp-box')?.classList.remove('hidden');
+                document.getElementById('signup-otp')?.focus();
+                showToast('OTP request accepted. Check your inbox and spam folder.', 'success');
+            } catch (err) { console.error('Customer signup failed:', err); showToast(err?.message || 'Account creation failed.', 'error'); }
         }
- 
  
         async function resendVerificationEmail() {
             const email = document.getElementById('login-email').value.trim().toLowerCase();
             if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter a valid account email first.', 'error');
+            if (email === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
             if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
             try {
                 const { error } = await supabaseClient.auth.resend({ type: 'signup', email, options: { emailRedirectTo: APP_AUTH_REDIRECT_URL } });
                 if (error) throw error;
-                showToast("Supabase accepted the resend request if verification is required. Check Inbox and Spam; delivery depends on the project email/SMTP configuration.", "success");
-            } catch (err) {
-                console.error('Resend verification failed:', err);
-                showToast(err?.message || 'Could not resend verification email.', 'error');
-            }
+                document.getElementById('signup-otp-box')?.classList.remove('hidden');
+                document.getElementById('signup-otp')?.focus();
+                showToast('OTP resend request accepted. Check Inbox and Spam.', 'success');
+            } catch (err) { console.error('Resend OTP failed:', err); showToast(err?.message || 'Could not resend OTP.', 'error'); }
         }
  
+        async function verifyCustomerSignupOtp() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const token = document.getElementById('signup-otp').value.trim().replace(/\s+/g, '');
+            const name = document.getElementById('login-name').value.trim() || 'Customer';
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter the same email address used to request the OTP.', 'error');
+            if (!token) return showToast('Enter the OTP from your email.', 'error');
+            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
+            try {
+                const { data, error } = await supabaseClient.auth.verifyOtp({ email, token, type: 'signup' });
+                if (error) throw error;
+                if (!data?.user || !data?.session) throw new Error('OTP verified, but no active session was returned. Please sign in with your email and password.');
+                appCurrentUser = { id: data.user.id, name: data.user.user_metadata?.name || name, email: (data.user.email || email).toLowerCase(), isAdmin: data.user.id === ADMIN_USER_ID };
+                localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
+                document.getElementById('signup-otp-box')?.classList.add('hidden'); document.getElementById('signup-otp').value = '';
+                updateUserAuthUI(); await pullFromSupabaseSQL();
+                showToast('Email verified. Your Subha Medical account is active.', 'success');
+                if (appCurrentUser.isAdmin) switchView('admin');
+            } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'OTP verification failed. Check the code and try again.', 'error'); }
+        }
+ 
+        function showForgotPasswordOtp() {
+            document.getElementById('forgot-password-otp-box')?.classList.remove('hidden');
+            document.getElementById('recovery-otp')?.focus();
+        }
+ 
+        async function sendPasswordRecoveryOtp() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter your registered email address first.', 'error');
+            if (email === ADMIN_EMAIL) return showToast('For the administrator account, use the authorized admin recovery process.', 'error');
+            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: APP_AUTH_REDIRECT_URL });
+                if (error) throw error;
+                showToast('Password recovery OTP request sent. Check your inbox and spam folder.', 'success');
+            } catch (err) { console.error('Password recovery request failed:', err); showToast(err?.message || 'Could not send recovery OTP.', 'error'); }
+        }
+ 
+        async function verifyRecoveryOtpAndSetPassword() {
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const token = document.getElementById('recovery-otp').value.trim().replace(/\s+/g, '');
+            const next = document.getElementById('recovery-new-password').value;
+            const confirm = document.getElementById('recovery-confirm-password').value;
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter the registered email address.', 'error');
+            if (!token) return showToast('Enter the recovery OTP from your email.', 'error');
+            if (!next || next.length < 6) return showToast('New password must contain at least 6 characters.', 'error');
+            if (next !== confirm) return showToast('New password and confirmation do not match.', 'error');
+            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
+            try {
+                const { error: verifyError } = await supabaseClient.auth.verifyOtp({ email, token, type: 'recovery' });
+                if (verifyError) throw verifyError;
+                const { error: updateError } = await supabaseClient.auth.updateUser({ password: next });
+                if (updateError) throw updateError;
+                document.getElementById('recovery-otp').value = '';
+                document.getElementById('recovery-new-password').value = '';
+                document.getElementById('recovery-confirm-password').value = '';
+                document.getElementById('forgot-password-otp-box')?.classList.add('hidden');
+                document.getElementById('login-pass').value = next;
+                showToast('Password reset successfully. You can now sign in with your new password.', 'success');
+            } catch (err) { console.error('Password reset failed:', err); showToast(err?.message || 'OTP verification or password reset failed.', 'error'); }
+        }
  
         function showChangePasswordForm() {
             if (!appCurrentUser) return showToast('Sign in first to change your password.', 'error');
