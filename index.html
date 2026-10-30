@@ -1133,6 +1133,8 @@ img { -webkit-user-drag: none; }
 .bottom-nav { z-index: 1100; }
 .hidden { pointer-events: none !important; }
  
+ 
+.password-visibility-btn{display:inline-flex;align-items:center;justify-content:center;min-width:34px;min-height:32px;vertical-align:middle;}
 </style>
  </head>
  <body>
@@ -1379,6 +1381,7 @@ img { -webkit-user-drag: none; }
      <h4 style="margin: 0 0 6px;">Sign In with Email</h4>
      <p class="muted" style="margin: 0 0 12px;">Customers can sign in to view order history, prescriptions &amp; GST bills. Store administrators should use their authorized account credentials.</p>
      <label class="form-label">Your Full Name</label> <input type="text" id="login-name" class="form-control" placeholder="Enter your name"> <label class="form-label">Email Address *</label> <input type="email" id="login-email" class="form-control" placeholder="Enter your email address"> <label class="form-label">Password</label> <input type="password" id="login-pass" class="form-control" placeholder="Enter your account password" autocomplete="current-password">
+     <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('login-pass', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
      <button class="primary-btn" style="width: 100%; margin-top: 10px;" onclick="handleUnifiedSignIn()">Sign In</button>
      <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="showForgotPasswordOtp()">Forgot Password?</button>
      <div class="account-auth-actions" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
@@ -1395,7 +1398,10 @@ img { -webkit-user-drag: none; }
       <strong>Reset password with email OTP</strong>
       <p class="muted" style="margin:5px 0 8px;">We will send a verification code to the email above.</p>
       <button class="secondary-btn" type="button" style="width:100%;" onclick="sendPasswordRecoveryOtp()">Send Password Reset OTP</button>
-      <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+      <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters">
+      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('recovery-new-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
+      <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('recovery-confirm-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="verifyRecoveryOtpAndSetPassword()">Verify OTP &amp; Reset Password</button>
      </div>
      <p class="muted" style="font-size:11px;margin:8px 0 0;">Customer registration uses email OTP. Admin access remains password-protected.</p>
@@ -1419,7 +1425,12 @@ img { -webkit-user-drag: none; }
     <div id="account-change-password-box" class="panel-card hidden">
      <h4>Change Account Password</h4>
      <p class="muted">Enter your current password and choose a new password.</p>
-     <label class="form-label" for="account-current-password">Current password</label> <input type="password" id="account-current-password" class="form-control" autocomplete="current-password"> <label class="form-label" for="account-new-password">New password</label> <input type="password" id="account-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="account-confirm-password">Confirm new password</label> <input type="password" id="account-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+     <label class="form-label" for="account-current-password">Current password</label> <input type="password" id="account-current-password" class="form-control" autocomplete="current-password">
+     <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('account-current-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
+     <label class="form-label" for="account-new-password">New password</label> <input type="password" id="account-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters">
+     <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('account-new-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
+     <label class="form-label" for="account-confirm-password">Confirm new password</label> <input type="password" id="account-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+     <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('account-confirm-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
       <button class="primary-btn" onclick="changeSignedInPassword('customer')">Save New Password</button>
       <button class="secondary-btn" onclick="hideChangePasswordForm()">Cancel</button>
@@ -1576,7 +1587,12 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
      <div class="panel-card">
       <h4>Admin Account Password</h4>
       <p class="muted">Change the password for the currently signed-in administrator account. This updates the Supabase Auth password, not a local website setting.</p>
-      <label class="form-label" for="admin-current-password">Current password</label> <input type="password" id="admin-current-password" class="form-control" autocomplete="current-password"> <label class="form-label" for="admin-new-password">New password</label> <input type="password" id="admin-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="admin-confirm-password">Confirm new password</label> <input type="password" id="admin-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+      <label class="form-label" for="admin-current-password">Current password</label> <input type="password" id="admin-current-password" class="form-control" autocomplete="current-password">
+      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('admin-current-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
+      <label class="form-label" for="admin-new-password">New password</label> <input type="password" id="admin-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters">
+      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('admin-new-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
+      <label class="form-label" for="admin-confirm-password">Confirm new password</label> <input type="password" id="admin-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
+      <button type="button" class="password-visibility-btn" aria-label="Show password" title="Show password" onclick="togglePasswordVisibility('admin-confirm-password', this)" style="border:0;background:transparent;color:var(--brand);padding:5px 8px;cursor:pointer;font-weight:700;"><i class="ri-eye-line"></i></button>
       <button class="primary-btn" style="margin-top:12px;" onclick="changeSignedInPassword('admin')">Update Admin Password</button>
      </div>
     </div>
@@ -1588,7 +1604,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         <label class="form-label">Store Title</label> <input type="text" id="adm-store-name" class="form-control">
        </div>
        <div>
-        <label class="form-label">WhatsApp Order Number (with 91)</label> <input type="text" id="adm-whatsapp" class="form-control">
+        <label class="form-label">Admin / WhatsApp Phone Number (with 91)</label> <input type="text" id="adm-whatsapp" class="form-control">
        </div>
        <div>
         <label class="form-label">Pharmacy GSTIN Number</label> <input type="text" id="adm-gstin" class="form-control" placeholder="e.g. 33AAAAA0000A1Z5">
@@ -1703,7 +1719,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
  
         let storeSettings = JSON.parse(localStorage.getItem('subha_settings') || JSON.stringify({
             store_name: 'Subha Medical | சுபா மருந்தகம்',
-            whatsapp: '919487165045',
+            whatsapp: '918072956113',
             address: 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103',
             gstin: '33AAAAA0000A1Z5',
             dl_no: 'TN-TPR-20/21-00000',
@@ -2220,7 +2236,7 @@ body { background-color:#f7f8fb; }
                                 <h1 class="store-title">${storeSettings.store_name || 'Subha Medical | சுபா மருந்தகம்'}</h1>
                                 <div class="store-sub">
                                     ${storeSettings.address || 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103'}<br>
-                                    <strong>Phone / WhatsApp:</strong> +${storeSettings.whatsapp || '919487165045'}<br>
+                                    <strong>Phone / WhatsApp:</strong> +${storeSettings.whatsapp || '918072956113'}<br>
                                     <strong>GSTIN:</strong> ${storeSettings.gstin || '33AAAAA0000A1Z5'} &nbsp;|&nbsp;
                                     <strong>D.L. No:</strong> ${storeSettings.dl_no || 'TN-TPR-20/21-00000'}
                                 </div>
@@ -2402,7 +2418,7 @@ body { background-color:#f7f8fb; }
             const cd = document.getElementById('adm-coupon-discount'); if (cd) cd.value = Number(storeSettings.coupon_discount) || 10;
  
             document.getElementById('adm-store-name').value = storeSettings.store_name || '';
-            document.getElementById('adm-whatsapp').value = storeSettings.whatsapp || '';
+            document.getElementById('adm-whatsapp').value = storeSettings.whatsapp || '918072956113';
             document.getElementById('adm-gstin').value = storeSettings.gstin || '33AAAAA0000A1Z5';
             document.getElementById('adm-dl-no').value = storeSettings.dl_no || 'TN-TPR-20/21-00000';
             document.getElementById('adm-gst-rate').value = storeSettings.gst_rate || 12;
@@ -2679,6 +2695,18 @@ body { background-color:#f7f8fb; }
                 showToast('Email verified. Your Subha Medical account is active.', 'success');
                 if (appCurrentUser.isAdmin) switchView('admin');
             } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'OTP verification failed. Check the code and try again.', 'error'); }
+        }
+ 
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            if (button) {
+                button.innerHTML = show ? '<i class="ri-eye-off-line"></i>' : '<i class="ri-eye-line"></i>';
+                button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+                button.title = show ? 'Hide password' : 'Show password';
+            }
         }
  
         function showForgotPasswordOtp() {
@@ -3037,7 +3065,7 @@ body { background-color:#f7f8fb; }
  
         async function saveCoreSettings() {
             storeSettings.store_name = document.getElementById('adm-store-name').value.trim() || 'Subha Medical';
-            storeSettings.whatsapp = document.getElementById('adm-whatsapp').value.trim() || '919487165045';
+            storeSettings.whatsapp = document.getElementById('adm-whatsapp').value.trim() || '918072956113';
             storeSettings.gstin = document.getElementById('adm-gstin').value.trim() || '33AAAAA0000A1Z5';
             storeSettings.dl_no = document.getElementById('adm-dl-no').value.trim() || 'TN-TPR-20/21-00000';
             storeSettings.gst_rate = parseFloat(document.getElementById('adm-gst-rate').value) || 12;
@@ -3273,7 +3301,7 @@ body { background-color:#f7f8fb; }
                 const lines = orderedItemsSnapshot.map(i => `• ${i.name} [Batch: ${i.batch || 'N/A'}] (x${i.qty}) - ₹${(i.price * i.qty).toFixed(2)}`).join('\\n');
                 const rxNote = orderObj.rx_image ? `\\n📄 Prescription: Attached in Store Order #${orderObj.id}` : '';
                 const msg = `New Medicine Order - ${storeSettings.store_name}\\nOrder ID: ${orderObj.id}\\nPatient: ${name}\\nPhone: ${phone}\\nAddress: ${address}\\n\\nItems:\\n${lines}${rxNote}\\n\\nTotal Payable: ₹${total.toFixed(2)}`;
-                const number = String(storeSettings.whatsapp || '919487165045').replace(/[^0-9]/g, '');
+                const number = String(storeSettings.whatsapp || '918072956113').replace(/[^0-9]/g, '');
                 const waUrl = `https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
                 if (whatsappTab && !whatsappTab.closed) whatsappTab.location.href = waUrl;
                 else window.location.href = waUrl;
@@ -3501,7 +3529,7 @@ body { background-color:#f7f8fb; }
  
         function openDirectWhatsApp() {
             try {
-                const configured = (storeSettings && storeSettings.whatsapp) || '919487165045';
+                const configured = (storeSettings && storeSettings.whatsapp) || '918072956113';
                 const number = String(configured).replace(/[^0-9]/g, '');
                 if (!number || number.length < 10) {
                     showToast('WhatsApp number is not configured correctly. Please contact the store.', 'error');
