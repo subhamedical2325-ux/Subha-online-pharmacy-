@@ -1778,36 +1778,33 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         ========================================================================= */
         async function deductInventoryStockForOrder(orderItems) {
             const supabaseUpdates = [];
- 
-            orderItems.forEach(cartItem => {
-                const prodIndex = products.findIndex(p => p.id === cartItem.id);
-                if (prodIndex !== -1) {
-                    const currentStock = Number(products[prodIndex].stock) || 0;
-                    const newStock = Math.max(0, currentStock - (Number(cartItem.qty) || 1));
-                    products[prodIndex].stock = newStock;
- 
-                    if (supabaseClient) {
-                        supabaseUpdates.push(
-                            supabaseClient
-                                .from('subha_products')
-                                .update({ stock: newStock, updated_at: new Date().toISOString() })
-                                .eq('id', cartItem.id)
-                        );
-                    }
+            (orderItems || []).forEach(cartItem => {
+                const prodIndex = products.findIndex(p => String(p.id) === String(cartItem.id));
+                if (prodIndex === -1) return;
+                const currentStock = Number(products[prodIndex].stock) || 0;
+                const quantity = Math.max(1, Number(cartItem.qty) || 1);
+                const newStock = Math.max(0, currentStock - quantity);
+                products[prodIndex].stock = newStock;
+                if (supabaseClient) {
+                    supabaseUpdates.push(
+                        supabaseClient.from('subha_products')
+                            .update({ stock: newStock, updated_at: new Date().toISOString() })
+                            .eq('id', cartItem.id)
+                    );
                 }
             });
- 
             saveStateLocal();
             renderStoreProducts();
             renderWishlist();
- 
-            if (supabaseUpdates.length > 0) {
-                try {
-                    await Promise.all(supabaseUpdates);
-                } catch (err) {
-                    console.warn('Supabase stock deduction sync warning:', err);
+            if (supabaseUpdates.length) {
+                const results = await Promise.all(supabaseUpdates);
+                const failed = results.filter(result => result?.error);
+                if (failed.length) {
+                    console.error('Supabase stock deduction sync warning:', failed.map(x => x.error));
+                    return { ok: false, errors: failed.map(x => x.error.message || 'Stock update failed') };
                 }
             }
+            return { ok: true, errors: [] };
         }
  
         async function restoreInventoryStockForCancelledOrder(orderItems) {
@@ -2623,7 +2620,7 @@ body { background-color:#f7f8fb; }
                     updateUserAuthUI();
                     showToast('Customer account created successfully.', 'success');
                 } else {
-                    showToast('Account created. Open the confirmation email and tap its link, then return here and sign in with your email and password.', 'success');
+                    showToast("Account created. Supabase accepted the confirmation request. If no email arrives, check Spam or ask the administrator to configure Supabase SMTP.", "success");
                 }
             } catch (err) {
                 const msg = String(err?.message || 'Account creation failed.');
@@ -2639,7 +2636,7 @@ body { background-color:#f7f8fb; }
             try {
                 const { error } = await supabaseClient.auth.resend({ type: 'signup', email, options: { emailRedirectTo: APP_AUTH_REDIRECT_URL } });
                 if (error) throw error;
-                showToast('If this account needs verification, a new confirmation email has been requested. Check Inbox and Spam.', 'success');
+                showToast("Supabase accepted the resend request if verification is required. Check Inbox and Spam; delivery depends on the project email/SMTP configuration.", "success");
             } catch (err) {
                 console.error('Resend verification failed:', err);
                 showToast(err?.message || 'Could not resend verification email.', 'error');
@@ -3150,36 +3147,54 @@ body { background-color:#f7f8fb; }
             // Open a tab during the original tap so mobile browsers do not block WhatsApp after async saves.
             const whatsappTab = channel === 'WhatsApp' ? window.open('about:blank', '_blank') : null;
  
+            if (!supabaseClient) {
+                if (whatsappTab && !whatsappTab.closed) whatsappTab.close();
+                return showToast('Order not submitted: cloud connection is unavailable. Please try again when connected.', 'error');
+            }
+ 
             const orderObj = {
-                id: 'ORD' + Date.now().toString().slice(-6),
-                customer_email: appCurrentUser ? appCurrentUser.email : 'guest',
+                id: 'ORD' + Date.now().toString(),
+                customer_email: appCurrentUser?.email || 'guest',
                 customer_name: name,
                 customer_phone: phone,
+                customer_pin: '',
+                address: address,
                 customer_address: address,
+                payment_mode: 'Cash on Delivery (COD)',
                 items: orderedItemsSnapshot,
-                total,
+                total: Number(total.toFixed(2)),
                 rx_image: currentRxImageData || null,
-                status: 'Confirmed',
-                created_at: new Date().toISOString()
+                prescription_path: null,
+                prescription_status: currentRxImageData ? 'pending' : 'not_required',
+                payment_status: 'pending',
+                payment_reference: null,
+                status: 'Order Placed',
+                created_at: new Date().toISOString(),
+                created_timestamp: Date.now(),
+                stock_restored: false
             };
  
-            // 3. Save Order locally & in Supabase
+            // Save to Supabase FIRST. Never show success or deduct stock if this fails.
+            const { error: orderSaveError } = await supabaseClient
+                .from('subha_orders')
+                .insert(orderObj);
+ 
+            if (orderSaveError) {
+                console.error('Order insert failed:', orderSaveError);
+                if (whatsappTab && !whatsappTab.closed) whatsappTab.close();
+                return showToast('Order could not be saved. No stock was deducted. ' + (orderSaveError.message || 'Please try again.'), 'error');
+            }
+ 
             orders.unshift(orderObj);
             saveStateLocal();
             renderOrders();
  
-            if (supabaseClient) {
-                const { error } = await supabaseClient.from('subha_orders').insert(orderObj);
-                if (error) console.warn('Supabase order insert warning:', error.message);
-            }
- 
-            // 4. Automatically deduct stock in local state AND Supabase SQL
-            await deductInventoryStockForOrder(orderedItemsSnapshot);
+            const stockResult = await deductInventoryStockForOrder(orderedItemsSnapshot);
  
             if (channel === 'WhatsApp') {
-                const lines = orderedItemsSnapshot.map(i => `• ${i.name} [Batch: ${i.batch || 'N/A'}] (x${i.qty}) - ₹${(i.price * i.qty).toFixed(2)}`).join('\n');
-                const rxNote = orderObj.rx_image ? `\n📄 Prescription: Attached in Store Order #${orderObj.id}` : '';
-                const msg = `New Medicine Order - ${storeSettings.store_name}\nOrder ID: ${orderObj.id}\nPatient: ${name}\nPhone: ${phone}\nAddress: ${address}\n\nItems:\n${lines}${rxNote}\n\nTotal Payable: ₹${total.toFixed(2)}`;
+                const lines = orderedItemsSnapshot.map(i => `• ${i.name} [Batch: ${i.batch || 'N/A'}] (x${i.qty}) - ₹${(i.price * i.qty).toFixed(2)}`).join('\\n');
+                const rxNote = orderObj.rx_image ? `\\n📄 Prescription: Attached in Store Order #${orderObj.id}` : '';
+                const msg = `New Medicine Order - ${storeSettings.store_name}\\nOrder ID: ${orderObj.id}\\nPatient: ${name}\\nPhone: ${phone}\\nAddress: ${address}\\n\\nItems:\\n${lines}${rxNote}\\n\\nTotal Payable: ₹${total.toFixed(2)}`;
                 const number = String(storeSettings.whatsapp || '919487165045').replace(/[^0-9]/g, '');
                 const waUrl = `https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
                 if (whatsappTab && !whatsappTab.closed) whatsappTab.location.href = waUrl;
@@ -3187,7 +3202,11 @@ body { background-color:#f7f8fb; }
             }
  
             clearCart();
-            showToast(`Order #${orderObj.id} placed & inventory stock updated!`);
+            if (stockResult.ok) {
+                showToast(`Order #${orderObj.id} saved successfully. Inventory updated.`);
+            } else {
+                showToast(`Order #${orderObj.id} was saved, but stock sync needs admin attention: ${stockResult.errors.join('; ')}`, 'error');
+            }
         }
  
         function viewOrderRxById(orderId) {
