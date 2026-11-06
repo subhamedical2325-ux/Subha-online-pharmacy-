@@ -1212,6 +1212,9 @@ img { -webkit-user-drag: none; }
        <p id="hero-promo-sub">பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103</p>
       </div>
      </div>
+     <div id="hero-promo-video-wrap" class="hidden" style="margin-top:10px;border-radius:14px;overflow:hidden;background:#111;">
+      <video id="hero-promo-video" controls playsinline preload="metadata" style="display:block;width:100%;max-height:320px;background:#111;"></video>
+     </div>
     </div>
     <!-- Coupon Offer Strip -->
     <div class="coupon-strip">
@@ -1385,20 +1388,29 @@ img { -webkit-user-drag: none; }
     </div>
     <!-- Sign In Box -->
     <div id="account-login-box" class="panel-card">
-     <h4 style="margin: 0 0 6px;">Sign In with Email</h4>
-     <p class="muted" style="margin: 0 0 12px;">Customers can sign in to view order history, prescriptions &amp; GST bills. Store administrators should use their authorized account credentials.</p>
-     <label class="form-label">Your Full Name</label> <input type="text" id="login-name" class="form-control" placeholder="Enter your name"> <label class="form-label">Email Address *</label> <input type="email" id="login-email" class="form-control" placeholder="Enter your email address"> <label class="form-label">Password</label> <input type="password" id="login-pass" class="form-control" placeholder="Enter your account password" autocomplete="current-password">
+     <h4 style="margin: 0 0 6px;">Sign in to Subha Medical</h4>
+     <p class="muted" style="margin: 0 0 12px;">Use your registered email or mobile number. Admin access opens automatically for the authorized admin account.</p>
+     <label class="form-label">Email address or mobile number *</label> <input type="text" id="login-email" class="form-control" placeholder="Email address or mobile number" autocomplete="username" inputmode="email"> <label class="form-label">Password (Admin / password accounts)</label> <input type="password" id="login-pass" class="form-control" placeholder="Enter password" autocomplete="current-password">
      <button class="primary-btn" style="width: 100%; margin-top: 10px;" onclick="handleUnifiedSignIn()">Sign In</button>
-     <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="showForgotPasswordOtp()">Forgot Password?</button>
-     <div class="account-auth-actions" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
-      <button class="secondary-btn" onclick="handleCustomerSignUp()">Create Account &amp; Send OTP</button>
-      <button class="secondary-btn" onclick="resendVerificationEmail()">Resend OTP</button>
+     <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="sendAccountLoginOtp()">Sign in with OTP</button>
+     <button type="button" class="link-btn" style="display:block;margin:5px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="showForgotPasswordOtp()">Forgot Password?</button>
+     <div style="text-align:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--brand-border);">
+      <span class="muted">New to Subha Medical?</span>
+      <br>
+      <button type="button" class="secondary-btn" style="margin-top:8px;min-width:180px;" onclick="handleCustomerSignUp()">Create Account</button>
+     </div>
+     <div id="signup-details-box" class="hidden" style="margin-top:14px;padding:14px;border:1px solid var(--brand-border);border-radius:12px;background:var(--brand-light);">
+      <strong>Create your account</strong>
+      <p class="muted" style="margin:5px 0 8px;">Enter your details. We will send a one-time verification code to your email or mobile.</p>
+      <label class="form-label" for="signup-name">Full name *</label><input type="text" id="signup-name" class="form-control" autocomplete="name" placeholder="Your full name"> <label class="form-label" for="signup-place">Place / City *</label><input type="text" id="signup-place" class="form-control" autocomplete="address-level2" placeholder="Your place or city"> <label class="form-label" for="signup-identifier">Mobile number or email ID *</label><input type="text" id="signup-identifier" class="form-control" autocomplete="email" placeholder="Enter mobile number or email ID">
+      <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="sendCustomerSignupOtp()">Send Verification OTP</button>
      </div>
      <div id="signup-otp-box" class="hidden" style="margin-top:14px;padding:12px;border:1px solid var(--brand-border);border-radius:10px;background:var(--brand-light);">
-      <strong>Verify your email with OTP</strong>
-      <p class="muted" style="margin:5px 0 8px;">Enter the numeric code sent to your email address.</p>
-      <label class="form-label" for="signup-otp">Email OTP</label> <input type="text" id="signup-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter OTP">
-      <button class="primary-btn" style="width:100%;margin-top:10px;" onclick="verifyCustomerSignupOtp()">Verify OTP &amp; Activate Account</button>
+      <strong id="signup-otp-title">Verify your account</strong>
+      <p id="signup-otp-help" class="muted" style="margin:5px 0 8px;">Enter the verification code sent to you.</p>
+      <label class="form-label" for="signup-otp">Verification OTP</label><input type="text" id="signup-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter OTP">
+      <button class="primary-btn" style="width:100%;margin-top:10px;" onclick="verifyCustomerSignupOtp()">Verify OTP &amp; Continue</button>
+      <button type="button" class="secondary-btn" style="width:100%;margin-top:8px;" onclick="resendVerificationEmail()">Resend OTP</button>
      </div>
      <div id="forgot-password-otp-box" class="hidden" style="margin-top:12px;padding:12px;border:1px solid var(--brand-border);border-radius:10px;background:var(--brand-light);">
       <strong>Reset password with email OTP</strong>
@@ -1407,7 +1419,7 @@ img { -webkit-user-drag: none; }
       <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="verifyRecoveryOtpAndSetPassword()">Verify OTP &amp; Reset Password</button>
      </div>
-     <p class="muted" style="font-size:11px;margin:8px 0 0;">Customer registration uses email OTP. Admin access remains password-protected.</p>
+     <p class="muted" style="font-size:11px;margin:8px 0 0;">Email and SMS OTP delivery depends on the verification providers enabled in the Subha Medical Supabase project.</p>
     </div>
     <!-- Logged In Profile Card -->
     <div id="account-profile-box" class="panel-card hidden">
@@ -1488,7 +1500,9 @@ img { -webkit-user-drag: none; }
         <label class="form-label">Stock Quantity *</label> <input type="number" id="adm-prod-stock" class="form-control" placeholder="e.g. 50">
        </div>
        <div>
-        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" multiple> <small class="muted">Select multiple medicine photos from your device. First photo is the main product photo; other photos are saved in the gallery when the database has an images column.</small> <input type="url" id="adm-prod-img" class="form-control hidden" aria-hidden="true" tabindex="-1">
+        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" multiple> <small class="muted">Choose several photos at once. The first photo becomes the main image; the rest appear as selectable gallery thumbnails on the product card.</small>
+        <div id="adm-prod-image-preview" aria-live="polite" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
+        <input type="url" id="adm-prod-img" class="form-control hidden" aria-hidden="true" tabindex="-1">
        </div>
        <div>
         <label class="form-label">Product Video (optional)</label> <input type="file" id="adm-prod-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime"> <small class="muted">MP4, WEBM or MOV video. Maximum 50 MB. Leave empty to keep the current video.</small> <input type="url" id="adm-prod-video" class="form-control hidden" aria-hidden="true" tabindex="-1">
@@ -1556,10 +1570,17 @@ img { -webkit-user-drag: none; }
       </div>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Subha Medical Logo &amp; Brand Image</h4>
-      <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">The uploaded logo appears in the website header.</small> <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif">
+      <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-logo-preview')"> <small class="muted">JPG, PNG, WEBP or AVIF, maximum 8 MB. This logo is shown in the customer header.</small>
+      <div id="adm-logo-preview" style="margin:8px 0;"></div>
+      <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-brand-preview')">
+      <div id="adm-brand-preview" style="margin:8px 0;"></div>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Global Background Image &amp; Promotional Banner Setup</h4>
-      <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="https://images.unsplash.com/..."> <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
+      <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Promo Banner Image from Phone</label> <input type="file" id="adm-promo-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-promo-preview')">
+      <div id="adm-promo-preview" style="margin:8px 0;"></div>
+      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')"> <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Customers can play it below the home banner.</small>
+      <div id="adm-promo-video-preview" style="margin:8px 0;"></div>
+      <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4>🎟️ Multiple Coupon Codes</h4>
       <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled"> Enable coupon banner on main store</label> <label class="form-label">Coupons (one per line: CODE,DISCOUNT%,ENABLED)</label> <textarea id="adm-coupons-list" class="form-control" rows="5" placeholder="SUBHA10,10,true
@@ -1692,7 +1713,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                 if (error) throw error;
                 const user = data?.session?.user;
                 if (user) {
-                    appCurrentUser = { id: user.id, name: user.user_metadata?.name || (user.email || '').split('@')[0], email: (user.email || '').toLowerCase(), isAdmin: user.id === ADMIN_USER_ID };
+                    appCurrentUser = { id: user.id, name: user.user_metadata?.name || user.user_metadata?.full_name || (user.email || user.phone || '').split('@')[0], email: (user.email || '').toLowerCase(), phone: user.phone || '', isAdmin: user.id === ADMIN_USER_ID };
                     localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                 } else {
                     appCurrentUser = null;
@@ -1734,6 +1755,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             bg_image: '',
             logo_image: '',
             promo_image: 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80',
+            promo_video: '',
             promo_title: 'Your Trusted Neighbourhood Healthcare Partner',
             promo_sub: 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103',
             coupon_enabled: false, coupon_code: 'SUBHA10', coupon_discount: 10
@@ -1797,7 +1819,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         // Only these columns are written to the public store-settings table.
         // Never send admin_pin or other local-only fields to Supabase.
         function cloudSettingsPayload() {
-            const allowed = ['store_name','whatsapp','address','gstin','dl_no','gst_rate','admin_email','theme_color','dark_mode','bg_image','logo_image','promo_image','promo_title','promo_sub','coupon_enabled','coupon_code','coupon_discount','coupons'];
+            const allowed = ['store_name','whatsapp','address','gstin','dl_no','gst_rate','admin_email','theme_color','dark_mode','bg_image','logo_image','promo_image','promo_video','promo_title','promo_sub','coupon_enabled','coupon_code','coupon_discount','coupons'];
             const payload = { id: 1 };
             allowed.forEach(key => { if (Object.prototype.hasOwnProperty.call(storeSettings, key)) payload[key] = storeSettings[key]; });
             return payload;
@@ -2404,6 +2426,9 @@ body { background-color:#f7f8fb; }
             }
             const heroPromoImg = document.getElementById('hero-promo-img');
             if (heroPromoImg) { heroPromoImg.style.display = 'block'; heroPromoImg.style.width = '100%'; heroPromoImg.style.height = '100%'; heroPromoImg.style.minHeight = '120px'; heroPromoImg.style.objectFit = 'cover'; heroPromoImg.src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80'; heroPromoImg.onerror = () => { heroPromoImg.onerror = null; heroPromoImg.src = 'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=1200&q=80'; }; }
+            const promoVideoWrap = document.getElementById('hero-promo-video-wrap');
+            const promoVideo = document.getElementById('hero-promo-video');
+            if (promoVideoWrap && promoVideo) { if (storeSettings.promo_video) { promoVideoWrap.classList.remove('hidden'); if (promoVideo.src !== storeSettings.promo_video) { promoVideo.src = storeSettings.promo_video; promoVideo.load(); } } else { promoVideo.pause(); promoVideo.removeAttribute('src'); promoVideo.load(); promoVideoWrap.classList.add('hidden'); } }
             document.getElementById('hero-promo-title').textContent = storeSettings.promo_title;
             document.getElementById('hero-promo-sub').textContent = storeSettings.promo_sub;
             const bgInput = document.getElementById('adm-bg-image'); if (bgInput && !bgInput.value) bgInput.value = storeSettings.bg_image || '';
@@ -2521,7 +2546,7 @@ body { background-color:#f7f8fb; }
                     <div class="p-img-box" style="height:250px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;">
                         <img src="${p.image || fallbackImg}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;" onerror="this.src='${fallbackImg}'">
                     </div>
-                    ${(Array.isArray(p.images) && p.images.filter(Boolean).length > 1) ? `<div class="medicine-gallery-thumbs" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0;">${p.images.map((src,ix)=>`<img src="${src}" alt="${p.name} photo ${ix+1}" onclick="this.closest('.p-card').querySelector('.p-img-box img').src=this.src" style="width:48px;height:48px;object-fit:contain;border:1px solid var(--border-color);border-radius:6px;cursor:pointer;background:#fff;">`).join('')}</div>` : ''}
+                    ${getProductGalleryImages(p).length > 1 ? `<div class="medicine-gallery-thumbs" aria-label="More product photos" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0;">${getProductGalleryImages(p).map((src,ix)=>`<button type="button" onclick="this.closest('.p-card').querySelector('.p-img-box img').src=this.querySelector('img').src" aria-label="View product photo ${ix+1}" style="padding:0;border:1px solid var(--border-color);border-radius:6px;background:#fff;flex:0 0 48px;"><img src="${src}" alt="${p.name} photo ${ix+1}" style="width:46px;height:46px;object-fit:contain;display:block;"></button>`).join('')}</div>` : ''}
                     ${p.video ? `<div class="product-video-wrap" style="margin:8px 0;"><video controls playsinline preload="metadata" style="width:100%;max-height:180px;border-radius:10px;background:#111" aria-label="${p.name} product video"><source src="${p.video}">Your browser does not support video playback.</video></div>` : ''}
                     <div class="p-title">${p.name}</div>
                     <div class="p-salt">${p.salt || 'Standard Formulation'}</div>
@@ -2546,6 +2571,14 @@ body { background-color:#f7f8fb; }
                     </button>
                 </div>
             `;
+        }
+ 
+        function getProductGalleryImages(product) {
+            let list = product?.images;
+            if (typeof list === 'string') { try { list = JSON.parse(list); } catch (_) { list = []; } }
+            if (!Array.isArray(list)) list = [];
+            const combined = [product?.image, ...list].filter(v => typeof v === 'string' && /^https?:\/\//i.test(v));
+            return [...new Set(combined)];
         }
  
         function renderStoreProducts() {
@@ -2611,93 +2644,181 @@ body { background-color:#f7f8fb; }
         /* =========================================================================
            8. UNIFIED ACCOUNT SIGN-IN
         ========================================================================= */
+        function normalizeLoginPhone(value) {
+            let phone = String(value || '').trim().replace(/[\\s().-]/g, '');
+            if (/^\\d{10}$/.test(phone)) phone = '+91' + phone;
+            else if (/^91\\d{10}$/.test(phone)) phone = '+' + phone;
+            return phone;
+        }
+ 
         async function handleUnifiedSignIn() {
             const name = document.getElementById('login-name').value.trim() || 'User';
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const identifier = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value;
-            if (!email || !pass) return showToast('Enter your email and password.', 'error');
+            if (!identifier || !pass) return showToast('Enter your email address or mobile number and password.', 'error');
             if (!supabaseClient) {
                 await initSupabase();
                 if (!supabaseClient) return showToast('Cloud service unavailable. Check internet, Supabase project status, and public key.', 'error');
             }
+            const isEmail = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(identifier);
+            const phone = normalizeLoginPhone(identifier);
+            if (!isEmail && !/^\\+?[1-9]\\d{7,14}$/.test(phone)) {
+                return showToast('Enter a valid email address or mobile number with country code.', 'error');
+            }
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+                // Supabase supports password sign-in by email OR by phone.
+                // Phone sign-in requires that the account already has a verified phone identity.
+                const credentials = isEmail ? { email: identifier.toLowerCase(), password: pass } : { phone, password: pass };
+                const { data, error } = await supabaseClient.auth.signInWithPassword(credentials);
                 if (error) throw error;
-                const verifiedEmail = (data.user?.email || '').toLowerCase();
-                const isAdmin = data.user?.id === ADMIN_USER_ID;
-                appCurrentUser = { id: data.user?.id || '', name: data.user?.user_metadata?.name || name, email: verifiedEmail, isAdmin };
+                const user = data.user;
+                if (!user?.id) throw new Error('Sign-in succeeded but no user profile was returned. Please try again.');
+                const verifiedEmail = (user.email || '').toLowerCase();
+                const verifiedPhone = user.phone || (!isEmail ? phone : '');
+                // Admin authority is derived from the known Supabase Auth user UUID, never from user input.
+                const isAdmin = user.id === ADMIN_USER_ID;
+                appCurrentUser = {
+                    id: user.id,
+                    name: user.user_metadata?.name || user.user_metadata?.full_name || (verifiedEmail ? verifiedEmail.split('@')[0] : verifiedPhone),
+                    email: verifiedEmail,
+                    phone: verifiedPhone,
+                    isAdmin
+                };
                 localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                 updateUserAuthUI();
                 await pullFromSupabaseSQL();
                 showToast(isAdmin ? 'Admin signed in securely.' : `Signed in as ${appCurrentUser.name}`, 'success');
                 if (isAdmin) switchView('admin');
+                else switchView('home');
             } catch (err) {
                 const msg = String(err?.message || 'Sign-in failed. Check your credentials.');
-                showToast(/invalid login credentials/i.test(msg) ? 'Email or password is incorrect, or this account has not been created yet. New customers can use Create Account.' : msg, 'error');
+                showToast(/invalid login credentials/i.test(msg)
+                    ? 'Email/mobile number or password is incorrect. Mobile login works only for a verified phone account enabled in Supabase Auth.'
+                    : msg, 'error');
             }
         }
  
+        let pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '' };
+ 
+        function classifyAccountIdentifier(value) {
+            const raw = String(value || '').trim();
+            if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) return { kind: 'email', value: raw.toLowerCase() };
+            const phone = normalizeLoginPhone(raw);
+            if (/^\+?[1-9]\d{7,14}$/.test(phone)) return { kind: 'phone', value: phone.startsWith('+') ? phone : '+' + phone };
+            return null;
+        }
+ 
+        async function ensureAuthClient() {
+            if (!supabaseClient) { await initSupabase(); }
+            if (!supabaseClient) throw new Error('Cloud service unavailable. Check internet and Supabase configuration.');
+        }
+ 
         async function handleCustomerSignUp() {
-            const name = document.getElementById('login-name').value.trim();
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const pass = document.getElementById('login-pass').value;
-            if (!name) return showToast('Enter your full name to create an account.', 'error');
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter a valid email address.', 'error');
-            if (!pass || pass.length < 6) return showToast('Create a password with at least 6 characters.', 'error');
-            if (email === ADMIN_EMAIL) return showToast('The store admin account must sign in; customer registration is not allowed for this email.', 'error');
-            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable. Check internet and Supabase configuration.', 'error'); }
+            const panel = document.getElementById('signup-details-box');
+            panel?.classList.toggle('hidden');
+            document.getElementById('signup-name')?.focus();
+        }
+ 
+        async function sendCustomerSignupOtp() {
+            const name = document.getElementById('signup-name').value.trim();
+            const place = document.getElementById('signup-place').value.trim();
+            const classified = classifyAccountIdentifier(document.getElementById('signup-identifier').value);
+            if (!name) return showToast('Enter your full name.', 'error');
+            if (!place) return showToast('Enter your place or city.', 'error');
+            if (!classified) return showToast('Enter a valid email address or mobile number.', 'error');
+            if (classified.kind === 'email' && classified.value === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
             try {
-                const { data, error } = await supabaseClient.auth.signUp({ email, password: pass, options: { data: { name }, emailRedirectTo: APP_AUTH_REDIRECT_URL } });
-                if (error) {
-                    if (/already registered|already been registered|user already registered/i.test(error.message || '')) {
-                        document.getElementById('signup-otp-box')?.classList.remove('hidden');
-                        return showToast('This email already has an account. If it is not verified, tap Resend OTP. Otherwise sign in.', 'error');
-                    }
-                    throw error;
-                }
-                if (data?.session && data?.user) {
-                    appCurrentUser = { id: data.user.id, name: data.user.user_metadata?.name || name, email: (data.user.email || email).toLowerCase(), isAdmin: false };
-                    localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
-                    updateUserAuthUI(); await pullFromSupabaseSQL();
-                    return showToast('Account created and email verified.', 'success');
-                }
+                await ensureAuthClient();
+                const options = { shouldCreateUser: true, data: { name, full_name: name, place } };
+                const request = classified.kind === 'email'
+                    ? { email: classified.value, options }
+                    : { phone: classified.value, options };
+                const { error } = await supabaseClient.auth.signInWithOtp(request);
+                if (error) throw error;
+                pendingAccountOtp = { ...classified, purpose: 'signup', name, place };
+                document.getElementById('signup-otp-title').textContent = 'Verify your ' + (classified.kind === 'email' ? 'email address' : 'mobile number');
+                document.getElementById('signup-otp-help').textContent = 'Enter the OTP sent to ' + classified.value + '. If it does not arrive, use Resend OTP.';
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
                 document.getElementById('signup-otp')?.focus();
-                showToast('OTP request accepted. Check your inbox and spam folder.', 'success');
-            } catch (err) { console.error('Customer signup failed:', err); showToast(err?.message || 'Account creation failed.', 'error'); }
+                showToast('OTP request submitted. Check your inbox or SMS.', 'success');
+            } catch (err) {
+                console.error('Customer OTP request failed:', err);
+                showToast(err?.message || 'Could not send verification OTP.', 'error');
+            }
+        }
+ 
+        async function sendAccountLoginOtp() {
+            const classified = classifyAccountIdentifier(document.getElementById('login-email').value);
+            if (!classified) return showToast('Enter a valid registered email address or mobile number first.', 'error');
+            if (classified.kind === 'email' && classified.value === ADMIN_EMAIL) return showToast('Admin must sign in using the admin password.', 'error');
+            try {
+                await ensureAuthClient();
+                const request = classified.kind === 'email'
+                    ? { email: classified.value, options: { shouldCreateUser: false } }
+                    : { phone: classified.value, options: { shouldCreateUser: false } };
+                const { error } = await supabaseClient.auth.signInWithOtp(request);
+                if (error) throw error;
+                pendingAccountOtp = { ...classified, purpose: 'login', name: '', place: '' };
+                document.getElementById('signup-otp-title').textContent = 'Sign in verification';
+                document.getElementById('signup-otp-help').textContent = 'Enter the login OTP sent to ' + classified.value + '.';
+                document.getElementById('signup-otp-box')?.classList.remove('hidden');
+                document.getElementById('signup-otp')?.focus();
+                showToast('Login OTP request submitted.', 'success');
+            } catch (err) { console.error('Login OTP failed:', err); showToast(err?.message || 'Could not send login OTP.', 'error'); }
         }
  
         async function resendVerificationEmail() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter a valid account email first.', 'error');
-            if (email === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
-            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
+            const pending = pendingAccountOtp;
+            if (!pending?.identifier && !pending?.value) {
+                const signupValue = document.getElementById('signup-identifier')?.value || document.getElementById('login-email')?.value;
+                const classified = classifyAccountIdentifier(signupValue);
+                if (!classified) return showToast('Enter the same email or mobile number used for registration.', 'error');
+                pendingAccountOtp = { ...classified, purpose: 'signup', name: document.getElementById('signup-name')?.value.trim() || '', place: document.getElementById('signup-place')?.value.trim() || '' };
+            }
+            const target = pendingAccountOtp;
             try {
-                const { error } = await supabaseClient.auth.resend({ type: 'signup', email, options: { emailRedirectTo: APP_AUTH_REDIRECT_URL } });
+                await ensureAuthClient();
+                const request = target.kind === 'email'
+                    ? { email: target.value, options: { shouldCreateUser: target.purpose === 'signup', data: { name: target.name, full_name: target.name, place: target.place } } }
+                    : { phone: target.value, options: { shouldCreateUser: target.purpose === 'signup', data: { name: target.name, full_name: target.name, place: target.place } } };
+                const { error } = await supabaseClient.auth.signInWithOtp(request);
                 if (error) throw error;
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
-                document.getElementById('signup-otp')?.focus();
-                showToast('OTP resend request accepted. Check Inbox and Spam.', 'success');
+                showToast('A new OTP request was submitted. Check your email or SMS.', 'success');
             } catch (err) { console.error('Resend OTP failed:', err); showToast(err?.message || 'Could not resend OTP.', 'error'); }
         }
  
         async function verifyCustomerSignupOtp() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const pending = pendingAccountOtp;
             const token = document.getElementById('signup-otp').value.trim().replace(/\s+/g, '');
-            const name = document.getElementById('login-name').value.trim() || 'Customer';
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter the same email address used to request the OTP.', 'error');
-            if (!token) return showToast('Enter the OTP from your email.', 'error');
-            if (!supabaseClient) { await initSupabase(); if (!supabaseClient) return showToast('Cloud service unavailable.', 'error'); }
+            if (!pending?.value || !pending?.kind) return showToast('First request an OTP using your email or mobile number.', 'error');
+            if (!token) return showToast('Enter the OTP you received.', 'error');
             try {
-                const { data, error } = await supabaseClient.auth.verifyOtp({ email, token, type: 'signup' });
+                await ensureAuthClient();
+                const verifyArgs = pending.kind === 'email'
+                    ? { email: pending.value, token, type: 'email' }
+                    : { phone: pending.value, token, type: 'sms' };
+                const { data, error } = await supabaseClient.auth.verifyOtp(verifyArgs);
                 if (error) throw error;
-                if (!data?.user || !data?.session) throw new Error('OTP verified, but no active session was returned. Please sign in with your email and password.');
-                appCurrentUser = { id: data.user.id, name: data.user.user_metadata?.name || name, email: (data.user.email || email).toLowerCase(), isAdmin: data.user.id === ADMIN_USER_ID };
+                if (!data?.user || !data?.session) throw new Error('OTP was accepted but no active session was returned. Please request a new OTP.');
+                const user = data.user;
+                const email = (user.email || (pending.kind === 'email' ? pending.value : '')).toLowerCase();
+                const phone = user.phone || (pending.kind === 'phone' ? pending.value : '');
+                appCurrentUser = {
+                    id: user.id,
+                    name: user.user_metadata?.name || user.user_metadata?.full_name || pending.name || email.split('@')[0] || phone,
+                    email, phone, place: user.user_metadata?.place || pending.place || '',
+                    isAdmin: user.id === ADMIN_USER_ID
+                };
                 localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
-                document.getElementById('signup-otp-box')?.classList.add('hidden'); document.getElementById('signup-otp').value = '';
-                updateUserAuthUI(); await pullFromSupabaseSQL();
-                showToast('Email verified. Your Subha Medical account is active.', 'success');
-                if (appCurrentUser.isAdmin) switchView('admin');
+                document.getElementById('signup-otp-box')?.classList.add('hidden');
+                document.getElementById('signup-details-box')?.classList.add('hidden');
+                document.getElementById('signup-otp').value = '';
+                pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '' };
+                updateUserAuthUI();
+                await pullFromSupabaseSQL();
+                showToast(pending.purpose === 'login' ? 'You are now signed in.' : 'Your account is verified and ready.', 'success');
+                if (appCurrentUser.isAdmin) switchView('admin'); else switchView('home');
             } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'OTP verification failed. Check the code and try again.', 'error'); }
         }
  
@@ -2808,7 +2929,7 @@ body { background-color:#f7f8fb; }
                 loginBox.classList.add('hidden');
                 profBox.classList.remove('hidden');
                 document.getElementById('prof-name-display').textContent = appCurrentUser.name;
-                document.getElementById('prof-email-display').textContent = appCurrentUser.email;
+                document.getElementById('prof-email-display').textContent = appCurrentUser.email || appCurrentUser.phone || '';
  
                 if (appCurrentUser.isAdmin) {
                     adminBtn.classList.remove('hidden');
@@ -2844,6 +2965,41 @@ body { background-color:#f7f8fb; }
             return data.publicUrl;
         }
  
+        function previewAdminImageFile(input, targetId) {
+            const target = document.getElementById(targetId);
+            if (!target) return;
+            target.innerHTML = '';
+            const file = input?.files?.[0];
+            if (!file) return;
+            if (!['image/jpeg','image/png','image/webp','image/avif'].includes(file.type) || file.size > 8 * 1024 * 1024) {
+                input.value = '';
+                return showToast('Choose JPG, PNG, WEBP or AVIF image up to 8 MB.', 'error');
+            }
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.alt = 'Selected image preview';
+            img.style.cssText = 'max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;';
+            target.appendChild(img);
+        }
+ 
+        function previewAdminVideoFile(input, targetId) {
+            const target = document.getElementById(targetId);
+            if (!target) return;
+            target.innerHTML = '';
+            const file = input?.files?.[0];
+            if (!file) return;
+            if (!['video/mp4','video/webm','video/quicktime'].includes(file.type) || file.size > 50 * 1024 * 1024) {
+                input.value = '';
+                return showToast('Choose MP4, WEBM or MOV video up to 50 MB.', 'error');
+            }
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.controls = true;
+            video.playsInline = true;
+            video.style.cssText = 'width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';
+            target.appendChild(video);
+        }
+ 
         async function uploadAdminImage(file, prefix = 'admin-image') {
             if (!file) return null;
             if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) throw new Error('Choose a JPG, PNG, WEBP or AVIF image.');
@@ -2869,6 +3025,38 @@ body { background-color:#f7f8fb; }
             if (error) throw error;
             const { data } = supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).getPublicUrl(path);
             return data.publicUrl;
+        }
+ 
+        function renderAdminProductImagePreview(urls) {
+            const box = document.getElementById('adm-prod-image-preview');
+            if (!box) return;
+            box.innerHTML = '';
+            (urls || []).filter(Boolean).forEach((url, index) => {
+                const wrap = document.createElement('div');
+                wrap.style.cssText = 'width:68px;text-align:center;font-size:10px;color:var(--text-light);';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = `Product photo ${index + 1}`;
+                img.style.cssText = 'width:64px;height:64px;object-fit:contain;background:#fff;border:1px solid var(--border-color);border-radius:8px;';
+                img.onerror = () => wrap.remove();
+                const caption = document.createElement('div');
+                caption.textContent = index === 0 ? 'Main photo' : `Photo ${index + 1}`;
+                wrap.append(img, caption);
+                box.appendChild(wrap);
+            });
+        }
+ 
+        function previewSelectedProductImages() {
+            const input = document.getElementById('adm-prod-image-file');
+            const files = Array.from(input?.files || []);
+            if (!files.length) return;
+            const invalid = files.find(file => !['image/jpeg','image/png','image/webp','image/avif'].includes(file.type) || file.size > 8 * 1024 * 1024);
+            if (invalid) {
+                input.value = '';
+                renderAdminProductImagePreview([]);
+                return showToast('Choose JPG, PNG, WEBP or AVIF photos, each 8 MB or smaller.', 'error');
+            }
+            renderAdminProductImagePreview(files.map(file => URL.createObjectURL(file)));
         }
  
         async function saveProductAdmin() {
@@ -3040,10 +3228,14 @@ body { background-color:#f7f8fb; }
             const logoFile = document.getElementById('adm-logo-file')?.files?.[0];
             const brandImageFile = document.getElementById('adm-brand-image-file')?.files?.[0];
             const bgFile = document.getElementById('adm-bg-file')?.files?.[0];
+            const promoFile = document.getElementById('adm-promo-file')?.files?.[0];
+            const promoVideoFile = document.getElementById('adm-promo-video-file')?.files?.[0];
             try {
                 if (bgFile) storeSettings.bg_image = await uploadAdminImage(bgFile, 'brand-images');
                 if (logoFile) storeSettings.logo_image = await uploadAdminImage(logoFile, 'store-logo');
                 if (brandImageFile) { storeSettings.promo_image = await uploadAdminImage(brandImageFile, 'brand-images'); document.getElementById('adm-promo-image').value = storeSettings.promo_image; }
+                if (promoFile) { storeSettings.promo_image = await uploadAdminImage(promoFile, 'promo-banners'); document.getElementById('adm-promo-image').value = storeSettings.promo_image; }
+                if (promoVideoFile) { storeSettings.promo_video = await uploadProductVideo(promoVideoFile); }
             } catch (err) {
                 return showToast(err.message || 'Logo / brand image upload failed.', 'error');
             }
@@ -3062,6 +3254,9 @@ body { background-color:#f7f8fb; }
             if (document.getElementById('adm-logo-file')) document.getElementById('adm-logo-file').value = '';
             if (document.getElementById('adm-brand-image-file')) document.getElementById('adm-brand-image-file').value = '';
             if (document.getElementById('adm-bg-file')) document.getElementById('adm-bg-file').value = '';
+            if (document.getElementById('adm-promo-file')) document.getElementById('adm-promo-file').value = '';
+            if (document.getElementById('adm-promo-video-file')) document.getElementById('adm-promo-video-file').value = '';
+            ['adm-logo-preview','adm-brand-preview','adm-promo-preview','adm-promo-video-preview'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=''; });
             if (supabaseClient) {
                 const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
                 if (error) {
@@ -3069,7 +3264,7 @@ body { background-color:#f7f8fb; }
                     return showToast('Saved on this device only. Cloud save failed: ' + error.message + '. Run the supplied SQL migration in Supabase.', 'error');
                 }
             }
-            showToast('Logo, background and promotional banner saved successfully.', 'success');
+            showToast('Logo, background, promo image/video settings saved. Check the customer home page.', 'success');
         }
  
         async function saveCoreSettings() {
@@ -3592,7 +3787,7 @@ body { background-color:#f7f8fb; }
                             if (window.location.hash.includes('access_token=') && !window.location.hash.includes('type=recovery')) {
                                 setTimeout(() => showToast('Email confirmed or sign-in completed. You are signed in.', 'success'), 300);
                             }
-                            appCurrentUser = { id: session.user.id, name: session.user.user_metadata?.name || (session.user.email || '').split('@')[0], email: (session.user.email || '').toLowerCase(), isAdmin: session.user.id === ADMIN_USER_ID };
+                            appCurrentUser = { id: session.user.id, name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || (session.user.email || session.user.phone || '').split('@')[0], email: (session.user.email || '').toLowerCase(), phone: session.user.phone || '', isAdmin: session.user.id === ADMIN_USER_ID };
                             localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                             updateUserAuthUI();
                             setTimeout(() => pullFromSupabaseSQL(), 0);
