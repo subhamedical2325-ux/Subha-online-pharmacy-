@@ -1389,10 +1389,10 @@ img { -webkit-user-drag: none; }
     <!-- Sign In Box -->
     <div id="account-login-box" class="panel-card">
      <h4 style="margin: 0 0 6px;">Sign in to Subha Medical</h4>
-     <p class="muted" style="margin: 0 0 12px;">Use your registered email or mobile number. Admin access opens automatically for the authorized admin account.</p>
+     <p class="muted" style="margin: 0 0 12px;">Use your registered email or mobile number with password. Customer OTP verification is by email; admin access opens automatically for the authorized admin account.</p>
      <label class="form-label">Email address or mobile number *</label> <input type="text" id="login-email" class="form-control" placeholder="Email address or mobile number" autocomplete="username" inputmode="email"> <label class="form-label">Password (Admin / password accounts)</label> <input type="password" id="login-pass" class="form-control" placeholder="Enter password" autocomplete="current-password">
      <button class="primary-btn" style="width: 100%; margin-top: 10px;" onclick="handleUnifiedSignIn()">Sign In</button>
-     <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="sendAccountLoginOtp()">Sign in with OTP</button>
+     <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="sendAccountLoginOtp()">Sign in with Email OTP</button>
      <button type="button" class="link-btn" style="display:block;margin:5px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="showForgotPasswordOtp()">Forgot Password?</button>
      <div style="text-align:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--brand-border);">
       <span class="muted">New to Subha Medical?</span>
@@ -1401,8 +1401,8 @@ img { -webkit-user-drag: none; }
      </div>
      <div id="signup-details-box" class="hidden" style="margin-top:14px;padding:14px;border:1px solid var(--brand-border);border-radius:12px;background:var(--brand-light);">
       <strong>Create your account</strong>
-      <p class="muted" style="margin:5px 0 8px;">Enter your details. We will send a one-time verification code to your email or mobile.</p>
-      <label class="form-label" for="signup-name">Full name *</label><input type="text" id="signup-name" class="form-control" autocomplete="name" placeholder="Your full name"> <label class="form-label" for="signup-place">Place / City *</label><input type="text" id="signup-place" class="form-control" autocomplete="address-level2" placeholder="Your place or city"> <label class="form-label" for="signup-identifier">Mobile number or email ID *</label><input type="text" id="signup-identifier" class="form-control" autocomplete="email" placeholder="Enter mobile number or email ID">
+      <p class="muted" style="margin:5px 0 8px;">Enter your details. We will send a one-time verification code to your email. Your mobile number is saved in your customer profile.</p>
+      <label class="form-label" for="signup-name">Full name *</label><input type="text" id="signup-name" class="form-control" autocomplete="name" placeholder="Your full name"> <label class="form-label" for="signup-place">Place / City *</label><input type="text" id="signup-place" class="form-control" autocomplete="address-level2" placeholder="Your place or city"> <label class="form-label" for="signup-mobile">Mobile number *</label><input type="tel" id="signup-mobile" class="form-control" autocomplete="tel" inputmode="tel" placeholder="Enter mobile number"> <label class="form-label" for="signup-email">Email ID * (OTP will be sent here)</label><input type="email" id="signup-email" class="form-control" autocomplete="email" placeholder="Enter your email address">
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="sendCustomerSignupOtp()">Send Verification OTP</button>
      </div>
      <div id="signup-otp-box" class="hidden" style="margin-top:14px;padding:12px;border:1px solid var(--brand-border);border-radius:10px;background:var(--brand-light);">
@@ -1419,7 +1419,7 @@ img { -webkit-user-drag: none; }
       <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="verifyRecoveryOtpAndSetPassword()">Verify OTP &amp; Reset Password</button>
      </div>
-     <p class="muted" style="font-size:11px;margin:8px 0 0;">Email and SMS OTP delivery depends on the verification providers enabled in the Subha Medical Supabase project.</p>
+     <p class="muted" style="font-size:11px;margin:8px 0 0;">Customer account creation and OTP sign-in use email only. Email delivery depends on your Supabase email / SMTP configuration. Mobile number is collected for the customer profile; no SMS provider is required.</p>
     </div>
     <!-- Logged In Profile Card -->
     <div id="account-profile-box" class="panel-card hidden">
@@ -2722,25 +2722,24 @@ body { background-color:#f7f8fb; }
         async function sendCustomerSignupOtp() {
             const name = document.getElementById('signup-name').value.trim();
             const place = document.getElementById('signup-place').value.trim();
-            const classified = classifyAccountIdentifier(document.getElementById('signup-identifier').value);
+            const mobile = normalizeLoginPhone(document.getElementById('signup-mobile').value);
+            const email = document.getElementById('signup-email').value.trim().toLowerCase();
             if (!name) return showToast('Enter your full name.', 'error');
             if (!place) return showToast('Enter your place or city.', 'error');
-            if (!classified) return showToast('Enter a valid email address or mobile number.', 'error');
-            if (classified.kind === 'email' && classified.value === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
+            if (!/^\+?[1-9]\d{7,14}$/.test(mobile)) return showToast('Enter a valid mobile number with country code.', 'error');
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter a valid email address for OTP verification.', 'error');
+            if (email === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
             try {
                 await ensureAuthClient();
-                const options = { shouldCreateUser: true, data: { name, full_name: name, place } };
-                const request = classified.kind === 'email'
-                    ? { email: classified.value, options }
-                    : { phone: classified.value, options };
-                const { error } = await supabaseClient.auth.signInWithOtp(request);
+                const options = { shouldCreateUser: true, data: { name, full_name: name, place, mobile } };
+                const { error } = await supabaseClient.auth.signInWithOtp({ email, options });
                 if (error) throw error;
-                pendingAccountOtp = { ...classified, purpose: 'signup', name, place };
-                document.getElementById('signup-otp-title').textContent = 'Verify your ' + (classified.kind === 'email' ? 'email address' : 'mobile number');
-                document.getElementById('signup-otp-help').textContent = 'Enter the OTP sent to ' + classified.value + '. If it does not arrive, use Resend OTP.';
+                pendingAccountOtp = { identifier: email, kind: 'email', value: email, purpose: 'signup', name, place, mobile };
+                document.getElementById('signup-otp-title').textContent = 'Verify your email address';
+                document.getElementById('signup-otp-help').textContent = 'Enter the OTP sent to ' + email + '. If it does not arrive, use Resend OTP.';
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
                 document.getElementById('signup-otp')?.focus();
-                showToast('OTP request submitted. Check your inbox or SMS.', 'success');
+                showToast('Email OTP request submitted. Check your inbox and spam folder.', 'success');
             } catch (err) {
                 console.error('Customer OTP request failed:', err);
                 showToast(err?.message || 'Could not send verification OTP.', 'error');
@@ -2748,65 +2747,56 @@ body { background-color:#f7f8fb; }
         }
  
         async function sendAccountLoginOtp() {
-            const classified = classifyAccountIdentifier(document.getElementById('login-email').value);
-            if (!classified) return showToast('Enter a valid registered email address or mobile number first.', 'error');
-            if (classified.kind === 'email' && classified.value === ADMIN_EMAIL) return showToast('Admin must sign in using the admin password.', 'error');
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter your registered email address. Email OTP is the only OTP sign-in method.', 'error');
+            if (email === ADMIN_EMAIL) return showToast('Admin must sign in using the admin password.', 'error');
             try {
                 await ensureAuthClient();
-                const request = classified.kind === 'email'
-                    ? { email: classified.value, options: { shouldCreateUser: false } }
-                    : { phone: classified.value, options: { shouldCreateUser: false } };
-                const { error } = await supabaseClient.auth.signInWithOtp(request);
+                const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
                 if (error) throw error;
-                pendingAccountOtp = { ...classified, purpose: 'login', name: '', place: '' };
-                document.getElementById('signup-otp-title').textContent = 'Sign in verification';
-                document.getElementById('signup-otp-help').textContent = 'Enter the login OTP sent to ' + classified.value + '.';
+                pendingAccountOtp = { identifier: email, kind: 'email', value: email, purpose: 'login', name: '', place: '', mobile: '' };
+                document.getElementById('signup-otp-title').textContent = 'Email sign-in verification';
+                document.getElementById('signup-otp-help').textContent = 'Enter the login OTP sent to ' + email + '.';
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
                 document.getElementById('signup-otp')?.focus();
-                showToast('Login OTP request submitted.', 'success');
-            } catch (err) { console.error('Login OTP failed:', err); showToast(err?.message || 'Could not send login OTP.', 'error'); }
+                showToast('Email login OTP request submitted.', 'success');
+            } catch (err) { console.error('Login OTP failed:', err); showToast(err?.message || 'Could not send email OTP.', 'error'); }
         }
  
         async function resendVerificationEmail() {
-            const pending = pendingAccountOtp;
-            if (!pending?.identifier && !pending?.value) {
-                const signupValue = document.getElementById('signup-identifier')?.value || document.getElementById('login-email')?.value;
-                const classified = classifyAccountIdentifier(signupValue);
-                if (!classified) return showToast('Enter the same email or mobile number used for registration.', 'error');
-                pendingAccountOtp = { ...classified, purpose: 'signup', name: document.getElementById('signup-name')?.value.trim() || '', place: document.getElementById('signup-place')?.value.trim() || '' };
+            let target = pendingAccountOtp;
+            if (!target?.value || target.kind !== 'email') {
+                const email = document.getElementById('signup-email')?.value.trim().toLowerCase() || document.getElementById('login-email')?.value.trim().toLowerCase();
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter the same registered email address first.', 'error');
+                target = { value: email, kind: 'email', purpose: 'signup', name: document.getElementById('signup-name')?.value.trim() || '', place: document.getElementById('signup-place')?.value.trim() || '', mobile: normalizeLoginPhone(document.getElementById('signup-mobile')?.value || '') };
+                pendingAccountOtp = target;
             }
-            const target = pendingAccountOtp;
             try {
                 await ensureAuthClient();
-                const request = target.kind === 'email'
-                    ? { email: target.value, options: { shouldCreateUser: target.purpose === 'signup', data: { name: target.name, full_name: target.name, place: target.place } } }
-                    : { phone: target.value, options: { shouldCreateUser: target.purpose === 'signup', data: { name: target.name, full_name: target.name, place: target.place } } };
-                const { error } = await supabaseClient.auth.signInWithOtp(request);
+                const options = { shouldCreateUser: target.purpose === 'signup', data: { name: target.name || '', full_name: target.name || '', place: target.place || '', mobile: target.mobile || '' } };
+                const { error } = await supabaseClient.auth.signInWithOtp({ email: target.value, options });
                 if (error) throw error;
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
-                showToast('A new OTP request was submitted. Check your email or SMS.', 'success');
-            } catch (err) { console.error('Resend OTP failed:', err); showToast(err?.message || 'Could not resend OTP.', 'error'); }
+                showToast('A new email OTP was requested. Check your inbox and spam folder.', 'success');
+            } catch (err) { console.error('Resend OTP failed:', err); showToast(err?.message || 'Could not resend email OTP.', 'error'); }
         }
  
         async function verifyCustomerSignupOtp() {
             const pending = pendingAccountOtp;
             const token = document.getElementById('signup-otp').value.trim().replace(/\s+/g, '');
-            if (!pending?.value || !pending?.kind) return showToast('First request an OTP using your email or mobile number.', 'error');
-            if (!token) return showToast('Enter the OTP you received.', 'error');
+            if (!pending?.value || pending.kind !== 'email') return showToast('First request an email OTP.', 'error');
+            if (!token) return showToast('Enter the OTP you received by email.', 'error');
             try {
                 await ensureAuthClient();
-                const verifyArgs = pending.kind === 'email'
-                    ? { email: pending.value, token, type: 'email' }
-                    : { phone: pending.value, token, type: 'sms' };
-                const { data, error } = await supabaseClient.auth.verifyOtp(verifyArgs);
+                const { data, error } = await supabaseClient.auth.verifyOtp({ email: pending.value, token, type: 'email' });
                 if (error) throw error;
                 if (!data?.user || !data?.session) throw new Error('OTP was accepted but no active session was returned. Please request a new OTP.');
                 const user = data.user;
-                const email = (user.email || (pending.kind === 'email' ? pending.value : '')).toLowerCase();
-                const phone = user.phone || (pending.kind === 'phone' ? pending.value : '');
+                const email = (user.email || pending.value).toLowerCase();
+                const phone = pending.mobile || user.user_metadata?.mobile || user.phone || '';
                 appCurrentUser = {
                     id: user.id,
-                    name: user.user_metadata?.name || user.user_metadata?.full_name || pending.name || email.split('@')[0] || phone,
+                    name: user.user_metadata?.name || user.user_metadata?.full_name || pending.name || email.split('@')[0],
                     email, phone, place: user.user_metadata?.place || pending.place || '',
                     isAdmin: user.id === ADMIN_USER_ID
                 };
@@ -2817,9 +2807,9 @@ body { background-color:#f7f8fb; }
                 pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '' };
                 updateUserAuthUI();
                 await pullFromSupabaseSQL();
-                showToast(pending.purpose === 'login' ? 'You are now signed in.' : 'Your account is verified and ready.', 'success');
+                showToast(pending.purpose === 'login' ? 'You are now signed in.' : 'Your email is verified and your account is ready.', 'success');
                 if (appCurrentUser.isAdmin) switchView('admin'); else switchView('home');
-            } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'OTP verification failed. Check the code and try again.', 'error'); }
+            } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'Email OTP verification failed. Check the code and try again.', 'error'); }
         }
  
         function showForgotPasswordOtp() {
