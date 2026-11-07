@@ -290,6 +290,13 @@
             box-shadow: 0 0 0 3px var(--brand-light);
         }
  
+        .voice-language-select {
+            border: 0; background: transparent; color: var(--text-light); font-size: 11px;
+            max-width: 82px; outline: none; padding: 4px 2px; flex: 0 0 auto;
+        }
+        .order-detail-toggle { color: var(--brand); font-size: 12px; font-weight: 700; cursor: pointer; }
+        .order-detail-panel { margin-top: 8px; padding: 10px; border-radius: 8px; background: var(--input-bg); font-size: 12px; line-height: 1.6; }
+        .order-notify-btn { border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-dark); border-radius:8px; padding:7px 10px; font-size:12px; font-weight:700; }
         .search-bar input {
             flex: 1;
             padding: 9.5px 8px;
@@ -1142,10 +1149,21 @@ img { -webkit-user-drag: none; }
         .login-settings-inline{grid-column:1/-1;}
         .login-settings-inline summary{justify-content:flex-start;}
         .login-settings-inline-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding:10px 14px 14px;}
+/* Keep the promotional video at its normal display size. Only compact the healthcare banner above it. */
+        .promo-banner-card { min-height:96px !important; height:96px !important; max-height:96px !important; }
+        .promo-banner-card > img { min-height:96px !important; height:96px !important; max-height:96px !important; }
+        .promo-banner-overlay { padding:8px 10px !important; }
+        .promo-banner-overlay h2 { font-size:15px !important; line-height:1.15 !important; margin:3px 0 !important; }
+        .promo-banner-overlay p { font-size:9px !important; line-height:1.2 !important; }
 </style>
  </head>
  <body>
   <!-- Toast Notifications -->
+  <div id="login-heart-overlay" aria-hidden="true">
+   <div class="heart">
+    <i class="ri-heart-3-fill"></i>
+   </div>
+  </div>
   <div id="toast-container" class="toast-container"></div>
   <!-- Prescription Image Lightbox Modal -->
   <div id="rx-lightbox-modal" class="rx-modal-backdrop hidden" onclick="closeRxModal(event)">
@@ -1188,8 +1206,9 @@ img { -webkit-user-drag: none; }
      </div>
      <div class="search-bar">
       <i class="ri-search-line"></i> <input type="search" id="search-input" placeholder="Search for medicines, generic salt, brand, or batch..." oninput="renderStoreProducts()">
+      <button type="button" id="voice-search-btn" class="voice-search-btn" aria-label="Search by voice" title="Search by voice" onclick="startSubhaVoiceSearch()"><i class="ri-mic-line"></i></button>
      </div>
-     <select id="sort-select" class="sort-select" onchange="renderStoreProducts()"> <option value="featured">Sort: Relevance</option> <option value="az">Name: A to Z</option> <option value="price-asc">Price: Low to High</option> <option value="price-desc">Price: High to Low</option> </select>
+     <select id="voice-search-language" class="sort-select voice-language-select" aria-label="Voice search language" title="Voice search language"> <option value="ta-IN">தமிழ்</option><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="ml-IN">മലയാളം</option><option value="te-IN">తెలుగు</option><option value="kn-IN">ಕನ್ನಡ</option><option value="bn-IN">বাংলা</option><option value="mr-IN">मराठी</option><option value="ur-IN">اردو</option> </select> <select id="sort-select" class="sort-select" onchange="renderStoreProducts()"> <option value="featured">Sort: Relevance</option> <option value="az">Name: A to Z</option> <option value="price-asc">Price: Low to High</option> <option value="price-desc">Price: High to Low</option> </select>
     </div>
     <div class="action-bar-row">
      <button class="quick-action-btn rx-btn" onclick="jumpToCartRxUpload()"><i class="ri-camera-lens-line"></i> Upload Rx in Cart</button>
@@ -1204,7 +1223,7 @@ img { -webkit-user-drag: none; }
    <section id="view-home" class="animate-up">
     <!-- Promo Banner -->
     <div class="promo-banner-wrap">
-     <div class="promo-banner-card" style="position:relative;overflow:hidden;">
+     <div class="promo-banner-card">
       <img id="hero-promo-img" src="https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Pharmacy Banner">
       <div class="promo-banner-overlay">
        <span class="promo-badge">LIVE HEALTHCARE PARTNER</span>
@@ -1212,8 +1231,8 @@ img { -webkit-user-drag: none; }
        <p id="hero-promo-sub">பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103</p>
       </div>
      </div>
-     <div id="hero-promo-video-wrap" class="hidden" style="position:absolute;right:12px;bottom:12px;width:min(34%,190px);min-width:112px;max-height:104px;border-radius:10px;overflow:hidden;background:#111;z-index:3;box-shadow:0 3px 12px #0005;">
-      <video id="hero-promo-video" controls playsinline preload="metadata" style="display:block;width:100%;height:100px;object-fit:contain;background:#111;"></video>
+     <div id="hero-promo-video-wrap" class="hidden" style="margin-top:10px;border-radius:14px;overflow:hidden;background:#111;">
+      <video id="hero-promo-video" controls playsinline preload="metadata" style="display:block;width:100%;max-height:320px;background:#111;"></video>
      </div>
     </div>
     <!-- Coupon Offer Strip -->
@@ -1300,13 +1319,18 @@ img { -webkit-user-drag: none; }
       <h4 style="margin: 0 0 10px; color: #7c3aed;"><i class="ri-alarm-line"></i> 4. Medicine Dose Reminder</h4>
       <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 8px;">
        <div>
-        <label class="form-label">Medicine Name</label> <input type="text" id="rem-name" class="form-control" placeholder="e.g. Paracetamol 650">
+        <label class="form-label">Medicine Name</label> <input type="text" id="rem-name" class="form-control" placeholder="Medicine name / மருந்தின் பெயர்">
        </div>
        <div>
         <label class="form-label">Time</label> <input type="time" id="rem-time" class="form-control">
        </div>
       </div>
+      <div style="margin-top:8px;">
+       <label class="form-label" for="rem-language">Reminder voice language</label> <select id="rem-language" class="form-control"> <option value="ta-IN">தமிழ் (Tamil)</option><option value="en-IN">English</option><option value="hi-IN">हिन्दी (Hindi)</option><option value="te-IN">తెలుగు (Telugu)</option><option value="ml-IN">മലയാളം (Malayalam)</option><option value="kn-IN">ಕನ್ನಡ (Kannada)</option><option value="bn-IN">বাংলা (Bengali)</option><option value="mr-IN">मराठी (Marathi)</option><option value="gu-IN">ગુજરાતી (Gujarati)</option><option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option> </select>
+      </div>
       <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #7c3aed;" onclick="addDoseReminder()">Save Daily Reminder</button>
+      <button type="button" class="secondary-btn" style="width:100%;margin-top:8px;" onclick="enableTamilReminderAlerts()">🔔 Enable Voice &amp; Notifications</button>
+      <p class="muted" style="font-size:11px;line-height:1.45;margin:8px 0 0;">Choose Tamil, English, Hindi, Telugu, Malayalam, Kannada, Bengali, Marathi, Gujarati or Punjabi. The phone speaks in the selected language when a supported voice is installed. Keep this website open in Brave; browser alarms may not work after the tab/browser is closed.</p>
       <div id="reminders-list" style="margin-top: 10px; font-size: 12px;"></div>
      </div>
     </div>
@@ -1401,8 +1425,8 @@ img { -webkit-user-drag: none; }
      </div>
      <div id="signup-details-box" class="hidden" style="margin-top:14px;padding:14px;border:1px solid var(--brand-border);border-radius:12px;background:var(--brand-light);">
       <strong>Create your account</strong>
-      <p class="muted" style="margin:5px 0 8px;">Enter your details. We will send a one-time verification code to your email or mobile.</p>
-      <label class="form-label" for="signup-name">Full name *</label><input type="text" id="signup-name" class="form-control" autocomplete="name" placeholder="Your full name"> <label class="form-label" for="signup-place">Place / City *</label><input type="text" id="signup-place" class="form-control" autocomplete="address-level2" placeholder="Your place or city"> <label class="form-label" for="signup-identifier">Mobile number or email ID *</label><input type="text" id="signup-identifier" class="form-control" autocomplete="email" placeholder="Enter mobile number or email ID">
+      <p class="muted" style="margin:5px 0 8px;">Enter your details and create a password. Verification code will be sent to your email address.</p>
+      <label class="form-label" for="signup-name">Full name *</label><input type="text" id="signup-name" class="form-control" autocomplete="name" placeholder="Your full name"> <label class="form-label" for="signup-place">Place / City *</label><input type="text" id="signup-place" class="form-control" autocomplete="address-level2" placeholder="Your place or city"> <label class="form-label" for="signup-identifier">Email ID for OTP verification *</label><input type="email" id="signup-identifier" class="form-control" autocomplete="email" placeholder="Enter your email address"><label class="form-label" for="signup-new-password">Create password *</label><input type="password" id="signup-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"><label class="form-label" for="signup-confirm-password">Confirm password *</label><input type="password" id="signup-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter password">
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="sendCustomerSignupOtp()">Send Verification OTP</button>
      </div>
      <div id="signup-otp-box" class="hidden" style="margin-top:14px;padding:12px;border:1px solid var(--brand-border);border-radius:10px;background:var(--brand-light);">
@@ -1419,7 +1443,7 @@ img { -webkit-user-drag: none; }
       <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="verifyRecoveryOtpAndSetPassword()">Verify OTP &amp; Reset Password</button>
      </div>
-     <p class="muted" style="font-size:11px;margin:8px 0 0;">Email and SMS OTP delivery depends on the verification providers enabled in the Subha Medical Supabase project.</p>
+     <p class="muted" style="font-size:11px;margin:8px 0 0;">Customer registration uses email OTP. After verification, sign in normally using your email ID and password.</p>
     </div>
     <!-- Logged In Profile Card -->
     <div id="account-profile-box" class="panel-card hidden">
@@ -1500,13 +1524,16 @@ img { -webkit-user-drag: none; }
         <label class="form-label">Stock Quantity *</label> <input type="number" id="adm-prod-stock" class="form-control" placeholder="e.g. 50">
        </div>
        <div>
-        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" multiple> <small class="muted">Choose several photos at once. The first photo becomes the main image; the rest appear as selectable gallery thumbnails on the product card.</small>
+        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" multiple> <small class="muted">Choose several photos at once. The first photo becomes the main image; the rest appear as selectable gallery thumbnails on the product card.</small>
         <div id="adm-prod-image-preview" aria-live="polite" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
         <input type="url" id="adm-prod-img" class="form-control hidden" aria-hidden="true" tabindex="-1">
        </div>
        <div>
-        <label class="form-label">Product Video (optional)</label> <input type="file" id="adm-prod-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime"> <small class="muted">MP4, WEBM or MOV video. Maximum 50 MB. Leave empty to keep the current video.</small> <input type="url" id="adm-prod-video" class="form-control hidden" aria-hidden="true" tabindex="-1">
+        <label class="form-label">Product Video (optional)</label> <input type="file" id="adm-prod-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v"> <small class="muted">MP4, WEBM or MOV video. Maximum 50 MB. Leave empty to keep the current video.</small> <input type="url" id="adm-prod-video" class="form-control hidden" aria-hidden="true" tabindex="-1">
        </div>
+      </div>
+      <div style="margin-top:10px;">
+       <label class="form-label">Other-language search names (Tamil, Hindi, English, etc.)</label> <input type="text" id="adm-prod-search-keywords" class="form-control" placeholder="Example: பாராசிட்டமால், पैरासिटामोल, paracetamol, fever tablet"> <small class="muted">Separate names with commas. Customers can find this medicine using any of these names or voice search.</small>
       </div>
       <div style="display: flex; gap: 18px; margin-top: 12px; font-size: 12.5px; font-weight: 700;">
        <label><input type="checkbox" id="adm-prod-rx"> Requires Prescription (Rx)</label> <label><input type="checkbox" id="adm-prod-featured" checked> Featured Priority</label>
@@ -1543,7 +1570,7 @@ img { -webkit-user-drag: none; }
         <label class="form-label">Category Name *</label> <input type="text" id="adm-cat-name" class="form-control" placeholder="e.g. Diabetes Care">
        </div>
        <div>
-        <label class="form-label">Category Image URL (Optional)</label> <input type="url" id="adm-cat-img" class="form-control" placeholder="https://... (or upload below)"> <label class="form-label" style="margin-top:8px;">Upload Category Image from Device</label> <input type="file" id="adm-cat-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif">
+        <label class="form-label">Category Image URL (Optional)</label> <input type="url" id="adm-cat-img" class="form-control" placeholder="https://... (or upload below)"> <label class="form-label" style="margin-top:8px;">Upload Category Image from Device</label> <input type="file" id="adm-cat-image-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif">
        </div>
       </div>
       <div style="display: flex; gap: 10px; margin-top: 12px;">
@@ -1570,17 +1597,26 @@ img { -webkit-user-drag: none; }
       </div>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Subha Medical Logo &amp; Brand Image</h4>
-      <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-logo-preview')"> <small class="muted">JPG, PNG, WEBP or AVIF, maximum 8 MB. This logo is shown in the customer header.</small>
+      <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-logo-preview')"> <small class="muted">JPG, PNG, WEBP or AVIF, maximum 8 MB. This logo is shown in the customer header.</small>
       <div id="adm-logo-preview" style="margin:8px 0;"></div>
-      <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-brand-preview')">
+      <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-brand-preview')">
       <div id="adm-brand-preview" style="margin:8px 0;"></div>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Global Background Image &amp; Promotional Banner Setup</h4>
-      <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Promo Banner Image from Phone</label> <input type="file" id="adm-promo-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-promo-preview')">
+      <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Promo Banner Image from Phone</label> <input type="file" id="adm-promo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-promo-preview')">
       <div id="adm-promo-preview" style="margin:8px 0;"></div>
-      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')"> <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Customers can play it in the LIVE HEALTHCARE PARTNER banner. It will not autoplay.</small>
+      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')"> <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Upload progress will be shown here; after saving, the uploaded video will remain visible below.</small>
+      <div id="adm-promo-video-progress" style="display:none;margin:10px 0;padding:10px;border:1px solid var(--border-color);border-radius:10px;">
+       <div id="adm-promo-video-progress-label" style="font-size:13px;margin-bottom:6px;">Waiting to upload…</div>
+       <div style="height:9px;background:var(--border-color);border-radius:20px;overflow:hidden;">
+        <div id="adm-promo-video-progress-bar" style="height:100%;width:0%;background:var(--primary-color,#2563eb);transition:width .15s;"></div>
+       </div>
+      </div>
       <div id="adm-promo-video-preview" style="margin:8px 0;"></div>
-      <div id="adm-saved-promo-video" style="margin:8px 0;"></div>
+      <div id="adm-promo-video-library" style="margin:10px 0;padding:10px;border:1px solid var(--border-color);border-radius:10px;">
+       <strong style="display:block;margin-bottom:8px;">Saved promotional videos</strong>
+       <div class="muted">Saved videos will appear here after cloud loading.</div>
+      </div>
       <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4>🎟️ Multiple Coupon Codes</h4>
@@ -1597,7 +1633,10 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
      <div class="panel-card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
        <h4 style="margin: 0;">📦 Customer Orders, Attached Rx &amp; Printable GST Invoices</h4>
-       <span class="muted">Changing status to "Cancelled" automatically restores deducted stock</span>
+       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span class="muted">Changing status to Cancelled restores deducted stock. Out for Delivery can still be cancelled by admin.</span>
+        <button type="button" class="order-notify-btn" onclick="requestOrderNotificationPermission()"><i class="ri-notification-3-line"></i> Enable order sound &amp; alerts</button>
+       </div>
       </div>
       <div id="adm-orders-container"></div>
      </div>
@@ -1722,6 +1761,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                 }
                 updateUserAuthUI();
                 await pullFromSupabaseSQL();
+                setupSubhaOrderRealtime();
             } catch (e) {
                 console.error('Supabase initialization failed:', e);
                 supabaseClient = null;
@@ -1745,7 +1785,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
  
         let storeSettings = JSON.parse(localStorage.getItem('subha_settings') || JSON.stringify({
             store_name: 'Subha Medical | சுபா மருந்தகம்',
-            whatsapp: '919487165045',
+            whatsapp: '918072956113',
             address: 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103',
             gstin: '33AAAAA0000A1Z5',
             dl_no: 'TN-TPR-20/21-00000',
@@ -1774,22 +1814,85 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         /* =========================================================================
            3. AUTOMATIC BACKGROUND SQL SYNC
         ========================================================================= */
+        function resolveSubhaStorageUrl(value, bucket) {
+            if (!value || typeof value !== 'string') return '';
+            const raw = value.trim();
+            if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+            const clean = raw.replace(/^\/+/, '').replace(new RegExp('^' + bucket + '/'), '');
+            try {
+                const client = supabaseClient;
+                if (client?.storage) return client.storage.from(bucket).getPublicUrl(clean).data.publicUrl || raw;
+            } catch (_) {}
+            return raw;
+        }
+ 
+        function normalizeCloudProduct(row) {
+            const p = { ...(row || {}) };
+            p.id = String(p.id ?? p.product_id ?? p.uuid ?? '');
+            p.name = p.name || p.product_name || p.medicine_name || p.title || '';
+            p.salt = p.salt || p.generic_name || p.composition || p.active_ingredient || '';
+            p.brand = p.brand || p.manufacturer || p.company || '';
+            p.category = p.category || p.category_name || 'General';
+            p.price = Number(p.price ?? p.selling_price ?? p.sale_price ?? p.offer_price ?? 0);
+            p.mrp = Number(p.mrp ?? p.mrp_price ?? p.price ?? p.selling_price ?? 0);
+            p.stock = Number(p.stock ?? p.quantity ?? p.qty ?? 0);
+            p.image = resolveSubhaStorageUrl(p.image || p.image_url || p.photo_url || p.thumbnail || '', PRODUCT_IMAGE_BUCKET);
+            p.video = resolveSubhaStorageUrl(p.video || p.video_url || p.product_video || '', PRODUCT_VIDEO_BUCKET);
+            p.search_keywords = p.search_keywords || p.alternative_names || p.search_terms || '';
+            p.batch = p.batch || p.batch_number || p.batch_no || '';
+            p.expiry = p.expiry || p.expiry_date || p.exp_date || '';
+            if (typeof p.images === 'string') { try { p.images = JSON.parse(p.images); } catch (_) { p.images = p.images.split(',').map(v=>v.trim()).filter(Boolean); } }
+            if (!Array.isArray(p.images)) p.images = p.image ? [p.image] : [];
+            p.images = p.images.map(x => typeof x === 'string' ? resolveSubhaStorageUrl(x, PRODUCT_IMAGE_BUCKET) : (x?.url ? resolveSubhaStorageUrl(x.url, PRODUCT_IMAGE_BUCKET) : '')).filter(Boolean);
+            if (!p.image && p.images.length) p.image = p.images[0];
+            return p;
+        }
+ 
+        async function fetchAllCloudRows(tableName) {
+            const all = [];
+            const pageSize = 1000;
+            for (let from = 0; from < 10000; from += pageSize) {
+                const { data, error } = await supabaseClient.from(tableName).select('*').range(from, from + pageSize - 1);
+                if (error) return { data: null, error };
+                const page = data || [];
+                all.push(...page);
+                if (page.length < pageSize) break;
+            }
+            return { data: all, error: null };
+        }
+ 
         async function pullFromSupabaseSQL() {
             if (!supabaseClient) return;
             try {
                 const [pResult, cResult, sResult] = await Promise.all([
-                    supabaseClient.from('subha_products').select('*').order('name', { ascending: true }),
-                    supabaseClient.from('subha_categories').select('*'),
+                    fetchAllCloudRows('subha_products'),
+                    fetchAllCloudRows('subha_categories'),
                     supabaseClient.from('subha_settings').select('*').eq('id', '1').maybeSingle()
                 ]);
-                if (pResult.error) console.error('Product list load failed:', pResult.error);
-                else { products = pResult.data || []; localStorage.setItem('subha_products', JSON.stringify(products)); }
+                if (pResult.error) {
+                    console.error('Product list load failed:', pResult.error);
+                    const grid = document.getElementById('products-grid');
+                    const cached = JSON.parse(localStorage.getItem('subha_products') || '[]');
+                    if (cached.length) { products = cached.map(normalizeCloudProduct); renderStoreProducts(); }
+                    else if (grid) grid.innerHTML = `<div style="grid-column:1/-1;padding:16px;border:1px solid #f59e0b;border-radius:10px;background:#fffbeb;color:#92400e;"><strong>Products are not available from the cloud yet.</strong><br>${String(pResult.error.message || 'Check the public product-read policy in Supabase.').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>`;
+                } else {
+                    products = (pResult.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name).sort((a,b) => a.name.localeCompare(b.name));
+                    localStorage.setItem('subha_products', JSON.stringify(products));
+                }
                 if (cResult.error) console.warn('Category list load failed:', cResult.error);
                 else { categories = cResult.data || []; localStorage.setItem('subha_categories', JSON.stringify(categories)); }
                 if (!sResult.error && sResult.data) {
                     storeSettings = { ...storeSettings, ...sResult.data };
-                    localStorage.setItem('subha_settings', JSON.stringify(storeSettings));
+                    storeSettings.logo_image = resolveSubhaStorageUrl(storeSettings.logo_image || '', PRODUCT_IMAGE_BUCKET);
+                    storeSettings.bg_image = resolveSubhaStorageUrl(storeSettings.bg_image || '', PRODUCT_IMAGE_BUCKET);
+                    storeSettings.promo_image = resolveSubhaStorageUrl(storeSettings.promo_image || '', PRODUCT_IMAGE_BUCKET);
+                    storeSettings.promo_video = resolveSubhaStorageUrl(storeSettings.promo_video || '', PRODUCT_VIDEO_BUCKET);
+                } else if (sResult.error) {
+                    console.warn('Store appearance settings could not be read from cloud:', sResult.error);
                 }
+                // Fixed pharmacist WhatsApp order destination requested by the store owner.
+                storeSettings.whatsapp = '918072956113';
+                localStorage.setItem('subha_settings', JSON.stringify(storeSettings));
  
                 // Orders are private: admins fetch all orders; customers fetch only their own.
                 // Do not silently keep stale local orders when the cloud request fails.
@@ -1809,6 +1912,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                     orders = [];
                 }
                 applyStoreBranding();
+                if (appCurrentUser?.isAdmin) loadSavedPromoVideoLibrary();
                 renderAll();
             } catch (err) {
                 console.error('Supabase sync failed:', err);
@@ -1821,7 +1925,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         // Never send admin_pin or other local-only fields to Supabase.
         function cloudSettingsPayload() {
             const allowed = ['store_name','whatsapp','address','gstin','dl_no','gst_rate','admin_email','theme_color','dark_mode','bg_image','logo_image','promo_image','promo_video','promo_title','promo_sub','coupon_enabled','coupon_code','coupon_discount','coupons'];
-            const payload = { id: 1 };
+            const payload = { id: 1, whatsapp: '918072956113' };
             allowed.forEach(key => { if (Object.prototype.hasOwnProperty.call(storeSettings, key)) payload[key] = storeSettings[key]; });
             return payload;
         }
@@ -1871,37 +1975,31 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         }
  
         async function restoreInventoryStockForCancelledOrder(orderItems) {
-            const supabaseUpdates = [];
- 
-            (orderItems || []).forEach(cartItem => {
-                const prodIndex = products.findIndex(p => p.id === cartItem.id);
-                if (prodIndex !== -1) {
-                    const currentStock = Number(products[prodIndex].stock) || 0;
-                    const restoredStock = currentStock + (Number(cartItem.qty) || 1);
-                    products[prodIndex].stock = restoredStock;
- 
-                    if (supabaseClient) {
-                        supabaseUpdates.push(
-                            supabaseClient
-                                .from('subha_products')
-                                .update({ stock: restoredStock, updated_at: new Date().toISOString() })
-                                .eq('id', cartItem.id)
-                        );
-                    }
+            const changed = [];
+            const updates = [];
+            for (const cartItem of (orderItems || [])) {
+                const idx = products.findIndex(p => String(p.id) === String(cartItem.id));
+                if (idx < 0) continue;
+                const oldStock = Number(products[idx].stock) || 0;
+                const restored = oldStock + (Number(cartItem.qty) || 1);
+                changed.push({ idx, oldStock });
+                products[idx].stock = restored;
+                if (supabaseClient) updates.push(supabaseClient.from('subha_products').update({ stock: restored, updated_at: new Date().toISOString() }).eq('id', cartItem.id));
+            }
+            if (updates.length) {
+                const results = await Promise.all(updates);
+                const failures = results.filter(r => r?.error);
+                if (failures.length) {
+                    changed.forEach(x => { products[x.idx].stock = x.oldStock; });
+                    saveStateLocal();
+                    renderStoreProducts();
+                    return { ok: false, error: failures.map(x => x.error.message).join('; ') };
                 }
-            });
- 
+            }
             saveStateLocal();
             renderStoreProducts();
             renderWishlist();
- 
-            if (supabaseUpdates.length > 0) {
-                try {
-                    await Promise.all(supabaseUpdates);
-                } catch (err) {
-                    console.warn('Supabase stock restore sync warning:', err);
-                }
-            }
+            return { ok: true };
         }
  
         /* =========================================================================
@@ -2263,7 +2361,7 @@ body { background-color:#f7f8fb; }
                                 <h1 class="store-title">${storeSettings.store_name || 'Subha Medical | சுபா மருந்தகம்'}</h1>
                                 <div class="store-sub">
                                     ${storeSettings.address || 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103'}<br>
-                                    <strong>Phone / WhatsApp:</strong> +${storeSettings.whatsapp || '919487165045'}<br>
+                                    <strong>Phone / WhatsApp:</strong> +${storeSettings.whatsapp || '918072956113'}<br>
                                     <strong>GSTIN:</strong> ${storeSettings.gstin || '33AAAAA0000A1Z5'} &nbsp;|&nbsp;
                                     <strong>D.L. No:</strong> ${storeSettings.dl_no || 'TN-TPR-20/21-00000'}
                                 </div>
@@ -2368,32 +2466,101 @@ body { background-color:#f7f8fb; }
         async function updateOrderStatusAdmin(orderId, newStatus) {
             const ord = orders.find(o => String(o.id) === String(orderId));
             if (!ord) return;
-            const previousStatus = ord.status || 'Confirmed';
-            if (previousStatus === newStatus) return;
- 
-            // Persist first so the UI never falsely reports a cloud update as successful.
-            if (supabaseClient) {
-                const cloudUpdate = { status: newStatus };
-                if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) cloudUpdate.stock_restored = true;
-                const { error } = await supabaseClient.from('subha_orders').update(cloudUpdate).eq('id', orderId);
-                if (error) {
-                    console.error('Order status update failed:', error);
-                    showToast('Could not update order in cloud: ' + error.message, 'error');
-                    renderOrders();
-                    return;
-                }
+            const previousStatus = ord.status || 'Order Placed';
+            if (previousStatus === newStatus && !(newStatus === 'Cancelled' && !ord.stock_restored)) return;
+            // Admin may correct any status, including Delivered -> Cancelled.
+            if (!appCurrentUser?.isAdmin) { showToast('Only the admin can change order status.', 'error'); renderOrders(); return; }
+            if (!supabaseClient) { showToast('Cloud connection unavailable. Status was not changed.', 'error'); renderOrders(); return; }
+            const { error } = await supabaseClient.from('subha_orders').update({ status: newStatus }).eq('id', orderId);
+            if (error) {
+                console.error('Order status update failed:', error);
+                showToast('Could not update order in cloud: ' + error.message, 'error');
+                renderOrders(); return;
             }
- 
             ord.status = newStatus;
-            if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) {
-                await restoreInventoryStockForCancelledOrder(ord.items);
-                ord.stock_restored = true;
-                showToast(`Order #${orderId} cancelled. Stock restoration was requested.`);
+            if (newStatus === 'Cancelled' && !ord.stock_restored) {
+                const restored = await restoreInventoryStockForCancelledOrder(ord.items);
+                if (!restored.ok) {
+                    showToast('Order cancelled, but stock restoration failed. Select Cancelled again to retry: ' + restored.error, 'error');
+                } else {
+                    const flagUpdate = await supabaseClient.from('subha_orders').update({ stock_restored: true }).eq('id', orderId);
+                    if (flagUpdate.error) showToast('Order cancelled and stock restored, but the restoration flag could not be saved: ' + flagUpdate.error.message, 'error');
+                    else ord.stock_restored = true;
+                    if (ord.stock_restored) showToast(`Order #${orderId} cancelled. Stock restored successfully.`);
+                }
             } else {
-                showToast(`Order #${orderId} marked as ${newStatus}`);
+                showToast(`Order #${orderId} updated to ${newStatus}.`);
             }
             saveStateLocal();
             renderOrders();
+        }
+ 
+        async function requestOrderNotificationPermission() {
+            if (!('Notification' in window)) return showToast('This browser does not support order notifications.', 'error');
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') showToast('Order notifications enabled. Keep this site signed in and allow Brave notifications.');
+                else showToast('Notifications are blocked. Allow them in Brave site settings.', 'error');
+            } catch (err) { showToast(err?.message || 'Could not enable notifications.', 'error'); }
+        }
+ 
+        let subhaOrderRealtimeChannel = null;
+        function setupSubhaOrderRealtime() {
+            if (!supabaseClient || !appCurrentUser?.id || subhaOrderRealtimeChannel) return;
+            subhaOrderRealtimeChannel = supabaseClient.channel('subha-medical-order-alerts')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'subha_orders' }, payload => {
+                    const freshOrder = payload.new || {};
+                    if (!freshOrder.id || !appCurrentUser?.isAdmin) return;
+                    if (orders.some(o => String(o.id) === String(freshOrder.id))) return;
+                    orders = [freshOrder, ...orders];
+                    saveStateLocal(); renderOrders();
+                    const title = `New order received – #${freshOrder.id}`;
+                    const body = `${freshOrder.customer_name || 'Customer'} • ₹${Number(freshOrder.total || freshOrder.total_amount || 0).toFixed(2)} • ${freshOrder.customer_phone || ''}`;
+                    showToast(`🔔 ${title}. Open Orders to view customer and item details.`);
+                    // Audible and vibration alert while the admin page is open.
+                    try {
+                        if (navigator.vibrate) navigator.vibrate([250,120,250,120,500]);
+                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                        if (AudioCtx) {
+                            const ctx = new AudioCtx();
+                            [0,0.22,0.44].forEach((delay, i) => {
+                                const osc = ctx.createOscillator(), gain = ctx.createGain();
+                                osc.type = 'sine'; osc.frequency.value = i === 2 ? 1040 : 880;
+                                gain.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
+                                gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + delay + 0.02);
+                                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.16);
+                                osc.connect(gain); gain.connect(ctx.destination); osc.start(ctx.currentTime + delay); osc.stop(ctx.currentTime + delay + 0.18);
+                            });
+                            setTimeout(() => ctx.close().catch(()=>{}), 1200);
+                        }
+                    } catch (soundErr) { console.warn('Order sound unavailable:', soundErr); }
+                    try {
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            const n = new Notification(title, { body: body + '\nTap to open order details.', tag: `subha-order-${freshOrder.id}`, renotify: true, requireInteraction: true });
+                            n.onclick = () => { window.focus(); switchView('admin'); const tabBtn = document.querySelectorAll('.admin-tab')[3]; if (tabBtn) openAdminTab('tab-orders', tabBtn); n.close(); };
+                        }
+                    } catch (err) { console.warn('Order notification unavailable:', err); }
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'subha_orders' }, payload => {
+                    const changed = payload.new || {};
+                    if (!changed.id) return;
+                    const belongsToCustomer = !appCurrentUser?.isAdmin && String(changed.customer_email || '').toLowerCase() === String(appCurrentUser?.email || '').toLowerCase();
+                    if (!appCurrentUser?.isAdmin && !belongsToCustomer) return;
+                    const idx = orders.findIndex(o => String(o.id) === String(changed.id));
+                    if (idx >= 0) orders[idx] = { ...orders[idx], ...changed };
+                    else orders.unshift(changed);
+                    saveStateLocal(); renderOrders();
+                    if (belongsToCustomer) {
+                        const message = `Your Subha Medical order #${changed.id} is now ${changed.status || 'updated'}.`;
+                        showToast(message);
+                        try {
+                            if ('Notification' in window && Notification.permission === 'granted') {
+                                const n = new Notification('Subha Medical – Order Update', { body: message, tag: `subha-order-status-${changed.id}` });
+                                n.onclick = () => { window.focus(); switchView('account'); n.close(); };
+                            }
+                        } catch (_) {}
+                    }
+                }).subscribe();
         }
  
         /* =========================================================================
@@ -2420,17 +2587,39 @@ body { background-color:#f7f8fb; }
             const logoBadge = document.getElementById('nav-logo-badge');
             if (logoBadge) {
                 if (storeSettings.logo_image) {
+                    storeSettings.logo_image = resolveSubhaStorageUrl(storeSettings.logo_image, PRODUCT_IMAGE_BUCKET);
                     logoBadge.innerHTML = `<img src="${storeSettings.logo_image}" alt="Subha Medical logo" style="display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:inherit;" onerror="this.onerror=null;this.remove();this.parentElement.innerHTML='<i class=\'ri-capsule-fill\'></i>'">`;
                 } else {
                     logoBadge.innerHTML = '<i class="ri-capsule-fill"></i>';
                 }
             }
             const heroPromoImg = document.getElementById('hero-promo-img');
-            if (heroPromoImg) { heroPromoImg.style.display = 'block'; heroPromoImg.style.width = '100%'; heroPromoImg.style.height = '100%'; heroPromoImg.style.minHeight = '120px'; heroPromoImg.style.objectFit = 'cover'; heroPromoImg.src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80'; heroPromoImg.onerror = () => { heroPromoImg.onerror = null; heroPromoImg.src = 'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=1200&q=80'; }; }
-            renderSavedPromoVideo();
+            if (heroPromoImg) { storeSettings.promo_image = resolveSubhaStorageUrl(storeSettings.promo_image || '', PRODUCT_IMAGE_BUCKET); heroPromoImg.style.display = 'block'; heroPromoImg.style.width = '100%'; heroPromoImg.style.height = '100%'; heroPromoImg.style.minHeight = '120px'; heroPromoImg.style.objectFit = 'cover'; heroPromoImg.src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80'; heroPromoImg.onerror = () => { heroPromoImg.onerror = null; heroPromoImg.src = 'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=1200&q=80'; }; }
             const promoVideoWrap = document.getElementById('hero-promo-video-wrap');
             const promoVideo = document.getElementById('hero-promo-video');
-            if (promoVideoWrap && promoVideo) { if (storeSettings.promo_video) { promoVideoWrap.classList.remove('hidden'); if (promoVideo.src !== storeSettings.promo_video) { promoVideo.src = storeSettings.promo_video; promoVideo.load(); } } else { promoVideo.pause(); promoVideo.removeAttribute('src'); promoVideo.load(); promoVideoWrap.classList.add('hidden'); } }
+            if (promoVideoWrap && promoVideo) {
+                storeSettings.promo_video = resolveSubhaStorageUrl(storeSettings.promo_video || '', PRODUCT_VIDEO_BUCKET);
+                if (storeSettings.promo_video) {
+                    promoVideoWrap.classList.remove('hidden');
+                    promoVideoWrap.style.display = 'block';
+                    promoVideoWrap.innerHTML = '';
+                    const savedVideo = document.createElement('video');
+                    savedVideo.id = 'hero-promo-video'; savedVideo.controls = true; savedVideo.playsInline = true;
+                    savedVideo.preload = 'metadata'; savedVideo.setAttribute('aria-label', 'Subha Medical promotional video');
+                    savedVideo.style.cssText = 'display:block;width:100%;height:76px;max-height:76px;object-fit:contain;background:#111;border-radius:10px;';
+                    const source = document.createElement('source'); source.src = storeSettings.promo_video;
+                    source.type = /\.webm(?:[?#]|$)/i.test(storeSettings.promo_video) ? 'video/webm' : 'video/mp4';
+                    savedVideo.appendChild(source);
+                    savedVideo.addEventListener('error', () => {
+                        let msg = promoVideoWrap.querySelector('.promo-video-load-error');
+                        if (!msg) { msg = document.createElement('div'); msg.className = 'promo-video-load-error'; msg.style.cssText = 'color:#fff;background:#7f1d1d;padding:8px;font-size:12px;'; msg.textContent = 'Video could not load. Check that the product-videos bucket is public and the saved file URL is valid.'; promoVideoWrap.appendChild(msg); }
+                    });
+                    promoVideoWrap.appendChild(savedVideo); savedVideo.load();
+                } else {
+                    promoVideo.pause(); promoVideo.removeAttribute('src'); promoVideo.load();
+                    promoVideoWrap.classList.add('hidden'); promoVideoWrap.style.display = 'none';
+                }
+            }
             document.getElementById('hero-promo-title').textContent = storeSettings.promo_title;
             document.getElementById('hero-promo-sub').textContent = storeSettings.promo_sub;
             const bgInput = document.getElementById('adm-bg-image'); if (bgInput && !bgInput.value) bgInput.value = storeSettings.bg_image || '';
@@ -2517,8 +2706,8 @@ body { background-color:#f7f8fb; }
         }
  
         function createProductCardHTML(p) {
-            const mrp = Number(p.mrp) || 0;
-            const price = Number(p.price) || 0;
+            const price = Number(p.price ?? p.selling_price ?? p.sale_price ?? 0) || 0;
+            const mrp = Number(p.mrp ?? p.mrp_price ?? price) || price;
             const stockCount = Number(p.stock) || 0;
             const disc = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
             const wished = wishlist.includes(p.id);
@@ -2579,8 +2768,119 @@ body { background-color:#f7f8fb; }
             let list = product?.images;
             if (typeof list === 'string') { try { list = JSON.parse(list); } catch (_) { list = []; } }
             if (!Array.isArray(list)) list = [];
-            const combined = [product?.image, ...list].filter(v => typeof v === 'string' && /^https?:\/\//i.test(v));
+            const combined = [product?.image, ...list].filter(v => typeof v === 'string' && /^(https?:|data:|blob:)/i.test(v));
             return [...new Set(combined)];
+        }
+ 
+        function subhaTamilLatin(text) {
+            const chars = Array.from(String(text || '').normalize('NFC'));
+            const vowels = {'அ':'a','ஆ':'aa','இ':'i','ஈ':'ii','உ':'u','ஊ':'uu','எ':'e','ஏ':'ee','ஐ':'ai','ஒ':'o','ஓ':'oo','ஔ':'au'};
+            const cons = {'க':'k','ங':'ng','ச':'c','ஞ':'ny','ட':'d','ண':'n','த':'th','ந':'n','ப':'p','ம':'m','ய':'y','ர':'r','ல':'l','வ':'v','ழ':'zh','ள':'l','ற':'r','ன':'n','ஜ':'j','ஷ':'sh','ஸ':'s','ஹ':'h','ஸ்ரீ':'sri'};
+            const signs = {'ா':'aa','ி':'i','ீ':'ii','ு':'u','ூ':'uu','ெ':'e','ே':'ee','ை':'ai','ொ':'o','ோ':'oo','ௌ':'au'};
+            let out='';
+            for (let i=0;i<chars.length;i++) {
+                const c=chars[i];
+                if (vowels[c]) { out+=vowels[c]; continue; }
+                if (cons[c]) {
+                    out+=cons[c];
+                    const next=chars[i+1];
+                    if (next==='்') { i++; continue; }
+                    if (signs[next]) { out+=signs[next]; i++; }
+                    else out+='a';
+                    continue;
+                }
+                if (signs[c]) { out+=signs[c]; continue; }
+                if (c==='்') continue;
+                out+=c;
+            }
+            return out;
+        }
+        function subhaHindiLatin(text) {
+            const chars = Array.from(String(text || '').normalize('NFC'));
+            const vowels = {'अ':'a','आ':'aa','इ':'i','ई':'ii','उ':'u','ऊ':'uu','ऋ':'ri','ए':'e','ऐ':'ai','ओ':'o','औ':'au'};
+            const cons = {'क':'k','ख':'kh','ग':'g','घ':'gh','ङ':'ng','च':'ch','छ':'chh','ज':'j','झ':'jh','ञ':'ny','ट':'t','ठ':'th','ड':'d','ढ':'dh','ण':'n','त':'t','थ':'th','द':'d','ध':'dh','न':'n','प':'p','फ':'ph','ब':'b','भ':'bh','म':'m','य':'y','र':'r','ल':'l','व':'v','श':'sh','ष':'sh','स':'s','ह':'h','क़':'q','ख़':'kh','ज़':'z','फ़':'f'};
+            const matras = {'ा':'aa','ि':'i','ी':'ii','ु':'u','ू':'uu','ृ':'ri','े':'e','ै':'ai','ो':'o','ौ':'au'};
+            let out='';
+            for(let i=0;i<chars.length;i++){
+                const c=chars[i];
+                if(vowels[c]){out+=vowels[c];continue;}
+                if(cons[c]){
+                    out+=cons[c];
+                    const next=chars[i+1];
+                    if(next==='्'){i++;continue;}
+                    if(matras[next]){out+=matras[next];i++;}
+                    else if(next==='ं'||next==='ँ'){out+='n';i++;}
+                    else out+='a';
+                    continue;
+                }
+                if(matras[c]){out+=matras[c];continue;}
+                if(c==='्'||c==='ं'||c==='ँ')continue;
+                out+=c;
+            }
+            return out;
+        }
+        function subhaOtherIndicLatin(text) {
+            const scripts = [
+                { vowels: {'അ':'a','ആ':'aa','ഇ':'i','ഈ':'ii','ഉ':'u','ഊ':'uu','ഋ':'ri','എ':'e','ഏ':'ee','ഐ':'ai','ഒ':'o','ഓ':'oo','ഔ':'au'}, cons: {'ക':'k','ഖ':'kh','ഗ':'g','ഘ':'gh','ങ':'ng','ച':'c','ഛ':'chh','ജ':'j','ഝ':'jh','ഞ':'ny','ട':'t','ഠ':'th','ഡ':'d','ഢ':'dh','ണ':'n','ത':'th','ഥ':'th','ദ':'d','ധ':'dh','ന':'n','പ':'p','ഫ':'ph','ബ':'b','ഭ':'bh','മ':'m','യ':'y','ര':'r','ല':'l','വ':'v','ശ':'sh','ഷ':'sh','സ':'s','ഹ':'h','ള':'l','ഴ':'zh','റ':'r'}, matras: {'ാ':'aa','ി':'i','ീ':'ii','ു':'u','ൂ':'uu','ൃ':'ri','െ':'e','േ':'ee','ൈ':'ai','ൊ':'o','ോ':'oo','ൌ':'au'}, virama:'്' },
+                { vowels: {'అ':'a','ఆ':'aa','ఇ':'i','ఈ':'ii','ఉ':'u','ఊ':'uu','ఋ':'ri','ఎ':'e','ఏ':'ee','ఐ':'ai','ఒ':'o','ఓ':'oo','ఔ':'au'}, cons: {'క':'k','ఖ':'kh','గ':'g','ఘ':'gh','ఙ':'ng','చ':'c','ఛ':'chh','జ':'j','ఝ':'jh','ఞ':'ny','ట':'t','ఠ':'th','డ':'d','ఢ':'dh','ణ':'n','త':'th','థ':'th','ద':'d','ధ':'dh','న':'n','ప':'p','ఫ':'ph','బ':'b','భ':'bh','మ':'m','య':'y','ర':'r','ల':'l','వ':'v','శ':'sh','ష':'sh','స':'s','హ':'h','ళ':'l','ఱ':'r'}, matras: {'ా':'aa','ి':'i','ీ':'ii','ు':'u','ూ':'uu','ృ':'ri','ె':'e','ే':'ee','ై':'ai','ొ':'o','ో':'oo','ౌ':'au'}, virama:'్' },
+                { vowels: {'ಅ':'a','ಆ':'aa','ಇ':'i','ಈ':'ii','ಉ':'u','ಊ':'uu','ಋ':'ri','ಎ':'e','ಏ':'ee','ಐ':'ai','ಒ':'o','ಓ':'oo','ಔ':'au'}, cons: {'ಕ':'k','ಖ':'kh','ಗ':'g','ಘ':'gh','ಙ':'ng','ಚ':'c','ಛ':'chh','ಜ':'j','ಝ':'jh','ಞ':'ny','ಟ':'t','ಠ':'th','ಡ':'d','ಢ':'dh','ಣ':'n','ತ':'th','ಥ':'th','ದ':'d','ಧ':'dh','ನ':'n','ಪ':'p','ಫ':'ph','ಬ':'b','ಭ':'bh','ಮ':'m','ಯ':'y','ರ':'r','ಲ':'l','ವ':'v','ಶ':'sh','ಷ':'sh','ಸ':'s','ಹ':'h','ಳ':'l','ೞ':'zh','ಱ':'r'}, matras: {'ಾ':'aa','ಿ':'i','ೀ':'ii','ು':'u','ೂ':'uu','ೃ':'ri','ೆ':'e','ೇ':'ee','ೈ':'ai','ೊ':'o','ೋ':'oo','ೌ':'au'}, virama:'್' }
+            ];
+            let result = '';
+            for (const cfg of scripts) {
+                const chars = Array.from(String(text || '').normalize('NFC'));
+                let out = '';
+                for (let i=0;i<chars.length;i++) {
+                    const c=chars[i];
+                    if(cfg.vowels[c]) { out+=cfg.vowels[c]; continue; }
+                    if(cfg.cons[c]) {
+                        out+=cfg.cons[c]; const next=chars[i+1];
+                        if(next===cfg.virama) { i++; continue; }
+                        if(cfg.matras[next]) { out+=cfg.matras[next]; i++; } else out+='a';
+                        continue;
+                    }
+                    if(cfg.matras[c]) { out+=cfg.matras[c]; continue; }
+                    if(c===cfg.virama) continue;
+                    out+=c;
+                }
+                result += ' ' + out;
+            }
+            return result.trim();
+        }
+ 
+        function subhaSoundKey(value) {
+            let x=String(value||'').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+            x=x.replace(/ph/g,'f').replace(/th/g,'t').replace(/dh/g,'d').replace(/kh/g,'k').replace(/gh/g,'g').replace(/chh?/g,'c').replace(/sh/g,'s').replace(/zh/g,'l').replace(/aa|ii|uu|ee|oo|ai|au/g,'a').replace(/s/g,'c');
+            return x.replace(/[^a-z0-9]/g,'').replace(/[aeiou]/g,'').replace(/(.)\1+/g,'$1');
+        }
+        function subhaEditDistance(a,b) {
+            if(!a||!b)return 99;
+            const prev=Array.from({length:b.length+1},(_,i)=>i);
+            let row;
+            for(let i=1;i<=a.length;i++){
+                row=[i];
+                for(let j=1;j<=b.length;j++) row[j]=Math.min(row[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+                for(let j=0;j<=b.length;j++)prev[j]=row[j];
+            }
+            return prev[b.length];
+        }
+        function subhaSearchMatch(query, fields) {
+            if(!query) return true;
+            const rawQ=query.normalize('NFC').toLocaleLowerCase().trim().replace(/\s+/g,' ');
+            const joined=fields.map(v=>String(v||'').normalize('NFC').toLocaleLowerCase()).join(' ');
+            if(joined.includes(rawQ)) return true;
+            const qLatin=(subhaTamilLatin(rawQ)+' '+subhaHindiLatin(rawQ)+' '+subhaOtherIndicLatin(rawQ)).toLocaleLowerCase();
+            const allLatin=fields.map(v=>subhaTamilLatin(v)+' '+subhaHindiLatin(v)+' '+subhaOtherIndicLatin(v)+' '+String(v||'')).join(' ').toLocaleLowerCase();
+            if(allLatin.includes(rawQ) || allLatin.includes(qLatin.trim())) return true;
+            const qTokens=rawQ.split(/\s+/).filter(Boolean);
+            const fTokens=allLatin.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+            const qKeys=qTokens.map(t=>subhaSoundKey(t)||subhaSoundKey(subhaTamilLatin(t))||subhaSoundKey(subhaHindiLatin(t))||subhaSoundKey(subhaOtherIndicLatin(t))).filter(Boolean);
+            const fKeys=fTokens.map(t=>subhaSoundKey(t)).filter(Boolean);
+            if(!qKeys.length)return false;
+            return qKeys.every(qk=>fKeys.some(fk=>{
+                if(fk.includes(qk)||qk.includes(fk))return Math.min(fk.length,qk.length)>=3;
+                if(Math.min(fk.length,qk.length)<4)return false;
+                return subhaEditDistance(qk,fk)<=Math.max(1,Math.floor(Math.max(qk.length,fk.length)*0.24));
+            }));
         }
  
         function renderStoreProducts() {
@@ -2589,10 +2889,8 @@ body { background-color:#f7f8fb; }
             const norm = value => String(value ?? '').toLocaleLowerCase().trim().replace(/\s+/g, ' ');
             let list = products.filter(p => {
                 const matchCat = activeCategory === 'ALL' || norm(p.category) === norm(activeCategory);
-                // Search all useful catalog fields, including category, expiry and alternate DB column names.
-                const searchable = [p.name, p.salt, p.brand, p.batch, p.category, p.expiry, p.generic_name, p.description, p.manufacturer, p.medicine_name]
-                    .map(norm).filter(Boolean).join(' ');
-                const matchQ = !q || searchable.includes(q) || q.split(' ').every(part => searchable.includes(part));
+                const searchableFields = [p.name, p.salt, p.brand, p.batch, p.category, p.expiry, p.generic_name, p.description, p.manufacturer, p.medicine_name, p.alternative_names, p.search_keywords, p.video];
+                const matchQ = subhaSearchMatch(q, searchableFields);
                 return matchCat && matchQ;
             });
  
@@ -2643,18 +2941,57 @@ body { background-color:#f7f8fb; }
             }).join('') || `<tr><td colspan="6" class="muted">No products in inventory. Add your first product above.</td></tr>`;
         }
  
+        function showLoginHeartAnimation() {
+            const overlay = document.getElementById('login-heart-overlay');
+            if (!overlay) return;
+            overlay.classList.add('show');
+            window.setTimeout(() => overlay.classList.remove('show'), 1700);
+        }
+ 
+        let subhaSpeechRecognition = null;
+        function startSubhaVoiceSearch() {
+            const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const btn = document.getElementById('voice-search-btn');
+            if (!SpeechRecognitionAPI) {
+                showToast('Voice search is not supported in this browser. Try Chrome or update Brave.', 'error');
+                return;
+            }
+            try {
+                if (subhaSpeechRecognition) subhaSpeechRecognition.abort();
+                subhaSpeechRecognition = new SpeechRecognitionAPI();
+                subhaSpeechRecognition.lang = document.getElementById('voice-search-language')?.value || 'ta-IN';
+                subhaSpeechRecognition.continuous = false;
+                subhaSpeechRecognition.interimResults = false;
+                subhaSpeechRecognition.maxAlternatives = 1;
+                if (btn) { btn.classList.add('listening'); btn.innerHTML = '<i class="ri-mic-fill"></i>'; }
+                showToast('Voice search is listening. Say a medicine name.', 'success');
+                subhaSpeechRecognition.onresult = event => {
+                    const phrase = event.results?.[0]?.[0]?.transcript || '';
+                    const input = document.getElementById('search-input');
+                    if (input) { input.value = phrase; renderStoreProducts(); }
+                    showToast(phrase ? `Voice search: ${phrase}` : 'மருந்தின் பெயர் தெளிவாக கேட்கவில்லை.', phrase ? 'success' : 'error');
+                };
+                subhaSpeechRecognition.onerror = event => showToast(`Voice search: ${event.error || 'Could not hear you.'}`, 'error');
+                subhaSpeechRecognition.onend = () => { if (btn) { btn.classList.remove('listening'); btn.innerHTML = '<i class="ri-mic-line"></i>'; } };
+                subhaSpeechRecognition.start();
+            } catch (err) {
+                if (btn) { btn.classList.remove('listening'); btn.innerHTML = '<i class="ri-mic-line"></i>'; }
+                showToast(err?.message || 'Could not start voice search. Allow microphone access.', 'error');
+            }
+        }
+ 
         /* =========================================================================
            8. UNIFIED ACCOUNT SIGN-IN
         ========================================================================= */
         function normalizeLoginPhone(value) {
-            let phone = String(value || '').trim().replace(/[\\s().-]/g, '');
-            if (/^\\d{10}$/.test(phone)) phone = '+91' + phone;
-            else if (/^91\\d{10}$/.test(phone)) phone = '+' + phone;
+            let phone = String(value || '').trim().replace(/[\s().-]/g, '');
+            if (/^\d{10}$/.test(phone)) phone = '+91' + phone;
+            else if (/^91\d{10}$/.test(phone)) phone = '+' + phone;
             return phone;
         }
  
         async function handleUnifiedSignIn() {
-            const name = document.getElementById('login-name').value.trim() || 'User';
+            const name = document.getElementById('login-name')?.value?.trim() || 'User';
             const identifier = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value;
             if (!identifier || !pass) return showToast('Enter your email address or mobile number and password.', 'error');
@@ -2662,9 +2999,9 @@ body { background-color:#f7f8fb; }
                 await initSupabase();
                 if (!supabaseClient) return showToast('Cloud service unavailable. Check internet, Supabase project status, and public key.', 'error');
             }
-            const isEmail = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(identifier);
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
             const phone = normalizeLoginPhone(identifier);
-            if (!isEmail && !/^\\+?[1-9]\\d{7,14}$/.test(phone)) {
+            if (!isEmail && !/^\+?[1-9]\d{7,14}$/.test(phone)) {
                 return showToast('Enter a valid email address or mobile number with country code.', 'error');
             }
             try {
@@ -2689,6 +3026,7 @@ body { background-color:#f7f8fb; }
                 localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                 updateUserAuthUI();
                 await pullFromSupabaseSQL();
+                showLoginHeartAnimation();
                 showToast(isAdmin ? 'Admin signed in securely.' : `Signed in as ${appCurrentUser.name}`, 'success');
                 if (isAdmin) switchView('admin');
                 else switchView('home');
@@ -2700,7 +3038,7 @@ body { background-color:#f7f8fb; }
             }
         }
  
-        let pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '' };
+        let pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '', password: '' };
  
         function classifyAccountIdentifier(value) {
             const raw = String(value || '').trim();
@@ -2725,24 +3063,25 @@ body { background-color:#f7f8fb; }
             const name = document.getElementById('signup-name').value.trim();
             const place = document.getElementById('signup-place').value.trim();
             const classified = classifyAccountIdentifier(document.getElementById('signup-identifier').value);
+            const password = document.getElementById('signup-new-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
             if (!name) return showToast('Enter your full name.', 'error');
             if (!place) return showToast('Enter your place or city.', 'error');
-            if (!classified) return showToast('Enter a valid email address or mobile number.', 'error');
-            if (classified.kind === 'email' && classified.value === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
+            if (!classified || classified.kind !== 'email') return showToast('Enter a valid email address. Customer registration verification is by email OTP.', 'error');
+            if (classified.value === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
+            if (password.length < 6) return showToast('Create a password with at least 6 characters.', 'error');
+            if (password !== confirmPassword) return showToast('Passwords do not match.', 'error');
             try {
                 await ensureAuthClient();
                 const options = { shouldCreateUser: true, data: { name, full_name: name, place } };
-                const request = classified.kind === 'email'
-                    ? { email: classified.value, options }
-                    : { phone: classified.value, options };
-                const { error } = await supabaseClient.auth.signInWithOtp(request);
+                const { error } = await supabaseClient.auth.signInWithOtp({ email: classified.value, options });
                 if (error) throw error;
-                pendingAccountOtp = { ...classified, purpose: 'signup', name, place };
-                document.getElementById('signup-otp-title').textContent = 'Verify your ' + (classified.kind === 'email' ? 'email address' : 'mobile number');
-                document.getElementById('signup-otp-help').textContent = 'Enter the OTP sent to ' + classified.value + '. If it does not arrive, use Resend OTP.';
+                pendingAccountOtp = { ...classified, purpose: 'signup', name, place, password };
+                document.getElementById('signup-otp-title').textContent = 'Verify your email address';
+                document.getElementById('signup-otp-help').textContent = 'Enter the numeric OTP sent to ' + classified.value + '. If it does not arrive, use Resend OTP.';
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
                 document.getElementById('signup-otp')?.focus();
-                showToast('OTP request submitted. Check your inbox or SMS.', 'success');
+                showToast('Email OTP requested. Check your inbox and spam folder.', 'success');
             } catch (err) {
                 console.error('Customer OTP request failed:', err);
                 showToast(err?.message || 'Could not send verification OTP.', 'error');
@@ -2793,7 +3132,7 @@ body { background-color:#f7f8fb; }
         async function verifyCustomerSignupOtp() {
             const pending = pendingAccountOtp;
             const token = document.getElementById('signup-otp').value.trim().replace(/\s+/g, '');
-            if (!pending?.value || !pending?.kind) return showToast('First request an OTP using your email or mobile number.', 'error');
+            if (!pending?.value || !pending?.kind) return showToast('First request an OTP using your email address.', 'error');
             if (!token) return showToast('Enter the OTP you received.', 'error');
             try {
                 await ensureAuthClient();
@@ -2803,6 +3142,12 @@ body { background-color:#f7f8fb; }
                 const { data, error } = await supabaseClient.auth.verifyOtp(verifyArgs);
                 if (error) throw error;
                 if (!data?.user || !data?.session) throw new Error('OTP was accepted but no active session was returned. Please request a new OTP.');
+                // A verified signup now receives the password the customer created before OTP.
+                if (pending.purpose === 'signup') {
+                    if (!pending.password || pending.password.length < 6) throw new Error('Verification succeeded, but the password was not retained. Please sign in with OTP and use Forgot Password to set a password.');
+                    const { error: passwordError } = await supabaseClient.auth.updateUser({ password: pending.password });
+                    if (passwordError) throw passwordError;
+                }
                 const user = data.user;
                 const email = (user.email || (pending.kind === 'email' ? pending.value : '')).toLowerCase();
                 const phone = user.phone || (pending.kind === 'phone' ? pending.value : '');
@@ -2816,10 +3161,12 @@ body { background-color:#f7f8fb; }
                 document.getElementById('signup-otp-box')?.classList.add('hidden');
                 document.getElementById('signup-details-box')?.classList.add('hidden');
                 document.getElementById('signup-otp').value = '';
-                pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '' };
+                document.getElementById('signup-new-password').value = '';
+                document.getElementById('signup-confirm-password').value = '';
+                pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '', password: '' };
                 updateUserAuthUI();
                 await pullFromSupabaseSQL();
-                showToast(pending.purpose === 'login' ? 'You are now signed in.' : 'Your account is verified and ready.', 'success');
+                showToast(pending.purpose === 'login' ? 'You are now signed in.' : 'Email verified. Your password is set. You can sign in with email and password next time.', 'success');
                 if (appCurrentUser.isAdmin) switchView('admin'); else switchView('home');
             } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'OTP verification failed. Check the code and try again.', 'error'); }
         }
@@ -2954,79 +3301,59 @@ body { background-color:#f7f8fb; }
         /* =========================================================================
            9. ADMIN CRUD OPERATIONS
         ========================================================================= */
-        async function uploadProductImage(file) {
-            if (!file) return null;
-            if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) throw new Error('Choose a JPG, PNG, WEBP or AVIF image.');
-            if (file.size > 8 * 1024 * 1024) throw new Error('Image must be 8 MB or smaller.');
-            if (!supabaseClient) throw new Error('Cloud storage is not configured.');
-            const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-            const path = `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-            const { error } = await supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
-            if (error) throw error;
-            const { data } = supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(path);
-            return data.publicUrl;
+        function subhaFileMime(file, kind) {
+            const ext = String(file?.name || '').split('.').pop().toLowerCase();
+            const map = kind === 'video'
+                ? { mp4:'video/mp4', webm:'video/webm', mov:'video/quicktime', m4v:'video/x-m4v' }
+                : { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', avif:'image/avif' };
+            return file?.type || map[ext] || '';
         }
+        async function subhaUploadStorage(file, bucket, prefix, kind, onProgress) {
+            if (!file) return null;
+            if (!supabaseClient) throw new Error('Please sign in as admin and wait until cloud connection is ready.');
+            const mime = subhaFileMime(file, kind);
+            const allowed = kind === 'video' ? ['video/mp4','video/webm','video/quicktime','video/x-m4v'] : ['image/jpeg','image/png','image/webp','image/avif'];
+            const max = kind === 'video' ? 50*1024*1024 : 8*1024*1024;
+            if (!allowed.includes(mime)) throw new Error(kind === 'video' ? 'Choose MP4, WEBM or MOV video.' : 'Choose JPG, PNG, WEBP or AVIF image.');
+            if (file.size > max) throw new Error(kind === 'video' ? 'Video must be 50 MB or smaller.' : 'Each image must be 8 MB or smaller.');
+            const clean = String(file.name || (kind === 'video' ? 'video.mp4' : 'image.jpg')).toLowerCase().replace(/[^a-z0-9._-]+/g,'-');
+            const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}-${clean}`;
+            const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !sessionData?.session?.access_token) throw new Error('Your admin session expired. Sign in again, then upload the video.');
+            const token = sessionData.session.access_token;
+            await new Promise((resolve,reject)=>{
+                const xhr=new XMLHttpRequest();
+                xhr.open('POST',`${DEFAULT_SB_URL}/storage/v1/object/${encodeURIComponent(bucket)}/${path.split('/').map(encodeURIComponent).join('/')}`);
+                xhr.setRequestHeader('apikey',DEFAULT_SB_KEY);
+                xhr.setRequestHeader('Authorization',`Bearer ${token}`);
+                xhr.setRequestHeader('Content-Type',mime);
+                xhr.setRequestHeader('x-upsert','false');
+                xhr.upload.onprogress=(event)=>{if(event.lengthComputable&&typeof onProgress==='function')onProgress(Math.min(99,Math.round(event.loaded/event.total*100)),event.loaded,event.total);};
+                xhr.onload=()=>{if(xhr.status>=200&&xhr.status<300){if(typeof onProgress==='function')onProgress(100,file.size,file.size);resolve();}else{let message=xhr.responseText||`HTTP ${xhr.status}`;try{const parsed=JSON.parse(xhr.responseText);message=parsed.message||parsed.error||message;}catch(_){}reject(new Error(`Storage upload failed (${bucket}): ${message}. Check bucket and Storage policies in Supabase.`));}};
+                xhr.onerror=()=>reject(new Error('Video upload network error. Check your internet connection and try again.'));
+                xhr.onabort=()=>reject(new Error('Video upload was cancelled.'));
+                xhr.send(file);
+            });
+            const publicResult = supabaseClient.storage.from(bucket).getPublicUrl(path);
+            const url = publicResult?.data?.publicUrl;
+            if (!url) throw new Error(`Upload finished but a public URL could not be created for ${bucket}.`);
+            return url;
+        }
+        async function uploadProductImage(file) { return subhaUploadStorage(file, PRODUCT_IMAGE_BUCKET, 'products', 'image'); }
+        async function uploadAdminImage(file, prefix='admin-image') { return subhaUploadStorage(file, PRODUCT_IMAGE_BUCKET, prefix, 'image'); }
+        async function uploadProductVideo(file) { return subhaUploadStorage(file, PRODUCT_VIDEO_BUCKET, 'videos', 'video'); }
  
         function previewAdminImageFile(input, targetId) {
-            const target = document.getElementById(targetId);
-            if (!target) return;
-            target.innerHTML = '';
-            const file = input?.files?.[0];
-            if (!file) return;
-            if (!['image/jpeg','image/png','image/webp','image/avif'].includes(file.type) || file.size > 8 * 1024 * 1024) {
-                input.value = '';
-                return showToast('Choose JPG, PNG, WEBP or AVIF image up to 8 MB.', 'error');
-            }
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.alt = 'Selected image preview';
-            img.style.cssText = 'max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;';
-            target.appendChild(img);
+            const target=document.getElementById(targetId); if(!target)return; target.innerHTML='';
+            const file=input?.files?.[0]; if(!file)return;
+            const mime=subhaFileMime(file,'image');
+            if(!['image/jpeg','image/png','image/webp','image/avif'].includes(mime)||file.size>8*1024*1024){input.value='';return showToast('Choose JPG, PNG, WEBP or AVIF image up to 8 MB.','error');}
+            const img=document.createElement('img'); img.src=URL.createObjectURL(file); img.alt='Selected image preview'; img.style.cssText='max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;'; target.appendChild(img);
         }
- 
-        function previewAdminVideoFile(input, targetId) {
-            const target = document.getElementById(targetId);
-            if (!target) return;
-            target.innerHTML = '';
-            const file = input?.files?.[0];
-            if (!file) return;
-            if (!['video/mp4','video/webm','video/quicktime'].includes(file.type) || file.size > 50 * 1024 * 1024) {
-                input.value = '';
-                return showToast('Choose MP4, WEBM or MOV video up to 50 MB.', 'error');
-            }
-            const video = document.createElement('video');
-            video.src = URL.createObjectURL(file);
-            video.controls = true;
-            video.playsInline = true;
-            video.style.cssText = 'width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';
-            target.appendChild(video);
-        }
- 
-        async function uploadAdminImage(file, prefix = 'admin-image') {
-            if (!file) return null;
-            if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) throw new Error('Choose a JPG, PNG, WEBP or AVIF image.');
-            if (file.size > 8 * 1024 * 1024) throw new Error('Image must be 8 MB or smaller.');
-            if (!supabaseClient) throw new Error('Cloud storage is not configured. Please sign in and check Supabase Storage.');
-            const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-            const path = `${prefix}/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-            const { error } = await supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
-            if (error) throw error;
-            const { data } = supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(path);
-            return data.publicUrl;
-        }
- 
-        async function uploadProductVideo(file) {
-            if (!file) return null;
-            const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
-            if (!allowedTypes.includes(file.type)) throw new Error('Choose an MP4, WEBM or MOV video.');
-            if (file.size > 50 * 1024 * 1024) throw new Error('Video must be 50 MB or smaller.');
-            if (!supabaseClient) throw new Error('Cloud storage is not configured.');
-            const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-            const path = `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-            const { error } = await supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
-            if (error) throw error;
-            const { data } = supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).getPublicUrl(path);
-            return data.publicUrl;
+        function previewAdminVideoFile(input,targetId){
+            const target=document.getElementById(targetId);if(!target)return;target.innerHTML='';const file=input?.files?.[0];if(!file)return;
+            const mime=subhaFileMime(file,'video');if(!['video/mp4','video/webm','video/quicktime','video/x-m4v'].includes(mime)||file.size>50*1024*1024){input.value='';return showToast('Choose MP4, WEBM or MOV video up to 50 MB.','error');}
+            const video=document.createElement('video');video.src=URL.createObjectURL(file);video.controls=true;video.playsInline=true;video.style.cssText='width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';target.appendChild(video);
         }
  
         function renderAdminProductImagePreview(urls) {
@@ -3059,6 +3386,7 @@ body { background-color:#f7f8fb; }
                 return showToast('Choose JPG, PNG, WEBP or AVIF photos, each 8 MB or smaller.', 'error');
             }
             renderAdminProductImagePreview(files.map(file => URL.createObjectURL(file)));
+            showToast(`${files.length} product photo(s) selected. They will upload when you save the medicine.`, 'success');
         }
  
         async function saveProductAdmin() {
@@ -3072,6 +3400,7 @@ body { background-color:#f7f8fb; }
             const mrp = parseFloat(document.getElementById('adm-prod-mrp').value) || 0;
             const price = parseFloat(document.getElementById('adm-prod-price').value) || 0;
             const stock = parseInt(document.getElementById('adm-prod-stock').value) || 0;
+            const searchKeywords = document.getElementById('adm-prod-search-keywords')?.value.trim() || '';
             let image = document.getElementById('adm-prod-img').value.trim();
             let video = document.getElementById('adm-prod-video').value.trim();
             const imageFiles = Array.from(document.getElementById('adm-prod-image-file')?.files || []);
@@ -3080,10 +3409,15 @@ body { background-color:#f7f8fb; }
             const videoFile = document.getElementById('adm-prod-video-file')?.files?.[0];
             if (imageFiles.length) {
                 try {
-                    showToast(`Uploading ${imageFiles.length} product photo(s)…`);
-                    const uploadedImages = await Promise.all(imageFiles.map(file => uploadProductImage(file)));
+                    const uploadedImages = [];
+                    for (let i=0;i<imageFiles.length;i++) {
+                        showToast(`Uploading product photo ${i+1} of ${imageFiles.length}…`);
+                        uploadedImages.push(await uploadProductImage(imageFiles[i]));
+                    }
                     images = uploadedImages;
                     image = uploadedImages[0] || image;
+                    renderAdminProductImagePreview(images);
+                    showToast(`${images.length} photo(s) uploaded. Saving medicine…`, 'success');
                 } catch (err) { return showToast(err.message || 'One or more image uploads failed. Product was not saved.', 'error'); }
             }
             if (!images.length && image) images = [image];
@@ -3096,10 +3430,17 @@ body { background-color:#f7f8fb; }
  
             if (!name || price <= 0) return showToast('Please enter Medicine Name and valid Price', 'error');
  
-            const item = { id, name, salt, brand, category, batch, expiry, mrp: mrp || price, price, stock, image, images: images.length ? images : (products.find(p => p.id === id)?.images || (image ? [image] : [])), video, rx, featured, updated_at: new Date().toISOString() };
+            const gallery = images.length ? images : (existingProduct?.images || (image ? [image] : []));
+            const item = { id, name, salt, brand, category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, video_url: video, search_keywords: searchKeywords, rx, featured, updated_at: new Date().toISOString() };
             const idx = products.findIndex(p => p.id === id);
-            if (idx >= 0) products[idx] = item;
-            else products.unshift(item);
+            if (idx >= 0) {
+                const oldStock = Number(products[idx].stock || 0);
+                if (oldStock !== stock) {
+                    const confirmed = window.confirm(`Overwrite stock for ${name}?\nCurrent stock: ${oldStock}\nNew stock: ${stock}\n\nThis will replace the current quantity in the cloud.`);
+                    if (!confirmed) return showToast('Product save cancelled. Existing stock was not changed.', 'error');
+                }
+                products[idx] = item;
+            } else products.unshift(item);
  
             saveStateLocal();
             resetProductForm();
@@ -3107,18 +3448,22 @@ body { background-color:#f7f8fb; }
             showToast('Medicine (with Batch, Expiry & Stock) saved!');
  
             if (supabaseClient) {
-                let { error: saveError } = await supabaseClient.from('subha_products').upsert(item);
-                // Older databases may not yet have the optional images JSON/array column.
-                // Retry the legacy-compatible product fields so existing inventory still saves.
-                if (saveError && /images|column/i.test(saveError.message || '')) {
-                    const legacyItem = { ...item }; delete legacyItem.images;
-                    const retry = await supabaseClient.from('subha_products').upsert(legacyItem);
-                    saveError = retry.error;
-                    if (!saveError) showToast('Product saved. Multiple-photo gallery needs the optional images column in subha_products.', 'error');
+                let result = await supabaseClient.from('subha_products').upsert(item);
+                if (result.error) {
+                    const schemaItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, images: gallery, video_url: video || null, search_keywords: searchKeywords || null, batch_number: batch || null, expiry_date: expiry || null };
+                    result = await supabaseClient.from('subha_products').upsert(schemaItem);
                 }
-                if (saveError) {
-                    console.error('Product SQL save failed:', saveError);
-                    showToast('Saved locally, but Supabase SQL save failed: ' + saveError.message, 'error');
+                if (result.error) {
+                    const legacyItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, batch_number: batch || null, expiry_date: expiry || null };
+                    result = await supabaseClient.from('subha_products').upsert(legacyItem);
+                    if (!result.error && (gallery.length > 1 || video)) showToast('Medicine saved, but this database is missing images/video columns. Run the SQL upgrade to publish the full gallery/video.', 'error');
+                }
+                if (result.error) {
+                    console.error('Supabase product save failed:', result.error);
+                    showToast('Product is visible only on this device because Supabase rejected the save: ' + result.error.message, 'error');
+                } else {
+                    const fresh = await supabaseClient.from('subha_products').select('*').order('name', { ascending: true });
+                    if (!fresh.error) { products = (fresh.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name); saveStateLocal(); renderStoreProducts(); }
                 }
             }
         }
@@ -3136,10 +3481,12 @@ body { background-color:#f7f8fb; }
             document.getElementById('adm-prod-mrp').value = p.mrp;
             document.getElementById('adm-prod-price').value = p.price;
             document.getElementById('adm-prod-stock').value = p.stock;
+            if (document.getElementById('adm-prod-search-keywords')) document.getElementById('adm-prod-search-keywords').value = p.search_keywords || '';
             document.getElementById('adm-prod-img').value = p.image || '';
             document.getElementById('adm-prod-video').value = p.video || '';
             document.getElementById('adm-prod-image-file').value = '';
             document.getElementById('adm-prod-video-file').value = '';
+            renderAdminProductImagePreview(getProductGalleryImages(p));
             document.getElementById('adm-prod-rx').checked = !!p.rx;
             document.getElementById('adm-prod-featured').checked = !!p.featured;
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3156,7 +3503,7 @@ body { background-color:#f7f8fb; }
         }
  
         function resetProductForm() {
-            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img', 'adm-prod-video'].forEach(k => {
+            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img', 'adm-prod-video', 'adm-prod-search-keywords'].forEach(k => {
                 document.getElementById(k).value = '';
             });
             document.getElementById('adm-prod-image-file').value = '';
@@ -3226,92 +3573,98 @@ body { background-color:#f7f8fb; }
             showToast('Store theme saved successfully!');
         }
  
-        function renderSavedPromoVideo() {
-            const box = document.getElementById('adm-saved-promo-video');
-            if (!box) return;
-            box.innerHTML = '';
-            const url = String(storeSettings.promo_video || '').trim();
-            if (!url) { box.innerHTML = '<small class="muted">No saved promotional video.</small>'; return; }
-            const title = document.createElement('strong'); title.textContent = 'Saved promotional video';
-            const video = document.createElement('video'); video.src = url; video.controls = true; video.playsInline = true; video.preload = 'metadata';
-            video.style.cssText = 'display:block;width:100%;max-width:260px;max-height:110px;object-fit:contain;background:#111;border-radius:8px;margin:6px 0;';
-            video.onerror = () => { const err=document.createElement('small'); err.className='text-danger'; err.textContent='Video could not load. Check the product-videos bucket read permission and saved URL.'; box.appendChild(err); };
-            const del = document.createElement('button'); del.type='button'; del.className='btn btn-danger'; del.textContent='Delete saved video'; del.onclick = deleteSavedPromoVideo;
-            box.append(title, video, del);
-        }
-        async function deleteSavedPromoVideo() {
-            const url = String(storeSettings.promo_video || '').trim();
-            if (!url) return showToast('No saved video to delete.', 'error');
-            if (!confirm('Delete this promotional video permanently and remove it from the customer home page?')) return;
+        async function loadSavedPromoVideoLibrary() {
+            const box = document.getElementById('adm-promo-video-library');
+            if (!box || !supabaseClient || !appCurrentUser?.isAdmin) return;
+            box.innerHTML = '<strong style="display:block;margin-bottom:8px;">Saved promotional videos</strong><div class="muted">Loading saved videos…</div>';
             try {
-                if (!supabaseClient) throw new Error('Please sign in as admin before deleting the video.');
-                // Remove the object only when its URL belongs to this project's product-videos bucket.
-                const marker = '/storage/v1/object/public/' + PRODUCT_VIDEO_BUCKET + '/';
-                const at = url.indexOf(marker);
-                if (at >= 0) {
-                    const objectPath = decodeURIComponent(url.slice(at + marker.length).split('?')[0]);
-                    if (objectPath && !objectPath.includes('..')) {
-                        const { error: removeError } = await supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).remove([objectPath]);
-                        if (removeError) throw removeError;
-                    }
-                }
-                storeSettings.promo_video = '';
-                const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
+                const { data, error } = await supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).list('videos', {
+                    limit: 100, sortBy: { column: 'created_at', order: 'desc' }
+                });
                 if (error) throw error;
-                const v=document.getElementById('hero-promo-video'); if(v){v.pause();v.removeAttribute('src');v.load();}
-                const w=document.getElementById('hero-promo-video-wrap'); if(w)w.classList.add('hidden');
-                renderSavedPromoVideo(); saveStateLocal();
-                showToast('Promotional video deleted and removed from customer website.', 'success');
-            } catch (e) { showToast('Video delete failed: ' + (e.message || e), 'error'); }
+                const files = (data || []).filter(f => f && f.name && !f.name.startsWith('.'));
+                const active = resolveSubhaStorageUrl(storeSettings.promo_video || '', PRODUCT_VIDEO_BUCKET);
+                const rows = files.map(f => {
+                    const path = `videos/${f.name}`;
+                    const url = supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).getPublicUrl(path)?.data?.publicUrl || '';
+                    return { name: f.name, path, url, active: !!active && url === active, created: f.created_at || f.updated_at || '' };
+                }).filter(x => x.url);
+                if (active && !rows.some(x => x.url === active)) rows.unshift({ name: 'Currently published video', path: '', url: active, active: true, created: '' });
+                box.innerHTML = '<strong style="display:block;margin-bottom:8px;">Saved promotional videos</strong>';
+                if (!rows.length) { const empty=document.createElement('div'); empty.className='muted'; empty.textContent='No saved videos were found in the videos folder.'; box.appendChild(empty); return; }
+                rows.forEach((item, index) => {
+                    const card=document.createElement('div'); card.style.cssText='padding:9px 0;border-top:1px solid var(--border-color);';
+                    const title=document.createElement('div'); title.style.cssText='font-size:12px;font-weight:700;margin-bottom:6px;';
+                    title.textContent=(item.active?'Published • ':'Saved • ')+item.name; card.appendChild(title);
+                    const player=document.createElement('video'); player.controls=true; player.playsInline=true; player.preload='metadata';
+                    player.style.cssText='width:100%;max-width:220px;height:76px;max-height:76px;object-fit:contain;background:#111;border-radius:8px;';
+                    const src=document.createElement('source'); src.src=item.url; src.type=/\.webm(?:[?#]|$)/i.test(item.url)?'video/webm':'video/mp4'; player.appendChild(src); card.appendChild(player);
+                    if (!item.active) { const use=document.createElement('button'); use.type='button'; use.className='secondary-btn'; use.style.cssText='margin:7px 6px 0 0;padding:6px 10px;font-size:11px;'; use.textContent='Publish this video'; use.onclick=async()=>{storeSettings.promo_video=item.url;try{const result=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(result.error)throw result.error;saveStateLocal();applyStoreBranding();await loadSavedPromoVideoLibrary();showToast('Video published to customer store.','success');}catch(e){showToast('Could not publish video: '+(e.message||e),'error');}}; card.appendChild(use); }
+                    if (item.path) { const del=document.createElement('button'); del.type='button'; del.className='danger-btn'; del.style.cssText='margin-top:7px;padding:6px 10px;font-size:11px;'; del.textContent='Delete video'; del.onclick=async()=>{if(!confirm('Permanently delete this promotional video?'))return;try{if(item.active){storeSettings.promo_video='';const saved=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(saved.error)throw saved.error;}const removed=await supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).remove([item.path]);if(removed.error)throw removed.error;saveStateLocal();applyStoreBranding();await loadSavedPromoVideoLibrary();showToast('Promotional video deleted.','success');}catch(e){showToast('Could not delete video: '+(e.message||e),'error');}}; card.appendChild(del); }
+                    box.appendChild(card);
+                });
+            } catch (err) {
+                console.warn('Saved promotional video list could not load:', err);
+                box.innerHTML='<strong style="display:block;margin-bottom:8px;">Saved promotional videos</strong><div class="muted">Could not list stored videos. The currently published video can still appear on the customer site if its public URL is saved. Check Storage list permission for the admin.</div>';
+            }
         }
  
         async function saveAppearanceSettings() {
-            const logoFile = document.getElementById('adm-logo-file')?.files?.[0];
-            const brandImageFile = document.getElementById('adm-brand-image-file')?.files?.[0];
-            const bgFile = document.getElementById('adm-bg-file')?.files?.[0];
-            const promoFile = document.getElementById('adm-promo-file')?.files?.[0];
-            const promoVideoFile = document.getElementById('adm-promo-video-file')?.files?.[0];
+            if (!supabaseClient) return showToast('Cloud is not connected. Sign in as admin and check your internet connection.', 'error');
+            const logoFile=document.getElementById('adm-logo-file')?.files?.[0];
+            const brandImageFile=document.getElementById('adm-brand-image-file')?.files?.[0];
+            const bgFile=document.getElementById('adm-bg-file')?.files?.[0];
+            const promoFile=document.getElementById('adm-promo-file')?.files?.[0];
+            const promoVideoFile=document.getElementById('adm-promo-video-file')?.files?.[0];
             try {
-                if (bgFile) storeSettings.bg_image = await uploadAdminImage(bgFile, 'brand-images');
-                if (logoFile) storeSettings.logo_image = await uploadAdminImage(logoFile, 'store-logo');
-                if (brandImageFile) { storeSettings.promo_image = await uploadAdminImage(brandImageFile, 'brand-images'); document.getElementById('adm-promo-image').value = storeSettings.promo_image; }
-                if (promoFile) { storeSettings.promo_image = await uploadAdminImage(promoFile, 'promo-banners'); document.getElementById('adm-promo-image').value = storeSettings.promo_image; }
-                if (promoVideoFile) { storeSettings.promo_video = await uploadProductVideo(promoVideoFile); }
-            } catch (err) {
-                return showToast(err.message || 'Logo / brand image upload failed.', 'error');
-            }
-            storeSettings.bg_image = document.getElementById('adm-bg-image').value.trim() || storeSettings.bg_image || '';
-            storeSettings.promo_image = document.getElementById('adm-promo-image').value.trim() || storeSettings.promo_image || '';
-            storeSettings.promo_title = document.getElementById('adm-promo-title').value.trim();
-            storeSettings.promo_sub = document.getElementById('adm-promo-sub').value.trim();
-            storeSettings.coupon_enabled = !!document.getElementById('adm-coupon-enabled')?.checked;
-            storeSettings.coupon_code = (document.getElementById('adm-coupon-code')?.value || 'SUBHA10').trim().toUpperCase();
-            storeSettings.coupon_discount = Math.min(90, Math.max(1, Number(document.getElementById('adm-coupon-discount')?.value) || 10));
-            const couponText = document.getElementById('adm-coupons-list')?.value || '';
-            const parsedCoupons = couponText.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => { const parts = line.split(',').map(v => v.trim()); return { code: (parts[0] || '').toUpperCase(), discount: Math.min(90, Math.max(1, Number(parts[1]) || 10)), enabled: !['false','no','0','off'].includes((parts[2] || 'true').toLowerCase()) }; }).filter(c => /^[A-Z0-9_-]{3,32}$/.test(c.code));
-            storeSettings.coupons = parsedCoupons.length ? parsedCoupons : [{ code: storeSettings.coupon_code, discount: storeSettings.coupon_discount, enabled: storeSettings.coupon_enabled }];
-            saveStateLocal();
-            applyStoreBranding();
-            if (document.getElementById('adm-logo-file')) document.getElementById('adm-logo-file').value = '';
-            if (document.getElementById('adm-brand-image-file')) document.getElementById('adm-brand-image-file').value = '';
-            if (document.getElementById('adm-bg-file')) document.getElementById('adm-bg-file').value = '';
-            if (document.getElementById('adm-promo-file')) document.getElementById('adm-promo-file').value = '';
-            if (document.getElementById('adm-promo-video-file')) document.getElementById('adm-promo-video-file').value = '';
-            ['adm-logo-preview','adm-brand-preview','adm-promo-preview','adm-promo-video-preview'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=''; });
-            if (supabaseClient) {
-                const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
-                if (error) {
-                    console.error('Appearance settings cloud save failed:', error);
-                    return showToast('Saved on this device only. Cloud save failed: ' + error.message + '. Run the supplied SQL migration in Supabase.', 'error');
+                if(bgFile){showToast('Uploading background image…');storeSettings.bg_image=await uploadAdminImage(bgFile,'backgrounds');}
+                if(logoFile){showToast('Uploading store logo…');storeSettings.logo_image=await uploadAdminImage(logoFile,'store-logo');}
+                if(brandImageFile){showToast('Uploading brand image…');storeSettings.promo_image=await uploadAdminImage(brandImageFile,'brand-images');}
+                if(promoFile){showToast('Uploading promotional banner…');storeSettings.promo_image=await uploadAdminImage(promoFile,'promo-banners');}
+                if(promoVideoFile){
+                    const progress=document.getElementById('adm-promo-video-progress');
+                    const bar=document.getElementById('adm-promo-video-progress-bar');
+                    const label=document.getElementById('adm-promo-video-progress-label');
+                    if(progress)progress.style.display='block';
+                    if(bar)bar.style.width='0%';
+                    if(label)label.textContent=`Uploading ${promoVideoFile.name} — 0%`;
+                    storeSettings.promo_video=await subhaUploadStorage(promoVideoFile,PRODUCT_VIDEO_BUCKET,'videos','video',(percent,loaded,total)=>{
+                        if(bar)bar.style.width=percent+'%';
+                        if(label){const mb=(loaded/1024/1024).toFixed(1);const totalMb=(total/1024/1024).toFixed(1);label.textContent=`Uploading ${promoVideoFile.name} — ${percent}% (${mb} / ${totalMb} MB)`;}
+                    });
+                    if(label)label.textContent='Upload complete (100%). Saving video link to your store…';
                 }
-            }
-            renderSavedPromoVideo();
-            showToast('Visual settings saved. Promotional video is available in the LIVE HEALTHCARE PARTNER banner.', 'success');
+            } catch(err){console.error('Media upload failed',err);return showToast(err.message||'Media upload failed. Nothing was published.', 'error');}
+            const bgValue=document.getElementById('adm-bg-image')?.value.trim();
+            const promoValue=document.getElementById('adm-promo-image')?.value.trim();
+            if(bgValue)storeSettings.bg_image=bgValue;
+            if(promoValue)storeSettings.promo_image=promoValue;
+            storeSettings.promo_title=document.getElementById('adm-promo-title')?.value.trim()||'';
+            storeSettings.promo_sub=document.getElementById('adm-promo-sub')?.value.trim()||'';
+            storeSettings.coupon_enabled=!!document.getElementById('adm-coupon-enabled')?.checked;
+            storeSettings.coupon_code=(document.getElementById('adm-coupon-code')?.value||'SUBHA10').trim().toUpperCase();
+            storeSettings.coupon_discount=Math.min(90,Math.max(1,Number(document.getElementById('adm-coupon-discount')?.value)||10));
+            const couponText=document.getElementById('adm-coupons-list')?.value||'';
+            const parsedCoupons=couponText.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{const parts=line.split(',').map(v=>v.trim());return{code:(parts[0]||'').toUpperCase(),discount:Math.min(90,Math.max(1,Number(parts[1])||10)),enabled:!['false','no','0','off'].includes((parts[2]||'true').toLowerCase())};}).filter(c=>/^[A-Z0-9_-]{3,32}$/.test(c.code));
+            storeSettings.coupons=parsedCoupons.length?parsedCoupons:[{code:storeSettings.coupon_code,discount:storeSettings.coupon_discount,enabled:storeSettings.coupon_enabled}];
+            showToast('Saving media links and settings to cloud…');
+            const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
+            if(error){console.error('Appearance settings cloud save failed:',error);return showToast('Upload completed but settings were not saved: '+error.message+'. Check subha_settings columns and RLS policy.', 'error');}
+            saveStateLocal();applyStoreBranding();
+            // Keep saved media visible in the admin panel after save/reopen.
+            const showSaved=(id,url,isVideo=false)=>{const box=document.getElementById(id);if(!box)return;box.innerHTML='';if(!url)return;if(isVideo){const v=document.createElement('video');v.src=url;v.controls=true;v.playsInline=true;v.style.cssText='width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';box.appendChild(v);}else{const im=document.createElement('img');im.src=url;im.alt='Saved image';im.style.cssText='max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;';box.appendChild(im);}};
+            showSaved('adm-logo-preview',storeSettings.logo_image);showSaved('adm-brand-preview',storeSettings.promo_image);showSaved('adm-promo-preview',storeSettings.promo_image);showSaved('adm-promo-video-preview',storeSettings.promo_video,true);
+            await loadSavedPromoVideoLibrary();
+            const videoProgressLabel=document.getElementById('adm-promo-video-progress-label');
+            const videoProgressBar=document.getElementById('adm-promo-video-progress-bar');
+            if(promoVideoFile){if(videoProgressBar)videoProgressBar.style.width='100%';if(videoProgressLabel)videoProgressLabel.textContent='Saved successfully — video is uploaded and the saved preview is shown below.';}
+            ['adm-logo-file','adm-brand-image-file','adm-bg-file','adm-promo-file','adm-promo-video-file'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+            showToast('Saved successfully. Logo, banner image and video are published to the customer store.', 'success');
         }
  
         async function saveCoreSettings() {
             storeSettings.store_name = document.getElementById('adm-store-name').value.trim() || 'Subha Medical';
-            storeSettings.whatsapp = document.getElementById('adm-whatsapp').value.trim() || '919487165045';
+            storeSettings.whatsapp = document.getElementById('adm-whatsapp').value.trim() || '918072956113';
             storeSettings.gstin = document.getElementById('adm-gstin').value.trim() || '33AAAAA0000A1Z5';
             storeSettings.dl_no = document.getElementById('adm-dl-no').value.trim() || 'TN-TPR-20/21-00000';
             storeSettings.gst_rate = parseFloat(document.getElementById('adm-gst-rate').value) || 12;
@@ -3547,7 +3900,7 @@ body { background-color:#f7f8fb; }
                 const lines = orderedItemsSnapshot.map(i => `• ${i.name} [Batch: ${i.batch || 'N/A'}] (x${i.qty}) - ₹${(i.price * i.qty).toFixed(2)}`).join('\\n');
                 const rxNote = orderObj.rx_image ? `\\n📄 Prescription: Attached in Store Order #${orderObj.id}` : '';
                 const msg = `New Medicine Order - ${storeSettings.store_name}\\nOrder ID: ${orderObj.id}\\nPatient: ${name}\\nPhone: ${phone}\\nAddress: ${address}\\n\\nItems:\\n${lines}${rxNote}\\n\\nTotal Payable: ₹${total.toFixed(2)}`;
-                const number = String(storeSettings.whatsapp || '919487165045').replace(/[^0-9]/g, '');
+                const number = String(storeSettings.whatsapp || '918072956113').replace(/[^0-9]/g, '');
                 const waUrl = `https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
                 if (whatsappTab && !whatsappTab.closed) whatsappTab.location.href = waUrl;
                 else window.location.href = waUrl;
@@ -3576,14 +3929,23 @@ body { background-color:#f7f8fb; }
             }
             if (['Delivered', 'Cancelled'].includes(order.status)) return showToast('This order can no longer be cancelled.', 'error');
             if (!confirm('Cancel this order?')) return;
+            if (!supabaseClient) return showToast('Cloud connection unavailable. Your order was not cancelled.', 'error');
+            const { error } = await supabaseClient.from('subha_orders').update({ status: 'Cancelled' }).eq('id', orderId).eq('customer_email', appCurrentUser.email);
+            if (error) { console.error(error); return showToast('Order cancellation failed: ' + error.message, 'error'); }
             order.status = 'Cancelled';
-            saveStateLocal();
-            if (supabaseClient) {
-                const { error } = await supabaseClient.from('subha_orders').update({ status: 'Cancelled' }).eq('id', orderId).eq('customer_email', appCurrentUser.email);
-                if (error) { console.error(error); showToast('Updated locally, but cloud cancellation failed: ' + error.message, 'error'); }
+            if (!order.stock_restored) {
+                const restored = await restoreInventoryStockForCancelledOrder(order.items);
+                if (restored.ok) {
+                    const flag = await supabaseClient.from('subha_orders').update({ stock_restored: true }).eq('id', orderId).eq('customer_email', appCurrentUser.email);
+                    if (!flag.error) order.stock_restored = true;
+                    else showToast('Order cancelled and stock restored, but the stock-restored marker failed: ' + flag.error.message, 'error');
+                } else {
+                    showToast('Order cancelled, but stock restoration needs admin attention: ' + restored.error, 'error');
+                }
             }
+            saveStateLocal();
             renderOrders();
-            showToast('Order cancelled.');
+            if (order.stock_restored) showToast('Order cancelled successfully. Stock restored.');
         }
  
         function renderOrders() {
@@ -3624,10 +3986,12 @@ body { background-color:#f7f8fb; }
                             </div>
                             <div class="muted">Address: ${o.customer_address}</div>
                             <div style="font-size:12px;margin-top:4px;">${(o.items || []).map(i => `${i.name} [B: ${i.batch || '--'}] (x${i.qty})`).join(', ')}</div>
+                            <details style="margin-top:7px;"><summary class="order-detail-toggle">View full order details</summary><div class="order-detail-panel"><strong>Customer:</strong> ${o.customer_name || '-'}<br><strong>Phone:</strong> ${o.customer_phone || '-'}<br><strong>Email:</strong> ${o.customer_email || '-'}<br><strong>Delivery address:</strong> ${o.customer_address || o.address || '-'}<br><strong>Order date:</strong> ${o.created_at ? new Date(o.created_at).toLocaleString('en-IN') : '-'}<br><strong>Payment:</strong> ${o.payment_mode || 'Cash on Delivery'} / ${o.payment_status || 'pending'}<hr style="border:0;border-top:1px solid var(--border-color);">${(o.items || []).map(i => `${i.name || 'Item'} — Qty ${i.qty || 1} × ₹${Number(i.price || 0).toFixed(2)}`).join('<br>')}<br><strong>Total: ₹${Number(o.total || 0).toFixed(2)}</strong></div></details>
                         </div>
  
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                             <select class="sort-select" style="padding:5px 8px;font-size:11px;" onchange="updateOrderStatusAdmin('${o.id}', this.value)">
+                                <option value="Order Placed" ${(!o.status || o.status === 'Order Placed') ? 'selected' : ''}>Order Placed</option>
                                 <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
                                 <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
                                 <option value="Out for Delivery" ${o.status === 'Out for Delivery' ? 'selected' : ''}>Out for Delivery</option>
@@ -3720,25 +4084,126 @@ body { background-color:#f7f8fb; }
             res.innerHTML = `Reading: <strong>${sys}/${dia} mmHg</strong> → <span style="color:${col};font-weight:800;">${cat}</span>`;
         }
  
+        const SUBHA_REMINDER_LANGUAGES = {
+            'ta-IN': { label:'Tamil', greeting:'வணக்கம்', brand:'சுபா மெடிக்கல் நினைவூட்டுகிறது', action:'தயவுசெய்து', suffix:'மருந்தை இப்போது எடுத்துக்கொள்ளுங்கள்.' , notice:'தயவுசெய்து உங்கள் மருந்தை எடுத்துக்கொள்ளுங்கள்.'},
+            'en-IN': { label:'English', greeting:'Hello', brand:'Subha Medical reminds you', action:'Please take', suffix:'now.', notice:'Please take your medicine now.'},
+            'hi-IN': { label:'Hindi', greeting:'नमस्ते', brand:'सुभा मेडिकल आपको याद दिलाता है', action:'कृपया', suffix:'दवा अभी लें।', notice:'कृपया अभी अपनी दवा लें।'},
+            'te-IN': { label:'Telugu', greeting:'నమస్కారం', brand:'సుభా మెడికల్ గుర్తు చేస్తోంది', action:'దయచేసి', suffix:'మందును ఇప్పుడు తీసుకోండి.', notice:'దయచేసి మీ మందును ఇప్పుడు తీసుకోండి.'},
+            'ml-IN': { label:'Malayalam', greeting:'നമസ്കാരം', brand:'സുഭ മെഡിക്കൽ ഓർമ്മിപ്പിക്കുന്നു', action:'ദയവായി', suffix:'മരുന്ന് ഇപ്പോൾ കഴിക്കുക.', notice:'ദയവായി നിങ്ങളുടെ മരുന്ന് ഇപ്പോൾ കഴിക്കുക.'},
+            'kn-IN': { label:'Kannada', greeting:'ನಮಸ್ಕಾರ', brand:'ಸುಭಾ ಮೆಡಿಕಲ್ ನೆನಪಿಸುತ್ತದೆ', action:'ದಯವಿಟ್ಟು', suffix:'ಔಷಧಿಯನ್ನು ಈಗ ತೆಗೆದುಕೊಳ್ಳಿ.', notice:'ದಯವಿಟ್ಟು ನಿಮ್ಮ ಔಷಧಿಯನ್ನು ಈಗ ತೆಗೆದುಕೊಳ್ಳಿ.'},
+            'bn-IN': { label:'Bengali', greeting:'নমস্কার', brand:'শুভা মেডিকেল মনে করিয়ে দিচ্ছে', action:'অনুগ্রহ করে', suffix:'ওষুধটি এখনই খান।', notice:'অনুগ্রহ করে এখনই আপনার ওষুধ খান।'},
+            'mr-IN': { label:'Marathi', greeting:'नमस्कार', brand:'सुभा मेडिकल आठवण करून देत आहे', action:'कृपया', suffix:'औषध आत्ताच घ्या.', notice:'कृपया आपले औषध आत्ताच घ्या.'},
+            'gu-IN': { label:'Gujarati', greeting:'નમસ્તે', brand:'સુભા મેડિકલ યાદ અપાવે છે', action:'કૃપા કરીને', suffix:'દવા હમણાં લો.', notice:'કૃપા કરીને તમારી દવા હમણાં લો.'},
+            'pa-IN': { label:'Punjabi', greeting:'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', brand:'ਸੁਭਾ ਮੈਡੀਕਲ ਯਾਦ ਕਰਵਾ ਰਿਹਾ ਹੈ', action:'ਕਿਰਪਾ ਕਰਕੇ', suffix:'ਦਵਾਈ ਹੁਣ ਲਓ।', notice:'ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਦਵਾਈ ਹੁਣ ਲਓ।'}
+        };
+        let subhaReminderAlarmTimer = null;
+ 
+        async function enableTamilReminderAlerts() {
+            try {
+                if ('Notification' in window && Notification.permission === 'default') await Notification.requestPermission();
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const lang = document.getElementById('rem-language')?.value || 'ta-IN';
+                    const testUtterance = new SpeechSynthesisUtterance('Subha Medical');
+                    testUtterance.lang = lang; testUtterance.volume = 0;
+                    window.speechSynthesis.speak(testUtterance);
+                }
+                const selected = SUBHA_REMINDER_LANGUAGES[document.getElementById('rem-language')?.value || 'ta-IN']?.label || 'selected language';
+                showToast(`${selected} reminder voice and notifications enabled. Keep this website open.`, 'success');
+            } catch (err) {
+                console.warn('Reminder permission/audio setup:', err);
+                showToast('Voice setup could not be completed. Please allow notifications and sound in Brave settings.', 'error');
+            }
+        }
+ 
+        function playSubhaReminderAlert(reminder) {
+            const lang = SUBHA_REMINDER_LANGUAGES[reminder.language] ? reminder.language : 'ta-IN';
+            const words = SUBHA_REMINDER_LANGUAGES[lang];
+            const customerName = String(reminder.customerName || appCurrentUser?.name || (lang === 'ta-IN' ? 'வாடிக்கையாளர்' : 'Customer')).trim();
+            const medicineName = String(reminder.name || (lang === 'ta-IN' ? 'மருந்து' : 'medicine')).trim();
+            const spokenMessage = `${words.greeting} ${customerName}. ${words.brand}. ${words.action} ${medicineName} ${words.suffix}`;
+            try { if ('vibrate' in navigator) navigator.vibrate([500, 250, 500]); } catch (_) {}
+            try {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const notice = new Notification('Subha Medical – Medicine Reminder', {
+                        body: `${customerName} – ${medicineName}: ${words.notice}`,
+                        tag: `subha-dose-${reminder.id}-${new Date().toISOString().slice(0,10)}`,
+                        renotify: false
+                    });
+                    notice.onclick = () => { window.focus(); notice.close(); };
+                }
+            } catch (err) { console.warn('Notification display unavailable:', err); }
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const voices = window.speechSynthesis.getVoices();
+                    const langPrefix = lang.split('-')[0].toLowerCase();
+                    const voice = voices.find(v => String(v.lang || '').toLowerCase() === lang.toLowerCase()) || voices.find(v => String(v.lang || '').toLowerCase().startsWith(langPrefix));
+                    let repetition = 0;
+                    const speakNext = () => {
+                        if (repetition >= 3) return;
+                        const utterance = new SpeechSynthesisUtterance(spokenMessage);
+                        utterance.lang = lang; utterance.rate = 0.88; utterance.pitch = 1; utterance.volume = 1;
+                        if (voice) utterance.voice = voice;
+                        utterance.onend = () => { repetition += 1; if (repetition < 3) window.setTimeout(speakNext, 900); };
+                        utterance.onerror = () => { repetition = 3; };
+                        window.speechSynthesis.speak(utterance);
+                    };
+                    speakNext();
+                }
+            } catch (err) { console.warn('Reminder voice playback unavailable:', err); }
+            showToast(`${words.label} medicine reminder: ${medicineName}`, 'success');
+        }
+ 
+        function checkSubhaDoseReminders() {
+            const now = new Date();
+            const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            let changed = false;
+            reminders.forEach(reminder => {
+                if (reminder.time === hhmm && reminder.lastFiredDate !== today) {
+                    reminder.lastFiredDate = today;
+                    changed = true;
+                    playSubhaReminderAlert(reminder);
+                }
+            });
+            if (changed) localStorage.setItem('subha_reminders', JSON.stringify(reminders));
+        }
+ 
+        function startSubhaDoseReminderChecker() {
+            if (subhaReminderAlarmTimer) clearInterval(subhaReminderAlarmTimer);
+            checkSubhaDoseReminders();
+            subhaReminderAlarmTimer = window.setInterval(checkSubhaDoseReminders, 15000);
+        }
+ 
         function addDoseReminder() {
             const name = document.getElementById('rem-name').value.trim();
             const time = document.getElementById('rem-time').value;
             if (!name || !time) return showToast('Enter medicine name and time', 'error');
-            reminders.push({ id: Date.now(), name, time });
+            const language = document.getElementById('rem-language')?.value || 'ta-IN';
+            reminders.push({ id: Date.now(), name, time, language, customerName: appCurrentUser?.name || '', lastFiredDate: '' });
             localStorage.setItem('subha_reminders', JSON.stringify(reminders));
             document.getElementById('rem-name').value = '';
             renderReminders();
-            showToast('Daily dose reminder added!');
+            enableTamilReminderAlerts();
+            showToast('Daily dose reminder saved!');
         }
  
         function renderReminders() {
             const box = document.getElementById('reminders-list');
+            if (!box) return;
             box.innerHTML = reminders.map(r => `
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
-                    <span>⏰ <strong>${r.time}</strong> -- ${r.name}</span>
-                    <span style="color:var(--danger);cursor:pointer;" onclick="reminders=reminders.filter(x=>x.id!==${r.id});localStorage.setItem('subha_reminders',JSON.stringify(reminders));renderReminders();">Remove</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-color);gap:8px;">
+                    <span>⏰ <strong>${r.time}</strong> · ${SUBHA_REMINDER_LANGUAGES[r.language]?.label || 'Tamil'} -- ${String(r.name).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]))}</span>
+                    <button type="button" style="color:var(--danger);background:transparent;border:0;cursor:pointer;" onclick="removeDoseReminder(${Number(r.id)})">Remove</button>
                 </div>
             `).join('') || '<span class="muted">No active reminders set.</span>';
+        }
+ 
+        function removeDoseReminder(id) {
+            reminders = reminders.filter(item => Number(item.id) !== Number(id));
+            localStorage.setItem('subha_reminders', JSON.stringify(reminders));
+            renderReminders();
         }
  
         /* =========================================================================
@@ -3775,7 +4240,7 @@ body { background-color:#f7f8fb; }
  
         function openDirectWhatsApp() {
             try {
-                const configured = (storeSettings && storeSettings.whatsapp) || '919487165045';
+                const configured = (storeSettings && storeSettings.whatsapp) || '918072956113';
                 const number = String(configured).replace(/[^0-9]/g, '');
                 if (!number || number.length < 10) {
                     showToast('WhatsApp number is not configured correctly. Please contact the store.', 'error');
@@ -3821,6 +4286,7 @@ body { background-color:#f7f8fb; }
             }
             applyStoreBranding();
             renderAll();
+            startSubhaDoseReminderChecker();
             initSupabase().then(() => {
                 if (supabaseClient?.auth?.onAuthStateChange) {
                     supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -3832,6 +4298,7 @@ body { background-color:#f7f8fb; }
                             appCurrentUser = { id: session.user.id, name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || (session.user.email || session.user.phone || '').split('@')[0], email: (session.user.email || '').toLowerCase(), phone: session.user.phone || '', isAdmin: session.user.id === ADMIN_USER_ID };
                             localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                             updateUserAuthUI();
+                            setupSubhaOrderRealtime();
                             setTimeout(() => pullFromSupabaseSQL(), 0);
                         }
                     });
