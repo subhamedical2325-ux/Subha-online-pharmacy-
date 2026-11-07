@@ -1607,6 +1607,10 @@ img { -webkit-user-drag: none; }
        </div>
       </div>
       <div id="adm-promo-video-preview" style="margin:8px 0;"></div>
+      <div id="adm-promo-video-library" style="margin:10px 0;padding:10px;border:1px solid var(--border-color);border-radius:10px;">
+       <strong style="display:block;margin-bottom:8px;">Saved promotional videos</strong>
+       <div class="muted">Saved videos will appear here after cloud loading.</div>
+      </div>
       <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4>🎟️ Multiple Coupon Codes</h4>
@@ -1902,6 +1906,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                     orders = [];
                 }
                 applyStoreBranding();
+                if (appCurrentUser?.isAdmin) loadSavedPromoVideoLibrary();
                 renderAll();
             } catch (err) {
                 console.error('Supabase sync failed:', err);
@@ -2586,7 +2591,29 @@ body { background-color:#f7f8fb; }
             if (heroPromoImg) { storeSettings.promo_image = resolveSubhaStorageUrl(storeSettings.promo_image || '', PRODUCT_IMAGE_BUCKET); heroPromoImg.style.display = 'block'; heroPromoImg.style.width = '100%'; heroPromoImg.style.height = '100%'; heroPromoImg.style.minHeight = '120px'; heroPromoImg.style.objectFit = 'cover'; heroPromoImg.src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80'; heroPromoImg.onerror = () => { heroPromoImg.onerror = null; heroPromoImg.src = 'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=1200&q=80'; }; }
             const promoVideoWrap = document.getElementById('hero-promo-video-wrap');
             const promoVideo = document.getElementById('hero-promo-video');
-            if (promoVideoWrap && promoVideo) { storeSettings.promo_video = resolveSubhaStorageUrl(storeSettings.promo_video || '', PRODUCT_VIDEO_BUCKET); if (storeSettings.promo_video) { promoVideoWrap.classList.remove('hidden'); if (promoVideo.src !== storeSettings.promo_video) { promoVideo.src = storeSettings.promo_video; promoVideo.load(); } } else { promoVideo.pause(); promoVideo.removeAttribute('src'); promoVideo.load(); promoVideoWrap.classList.add('hidden'); } }
+            if (promoVideoWrap && promoVideo) {
+                storeSettings.promo_video = resolveSubhaStorageUrl(storeSettings.promo_video || '', PRODUCT_VIDEO_BUCKET);
+                if (storeSettings.promo_video) {
+                    promoVideoWrap.classList.remove('hidden');
+                    promoVideoWrap.style.display = 'block';
+                    promoVideoWrap.innerHTML = '';
+                    const savedVideo = document.createElement('video');
+                    savedVideo.id = 'hero-promo-video'; savedVideo.controls = true; savedVideo.playsInline = true;
+                    savedVideo.preload = 'metadata'; savedVideo.setAttribute('aria-label', 'Subha Medical promotional video');
+                    savedVideo.style.cssText = 'display:block;width:100%;max-height:320px;background:#111;border-radius:12px;';
+                    const source = document.createElement('source'); source.src = storeSettings.promo_video;
+                    source.type = /\.webm(?:[?#]|$)/i.test(storeSettings.promo_video) ? 'video/webm' : 'video/mp4';
+                    savedVideo.appendChild(source);
+                    savedVideo.addEventListener('error', () => {
+                        let msg = promoVideoWrap.querySelector('.promo-video-load-error');
+                        if (!msg) { msg = document.createElement('div'); msg.className = 'promo-video-load-error'; msg.style.cssText = 'color:#fff;background:#7f1d1d;padding:8px;font-size:12px;'; msg.textContent = 'Video could not load. Check that the product-videos bucket is public and the saved file URL is valid.'; promoVideoWrap.appendChild(msg); }
+                    });
+                    promoVideoWrap.appendChild(savedVideo); savedVideo.load();
+                } else {
+                    promoVideo.pause(); promoVideo.removeAttribute('src'); promoVideo.load();
+                    promoVideoWrap.classList.add('hidden'); promoVideoWrap.style.display = 'none';
+                }
+            }
             document.getElementById('hero-promo-title').textContent = storeSettings.promo_title;
             document.getElementById('hero-promo-sub').textContent = storeSettings.promo_sub;
             const bgInput = document.getElementById('adm-bg-image'); if (bgInput && !bgInput.value) bgInput.value = storeSettings.bg_image || '';
@@ -3540,6 +3567,41 @@ body { background-color:#f7f8fb; }
             showToast('Store theme saved successfully!');
         }
  
+        async function loadSavedPromoVideoLibrary() {
+            const box = document.getElementById('adm-promo-video-library');
+            if (!box || !supabaseClient || !appCurrentUser?.isAdmin) return;
+            box.innerHTML = '<strong style="display:block;margin-bottom:8px;">Saved promotional videos</strong><div class="muted">Loading saved videos…</div>';
+            try {
+                const { data, error } = await supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).list('videos', {
+                    limit: 100, sortBy: { column: 'created_at', order: 'desc' }
+                });
+                if (error) throw error;
+                const files = (data || []).filter(f => f && f.name && !f.name.startsWith('.'));
+                const active = resolveSubhaStorageUrl(storeSettings.promo_video || '', PRODUCT_VIDEO_BUCKET);
+                const rows = files.map(f => {
+                    const path = `videos/${f.name}`;
+                    const url = supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).getPublicUrl(path)?.data?.publicUrl || '';
+                    return { name: f.name, url, active: !!active && url === active, created: f.created_at || f.updated_at || '' };
+                }).filter(x => x.url);
+                if (active && !rows.some(x => x.url === active)) rows.unshift({ name: 'Currently published video', url: active, active: true, created: '' });
+                box.innerHTML = '<strong style="display:block;margin-bottom:8px;">Saved promotional videos</strong>';
+                if (!rows.length) { const empty=document.createElement('div'); empty.className='muted'; empty.textContent='No saved videos were found in the videos folder.'; box.appendChild(empty); return; }
+                rows.forEach((item, index) => {
+                    const card=document.createElement('div'); card.style.cssText='padding:9px 0;border-top:1px solid var(--border-color);';
+                    const title=document.createElement('div'); title.style.cssText='font-size:12px;font-weight:700;margin-bottom:6px;';
+                    title.textContent=(item.active?'Published • ':'Saved • ')+item.name; card.appendChild(title);
+                    const player=document.createElement('video'); player.controls=true; player.playsInline=true; player.preload='metadata';
+                    player.style.cssText='width:100%;max-width:340px;max-height:190px;background:#111;border-radius:8px;';
+                    const src=document.createElement('source'); src.src=item.url; src.type=/\.webm(?:[?#]|$)/i.test(item.url)?'video/webm':'video/mp4'; player.appendChild(src); card.appendChild(player);
+                    if (!item.active) { const use=document.createElement('button'); use.type='button'; use.className='secondary-btn'; use.style.cssText='margin-top:7px;padding:6px 10px;font-size:11px;'; use.textContent='Publish this video'; use.onclick=async()=>{storeSettings.promo_video=item.url;try{const result=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(result.error)throw result.error;saveStateLocal();applyStoreBranding();await loadSavedPromoVideoLibrary();showToast('Video published to customer store.','success');}catch(e){showToast('Could not publish video: '+(e.message||e),'error');}}; card.appendChild(use); }
+                    box.appendChild(card);
+                });
+            } catch (err) {
+                console.warn('Saved promotional video list could not load:', err);
+                box.innerHTML='<strong style="display:block;margin-bottom:8px;">Saved promotional videos</strong><div class="muted">Could not list stored videos. The currently published video can still appear on the customer site if its public URL is saved. Check Storage list permission for the admin.</div>';
+            }
+        }
+ 
         async function saveAppearanceSettings() {
             if (!supabaseClient) return showToast('Cloud is not connected. Sign in as admin and check your internet connection.', 'error');
             const logoFile=document.getElementById('adm-logo-file')?.files?.[0];
@@ -3585,6 +3647,7 @@ body { background-color:#f7f8fb; }
             // Keep saved media visible in the admin panel after save/reopen.
             const showSaved=(id,url,isVideo=false)=>{const box=document.getElementById(id);if(!box)return;box.innerHTML='';if(!url)return;if(isVideo){const v=document.createElement('video');v.src=url;v.controls=true;v.playsInline=true;v.style.cssText='width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';box.appendChild(v);}else{const im=document.createElement('img');im.src=url;im.alt='Saved image';im.style.cssText='max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;';box.appendChild(im);}};
             showSaved('adm-logo-preview',storeSettings.logo_image);showSaved('adm-brand-preview',storeSettings.promo_image);showSaved('adm-promo-preview',storeSettings.promo_image);showSaved('adm-promo-video-preview',storeSettings.promo_video,true);
+            await loadSavedPromoVideoLibrary();
             const videoProgressLabel=document.getElementById('adm-promo-video-progress-label');
             const videoProgressBar=document.getElementById('adm-promo-video-progress-bar');
             if(promoVideoFile){if(videoProgressBar)videoProgressBar.style.width='100%';if(videoProgressLabel)videoProgressLabel.textContent='Saved successfully — video is uploaded and the saved preview is shown below.';}
