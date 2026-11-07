@@ -1313,15 +1313,18 @@ img { -webkit-user-drag: none; }
       <h4 style="margin: 0 0 10px; color: #7c3aed;"><i class="ri-alarm-line"></i> 4. Medicine Dose Reminder</h4>
       <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 8px;">
        <div>
-        <label class="form-label">Medicine Name</label> <input type="text" id="rem-name" class="form-control" placeholder="e.g. Paracetamol 650">
+        <label class="form-label">Medicine Name</label> <input type="text" id="rem-name" class="form-control" placeholder="Medicine name / மருந்தின் பெயர்">
        </div>
        <div>
         <label class="form-label">Time</label> <input type="time" id="rem-time" class="form-control">
        </div>
       </div>
+      <div style="margin-top:8px;">
+       <label class="form-label" for="rem-language">Reminder voice language</label> <select id="rem-language" class="form-control"> <option value="ta-IN">தமிழ் (Tamil)</option><option value="en-IN">English</option><option value="hi-IN">हिन्दी (Hindi)</option><option value="te-IN">తెలుగు (Telugu)</option><option value="ml-IN">മലയാളം (Malayalam)</option><option value="kn-IN">ಕನ್ನಡ (Kannada)</option><option value="bn-IN">বাংলা (Bengali)</option><option value="mr-IN">मराठी (Marathi)</option><option value="gu-IN">ગુજરાતી (Gujarati)</option><option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option> </select>
+      </div>
       <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #7c3aed;" onclick="addDoseReminder()">Save Daily Reminder</button>
-      <button type="button" class="secondary-btn" style="width:100%;margin-top:8px;" onclick="enableTamilReminderAlerts()">🔔 Enable Tamil Voice &amp; Notifications</button>
-      <p class="muted" style="font-size:11px;line-height:1.45;margin:8px 0 0;">At reminder time, your phone can show an alert and speak in Tamil: “சுபா மெடிக்கல். தயவுசெய்து உங்கள் மருந்தை எடுத்துக்கொள்ளுங்கள்.” Keep this website open in Brave for reminders to ring. Browser alarms may not work after the tab/browser is closed.</p>
+      <button type="button" class="secondary-btn" style="width:100%;margin-top:8px;" onclick="enableTamilReminderAlerts()">🔔 Enable Voice &amp; Notifications</button>
+      <p class="muted" style="font-size:11px;line-height:1.45;margin:8px 0 0;">Choose Tamil, English, Hindi, Telugu, Malayalam, Kannada, Bengali, Marathi, Gujarati or Punjabi. The phone speaks in the selected language when a supported voice is installed. Keep this website open in Brave; browser alarms may not work after the tab/browser is closed.</p>
       <div id="reminders-list" style="margin-top: 10px; font-size: 12px;"></div>
      </div>
     </div>
@@ -1596,7 +1599,13 @@ img { -webkit-user-drag: none; }
       <h4 style="margin: 0 0 8px;">🖼️ Global Background Image &amp; Promotional Banner Setup</h4>
       <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Promo Banner Image from Phone</label> <input type="file" id="adm-promo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-promo-preview')">
       <div id="adm-promo-preview" style="margin:8px 0;"></div>
-      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')"> <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Customers can play it below the home banner.</small>
+      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')"> <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Upload progress will be shown here; after saving, the uploaded video will remain visible below.</small>
+      <div id="adm-promo-video-progress" style="display:none;margin:10px 0;padding:10px;border:1px solid var(--border-color);border-radius:10px;">
+       <div id="adm-promo-video-progress-label" style="font-size:13px;margin-bottom:6px;">Waiting to upload…</div>
+       <div style="height:9px;background:var(--border-color);border-radius:20px;overflow:hidden;">
+        <div id="adm-promo-video-progress-bar" style="height:100%;width:0%;background:var(--primary-color,#2563eb);transition:width .15s;"></div>
+       </div>
+      </div>
       <div id="adm-promo-video-preview" style="margin:8px 0;"></div>
       <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
@@ -3266,7 +3275,7 @@ body { background-color:#f7f8fb; }
                 : { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', avif:'image/avif' };
             return file?.type || map[ext] || '';
         }
-        async function subhaUploadStorage(file, bucket, prefix, kind) {
+        async function subhaUploadStorage(file, bucket, prefix, kind, onProgress) {
             if (!file) return null;
             if (!supabaseClient) throw new Error('Please sign in as admin and wait until cloud connection is ready.');
             const mime = subhaFileMime(file, kind);
@@ -3276,9 +3285,23 @@ body { background-color:#f7f8fb; }
             if (file.size > max) throw new Error(kind === 'video' ? 'Video must be 50 MB or smaller.' : 'Each image must be 8 MB or smaller.');
             const clean = String(file.name || (kind === 'video' ? 'video.mp4' : 'image.jpg')).toLowerCase().replace(/[^a-z0-9._-]+/g,'-');
             const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}-${clean}`;
-            const { data, error } = await supabaseClient.storage.from(bucket).upload(path, file, { upsert:false, contentType:mime, cacheControl:'3600' });
-            if (error) throw new Error(`Storage upload failed (${bucket}): ${error.message}. Check bucket and Storage policies in Supabase.`);
-            const publicResult = supabaseClient.storage.from(bucket).getPublicUrl(data?.path || path);
+            const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !sessionData?.session?.access_token) throw new Error('Your admin session expired. Sign in again, then upload the video.');
+            const token = sessionData.session.access_token;
+            await new Promise((resolve,reject)=>{
+                const xhr=new XMLHttpRequest();
+                xhr.open('POST',`${DEFAULT_SB_URL}/storage/v1/object/${encodeURIComponent(bucket)}/${path.split('/').map(encodeURIComponent).join('/')}`);
+                xhr.setRequestHeader('apikey',DEFAULT_SB_KEY);
+                xhr.setRequestHeader('Authorization',`Bearer ${token}`);
+                xhr.setRequestHeader('Content-Type',mime);
+                xhr.setRequestHeader('x-upsert','false');
+                xhr.upload.onprogress=(event)=>{if(event.lengthComputable&&typeof onProgress==='function')onProgress(Math.min(99,Math.round(event.loaded/event.total*100)),event.loaded,event.total);};
+                xhr.onload=()=>{if(xhr.status>=200&&xhr.status<300){if(typeof onProgress==='function')onProgress(100,file.size,file.size);resolve();}else{let message=xhr.responseText||`HTTP ${xhr.status}`;try{const parsed=JSON.parse(xhr.responseText);message=parsed.message||parsed.error||message;}catch(_){}reject(new Error(`Storage upload failed (${bucket}): ${message}. Check bucket and Storage policies in Supabase.`));}};
+                xhr.onerror=()=>reject(new Error('Video upload network error. Check your internet connection and try again.'));
+                xhr.onabort=()=>reject(new Error('Video upload was cancelled.'));
+                xhr.send(file);
+            });
+            const publicResult = supabaseClient.storage.from(bucket).getPublicUrl(path);
             const url = publicResult?.data?.publicUrl;
             if (!url) throw new Error(`Upload finished but a public URL could not be created for ${bucket}.`);
             return url;
@@ -3529,7 +3552,19 @@ body { background-color:#f7f8fb; }
                 if(logoFile){showToast('Uploading store logo…');storeSettings.logo_image=await uploadAdminImage(logoFile,'store-logo');}
                 if(brandImageFile){showToast('Uploading brand image…');storeSettings.promo_image=await uploadAdminImage(brandImageFile,'brand-images');}
                 if(promoFile){showToast('Uploading promotional banner…');storeSettings.promo_image=await uploadAdminImage(promoFile,'promo-banners');}
-                if(promoVideoFile){showToast('Uploading promotional video…');storeSettings.promo_video=await uploadProductVideo(promoVideoFile);}
+                if(promoVideoFile){
+                    const progress=document.getElementById('adm-promo-video-progress');
+                    const bar=document.getElementById('adm-promo-video-progress-bar');
+                    const label=document.getElementById('adm-promo-video-progress-label');
+                    if(progress)progress.style.display='block';
+                    if(bar)bar.style.width='0%';
+                    if(label)label.textContent=`Uploading ${promoVideoFile.name} — 0%`;
+                    storeSettings.promo_video=await subhaUploadStorage(promoVideoFile,PRODUCT_VIDEO_BUCKET,'videos','video',(percent,loaded,total)=>{
+                        if(bar)bar.style.width=percent+'%';
+                        if(label){const mb=(loaded/1024/1024).toFixed(1);const totalMb=(total/1024/1024).toFixed(1);label.textContent=`Uploading ${promoVideoFile.name} — ${percent}% (${mb} / ${totalMb} MB)`;}
+                    });
+                    if(label)label.textContent='Upload complete (100%). Saving video link to your store…';
+                }
             } catch(err){console.error('Media upload failed',err);return showToast(err.message||'Media upload failed. Nothing was published.', 'error');}
             const bgValue=document.getElementById('adm-bg-image')?.value.trim();
             const promoValue=document.getElementById('adm-promo-image')?.value.trim();
@@ -3550,6 +3585,9 @@ body { background-color:#f7f8fb; }
             // Keep saved media visible in the admin panel after save/reopen.
             const showSaved=(id,url,isVideo=false)=>{const box=document.getElementById(id);if(!box)return;box.innerHTML='';if(!url)return;if(isVideo){const v=document.createElement('video');v.src=url;v.controls=true;v.playsInline=true;v.style.cssText='width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';box.appendChild(v);}else{const im=document.createElement('img');im.src=url;im.alt='Saved image';im.style.cssText='max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;';box.appendChild(im);}};
             showSaved('adm-logo-preview',storeSettings.logo_image);showSaved('adm-brand-preview',storeSettings.promo_image);showSaved('adm-promo-preview',storeSettings.promo_image);showSaved('adm-promo-video-preview',storeSettings.promo_video,true);
+            const videoProgressLabel=document.getElementById('adm-promo-video-progress-label');
+            const videoProgressBar=document.getElementById('adm-promo-video-progress-bar');
+            if(promoVideoFile){if(videoProgressBar)videoProgressBar.style.width='100%';if(videoProgressLabel)videoProgressLabel.textContent='Saved successfully — video is uploaded and the saved preview is shown below.';}
             ['adm-logo-file','adm-brand-image-file','adm-bg-file','adm-promo-file','adm-promo-video-file'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
             showToast('Saved successfully. Logo, banner image and video are published to the customer store.', 'success');
         }
@@ -3976,40 +4014,49 @@ body { background-color:#f7f8fb; }
             res.innerHTML = `Reading: <strong>${sys}/${dia} mmHg</strong> → <span style="color:${col};font-weight:800;">${cat}</span>`;
         }
  
-        const SUBHA_TAMIL_REMINDER_VOICE = 'சுபா மெடிக்கல். தயவுசெய்து உங்கள் மருந்தை எடுத்துக்கொள்ளுங்கள்.';
+        const SUBHA_REMINDER_LANGUAGES = {
+            'ta-IN': { label:'Tamil', greeting:'வணக்கம்', brand:'சுபா மெடிக்கல் நினைவூட்டுகிறது', action:'தயவுசெய்து', suffix:'மருந்தை இப்போது எடுத்துக்கொள்ளுங்கள்.' , notice:'தயவுசெய்து உங்கள் மருந்தை எடுத்துக்கொள்ளுங்கள்.'},
+            'en-IN': { label:'English', greeting:'Hello', brand:'Subha Medical reminds you', action:'Please take', suffix:'now.', notice:'Please take your medicine now.'},
+            'hi-IN': { label:'Hindi', greeting:'नमस्ते', brand:'सुभा मेडिकल आपको याद दिलाता है', action:'कृपया', suffix:'दवा अभी लें।', notice:'कृपया अभी अपनी दवा लें।'},
+            'te-IN': { label:'Telugu', greeting:'నమస్కారం', brand:'సుభా మెడికల్ గుర్తు చేస్తోంది', action:'దయచేసి', suffix:'మందును ఇప్పుడు తీసుకోండి.', notice:'దయచేసి మీ మందును ఇప్పుడు తీసుకోండి.'},
+            'ml-IN': { label:'Malayalam', greeting:'നമസ്കാരം', brand:'സുഭ മെഡിക്കൽ ഓർമ്മിപ്പിക്കുന്നു', action:'ദയവായി', suffix:'മരുന്ന് ഇപ്പോൾ കഴിക്കുക.', notice:'ദയവായി നിങ്ങളുടെ മരുന്ന് ഇപ്പോൾ കഴിക്കുക.'},
+            'kn-IN': { label:'Kannada', greeting:'ನಮಸ್ಕಾರ', brand:'ಸುಭಾ ಮೆಡಿಕಲ್ ನೆನಪಿಸುತ್ತದೆ', action:'ದಯವಿಟ್ಟು', suffix:'ಔಷಧಿಯನ್ನು ಈಗ ತೆಗೆದುಕೊಳ್ಳಿ.', notice:'ದಯವಿಟ್ಟು ನಿಮ್ಮ ಔಷಧಿಯನ್ನು ಈಗ ತೆಗೆದುಕೊಳ್ಳಿ.'},
+            'bn-IN': { label:'Bengali', greeting:'নমস্কার', brand:'শুভা মেডিকেল মনে করিয়ে দিচ্ছে', action:'অনুগ্রহ করে', suffix:'ওষুধটি এখনই খান।', notice:'অনুগ্রহ করে এখনই আপনার ওষুধ খান।'},
+            'mr-IN': { label:'Marathi', greeting:'नमस्कार', brand:'सुभा मेडिकल आठवण करून देत आहे', action:'कृपया', suffix:'औषध आत्ताच घ्या.', notice:'कृपया आपले औषध आत्ताच घ्या.'},
+            'gu-IN': { label:'Gujarati', greeting:'નમસ્તે', brand:'સુભા મેડિકલ યાદ અપાવે છે', action:'કૃપા કરીને', suffix:'દવા હમણાં લો.', notice:'કૃપા કરીને તમારી દવા હમણાં લો.'},
+            'pa-IN': { label:'Punjabi', greeting:'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', brand:'ਸੁਭਾ ਮੈਡੀਕਲ ਯਾਦ ਕਰਵਾ ਰਿਹਾ ਹੈ', action:'ਕਿਰਪਾ ਕਰਕੇ', suffix:'ਦਵਾਈ ਹੁਣ ਲਓ।', notice:'ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਦਵਾਈ ਹੁਣ ਲਓ।'}
+        };
         let subhaReminderAlarmTimer = null;
  
         async function enableTamilReminderAlerts() {
             try {
-                if ('Notification' in window && Notification.permission === 'default') {
-                    await Notification.requestPermission();
-                }
-                // Prime speech/audio after the customer's tap; Android may otherwise block playback.
+                if ('Notification' in window && Notification.permission === 'default') await Notification.requestPermission();
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
-                    const testUtterance = new SpeechSynthesisUtterance('சுபா மெடிக்கல்');
-                    testUtterance.lang = 'ta-IN';
-                    testUtterance.volume = 0;
+                    const lang = document.getElementById('rem-language')?.value || 'ta-IN';
+                    const testUtterance = new SpeechSynthesisUtterance('Subha Medical');
+                    testUtterance.lang = lang; testUtterance.volume = 0;
                     window.speechSynthesis.speak(testUtterance);
                 }
-                showToast('Tamil reminder alerts enabled. Keep this website open.', 'success');
+                const selected = SUBHA_REMINDER_LANGUAGES[document.getElementById('rem-language')?.value || 'ta-IN']?.label || 'selected language';
+                showToast(`${selected} reminder voice and notifications enabled. Keep this website open.`, 'success');
             } catch (err) {
                 console.warn('Reminder permission/audio setup:', err);
-                showToast('Voice setup could not be completed. Please allow notifications in Brave settings.', 'error');
+                showToast('Voice setup could not be completed. Please allow notifications and sound in Brave settings.', 'error');
             }
         }
  
         function playSubhaReminderAlert(reminder) {
-            const customerName = String(reminder.customerName || appCurrentUser?.name || 'வாடிக்கையாளர்').trim();
-            const medicineName = String(reminder.name || 'மருந்து').trim();
-            const spokenMessage = `வணக்கம் ${customerName}. சுபா மெடிக்கல் நினைவூட்டுகிறது. தயவுசெய்து ${medicineName} மருந்தை இப்போது எடுத்துக்கொள்ளுங்கள். மீண்டும் நினைவூட்டுகிறோம்.`;
-            try {
-                if ('vibrate' in navigator) navigator.vibrate([500, 250, 500]);
-            } catch (_) {}
+            const lang = SUBHA_REMINDER_LANGUAGES[reminder.language] ? reminder.language : 'ta-IN';
+            const words = SUBHA_REMINDER_LANGUAGES[lang];
+            const customerName = String(reminder.customerName || appCurrentUser?.name || (lang === 'ta-IN' ? 'வாடிக்கையாளர்' : 'Customer')).trim();
+            const medicineName = String(reminder.name || (lang === 'ta-IN' ? 'மருந்து' : 'medicine')).trim();
+            const spokenMessage = `${words.greeting} ${customerName}. ${words.brand}. ${words.action} ${medicineName} ${words.suffix}`;
+            try { if ('vibrate' in navigator) navigator.vibrate([500, 250, 500]); } catch (_) {}
             try {
                 if ('Notification' in window && Notification.permission === 'granted') {
                     const notice = new Notification('Subha Medical – Medicine Reminder', {
-                        body: `${reminder.customerName || appCurrentUser?.name || ''} – ${reminder.name}: தயவுசெய்து மருந்தை எடுத்துக்கொள்ளுங்கள்.`,
+                        body: `${customerName} – ${medicineName}: ${words.notice}`,
                         tag: `subha-dose-${reminder.id}-${new Date().toISOString().slice(0,10)}`,
                         renotify: false
                     });
@@ -4019,21 +4066,23 @@ body { background-color:#f7f8fb; }
             try {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
-                    const tamilVoice = window.speechSynthesis.getVoices().find(v => /^ta(-|_)/i.test(v.lang) || /tamil/i.test(v.name));
+                    const voices = window.speechSynthesis.getVoices();
+                    const langPrefix = lang.split('-')[0].toLowerCase();
+                    const voice = voices.find(v => String(v.lang || '').toLowerCase() === lang.toLowerCase()) || voices.find(v => String(v.lang || '').toLowerCase().startsWith(langPrefix));
                     let repetition = 0;
                     const speakNext = () => {
                         if (repetition >= 3) return;
                         const utterance = new SpeechSynthesisUtterance(spokenMessage);
-                        utterance.lang = 'ta-IN'; utterance.rate = 0.88; utterance.pitch = 1; utterance.volume = 1;
-                        if (tamilVoice) utterance.voice = tamilVoice;
+                        utterance.lang = lang; utterance.rate = 0.88; utterance.pitch = 1; utterance.volume = 1;
+                        if (voice) utterance.voice = voice;
                         utterance.onend = () => { repetition += 1; if (repetition < 3) window.setTimeout(speakNext, 900); };
                         utterance.onerror = () => { repetition = 3; };
                         window.speechSynthesis.speak(utterance);
                     };
                     speakNext();
                 }
-            } catch (err) { console.warn('Tamil voice playback unavailable:', err); }
-            showToast(`Medicine reminder: ${reminder.name}`, 'success');
+            } catch (err) { console.warn('Reminder voice playback unavailable:', err); }
+            showToast(`${words.label} medicine reminder: ${medicineName}`, 'success');
         }
  
         function checkSubhaDoseReminders() {
@@ -4061,7 +4110,8 @@ body { background-color:#f7f8fb; }
             const name = document.getElementById('rem-name').value.trim();
             const time = document.getElementById('rem-time').value;
             if (!name || !time) return showToast('Enter medicine name and time', 'error');
-            reminders.push({ id: Date.now(), name, time, customerName: appCurrentUser?.name || '', lastFiredDate: '' });
+            const language = document.getElementById('rem-language')?.value || 'ta-IN';
+            reminders.push({ id: Date.now(), name, time, language, customerName: appCurrentUser?.name || '', lastFiredDate: '' });
             localStorage.setItem('subha_reminders', JSON.stringify(reminders));
             document.getElementById('rem-name').value = '';
             renderReminders();
@@ -4074,7 +4124,7 @@ body { background-color:#f7f8fb; }
             if (!box) return;
             box.innerHTML = reminders.map(r => `
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-color);gap:8px;">
-                    <span>⏰ <strong>${r.time}</strong> -- ${String(r.name).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]))}</span>
+                    <span>⏰ <strong>${r.time}</strong> · ${SUBHA_REMINDER_LANGUAGES[r.language]?.label || 'Tamil'} -- ${String(r.name).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]))}</span>
                     <button type="button" style="color:var(--danger);background:transparent;border:0;cursor:pointer;" onclick="removeDoseReminder(${Number(r.id)})">Remove</button>
                 </div>
             `).join('') || '<span class="muted">No active reminders set.</span>';
