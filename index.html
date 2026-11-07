@@ -290,6 +290,13 @@
             box-shadow: 0 0 0 3px var(--brand-light);
         }
  
+        .voice-language-select {
+            border: 0; background: transparent; color: var(--text-light); font-size: 11px;
+            max-width: 82px; outline: none; padding: 4px 2px; flex: 0 0 auto;
+        }
+        .order-detail-toggle { color: var(--brand); font-size: 12px; font-weight: 700; cursor: pointer; }
+        .order-detail-panel { margin-top: 8px; padding: 10px; border-radius: 8px; background: var(--input-bg); font-size: 12px; line-height: 1.6; }
+        .order-notify-btn { border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-dark); border-radius:8px; padding:7px 10px; font-size:12px; font-weight:700; }
         .search-bar input {
             flex: 1;
             padding: 9.5px 8px;
@@ -1195,7 +1202,7 @@ img { -webkit-user-drag: none; }
       <i class="ri-search-line"></i> <input type="search" id="search-input" placeholder="Search for medicines, generic salt, brand, or batch..." oninput="renderStoreProducts()">
       <button type="button" id="voice-search-btn" class="voice-search-btn" aria-label="Search by voice" title="Search by voice" onclick="startSubhaVoiceSearch()"><i class="ri-mic-line"></i></button>
      </div>
-     <select id="sort-select" class="sort-select" onchange="renderStoreProducts()"> <option value="featured">Sort: Relevance</option> <option value="az">Name: A to Z</option> <option value="price-asc">Price: Low to High</option> <option value="price-desc">Price: High to Low</option> </select>
+     <select id="voice-search-language" class="sort-select voice-language-select" aria-label="Voice search language" title="Voice search language"> <option value="ta-IN">தமிழ்</option><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="ml-IN">മലയാളം</option><option value="te-IN">తెలుగు</option><option value="kn-IN">ಕನ್ನಡ</option><option value="bn-IN">বাংলা</option><option value="mr-IN">मराठी</option><option value="ur-IN">اردو</option> </select> <select id="sort-select" class="sort-select" onchange="renderStoreProducts()"> <option value="featured">Sort: Relevance</option> <option value="az">Name: A to Z</option> <option value="price-asc">Price: Low to High</option> <option value="price-desc">Price: High to Low</option> </select>
     </div>
     <div class="action-bar-row">
      <button class="quick-action-btn rx-btn" onclick="jumpToCartRxUpload()"><i class="ri-camera-lens-line"></i> Upload Rx in Cart</button>
@@ -1516,6 +1523,9 @@ img { -webkit-user-drag: none; }
         <label class="form-label">Product Video (optional)</label> <input type="file" id="adm-prod-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime"> <small class="muted">MP4, WEBM or MOV video. Maximum 50 MB. Leave empty to keep the current video.</small> <input type="url" id="adm-prod-video" class="form-control hidden" aria-hidden="true" tabindex="-1">
        </div>
       </div>
+      <div style="margin-top:10px;">
+       <label class="form-label">Other-language search names (Tamil, Hindi, English, etc.)</label> <input type="text" id="adm-prod-search-keywords" class="form-control" placeholder="Example: பாராசிட்டமால், पैरासिटामोल, paracetamol, fever tablet"> <small class="muted">Separate names with commas. Customers can find this medicine using any of these names or voice search.</small>
+      </div>
       <div style="display: flex; gap: 18px; margin-top: 12px; font-size: 12.5px; font-weight: 700;">
        <label><input type="checkbox" id="adm-prod-rx"> Requires Prescription (Rx)</label> <label><input type="checkbox" id="adm-prod-featured" checked> Featured Priority</label>
       </div>
@@ -1604,7 +1614,10 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
      <div class="panel-card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
        <h4 style="margin: 0;">📦 Customer Orders, Attached Rx &amp; Printable GST Invoices</h4>
-       <span class="muted">Changing status to "Cancelled" automatically restores deducted stock</span>
+       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span class="muted">Changing status to Cancelled restores deducted stock. Out for Delivery can still be cancelled by admin.</span>
+        <button type="button" class="order-notify-btn" onclick="requestOrderNotificationPermission()"><i class="ri-notification-3-line"></i> Enable order alerts</button>
+       </div>
       </div>
       <div id="adm-orders-container"></div>
      </div>
@@ -1729,6 +1742,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                 }
                 updateUserAuthUI();
                 await pullFromSupabaseSQL();
+                setupSubhaOrderRealtime();
             } catch (e) {
                 console.error('Supabase initialization failed:', e);
                 supabaseClient = null;
@@ -1781,42 +1795,81 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         /* =========================================================================
            3. AUTOMATIC BACKGROUND SQL SYNC
         ========================================================================= */
+        function resolveSubhaStorageUrl(value, bucket) {
+            if (!value || typeof value !== 'string') return '';
+            const raw = value.trim();
+            if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+            const clean = raw.replace(/^\/+/, '').replace(new RegExp('^' + bucket + '/'), '');
+            try {
+                const client = supabaseClient;
+                if (client?.storage) return client.storage.from(bucket).getPublicUrl(clean).data.publicUrl || raw;
+            } catch (_) {}
+            return raw;
+        }
+ 
         function normalizeCloudProduct(row) {
             const p = { ...(row || {}) };
             p.id = String(p.id ?? p.product_id ?? p.uuid ?? '');
             p.name = p.name || p.product_name || p.medicine_name || p.title || '';
-            p.salt = p.salt || p.generic_name || p.composition || '';
+            p.salt = p.salt || p.generic_name || p.composition || p.active_ingredient || '';
             p.brand = p.brand || p.manufacturer || p.company || '';
             p.category = p.category || p.category_name || 'General';
             p.price = Number(p.price ?? p.selling_price ?? p.sale_price ?? p.offer_price ?? 0);
             p.mrp = Number(p.mrp ?? p.mrp_price ?? p.price ?? p.selling_price ?? 0);
             p.stock = Number(p.stock ?? p.quantity ?? p.qty ?? 0);
-            p.image = p.image || p.image_url || p.photo_url || p.thumbnail || '';
+            p.image = resolveSubhaStorageUrl(p.image || p.image_url || p.photo_url || p.thumbnail || '', PRODUCT_IMAGE_BUCKET);
+            p.video = resolveSubhaStorageUrl(p.video || p.video_url || p.product_video || '', PRODUCT_VIDEO_BUCKET);
+            p.search_keywords = p.search_keywords || p.alternative_names || p.search_terms || '';
             p.batch = p.batch || p.batch_number || p.batch_no || '';
             p.expiry = p.expiry || p.expiry_date || p.exp_date || '';
             if (typeof p.images === 'string') { try { p.images = JSON.parse(p.images); } catch (_) { p.images = []; } }
             if (!Array.isArray(p.images)) p.images = p.image ? [p.image] : [];
+            p.images = p.images.map(x => typeof x === 'string' ? resolveSubhaStorageUrl(x, PRODUCT_IMAGE_BUCKET) : '').filter(Boolean);
             if (!p.image && p.images.length) p.image = p.images[0];
             return p;
+        }
+ 
+        async function fetchAllCloudRows(tableName) {
+            const all = [];
+            const pageSize = 1000;
+            for (let from = 0; from < 10000; from += pageSize) {
+                const { data, error } = await supabaseClient.from(tableName).select('*').range(from, from + pageSize - 1);
+                if (error) return { data: null, error };
+                const page = data || [];
+                all.push(...page);
+                if (page.length < pageSize) break;
+            }
+            return { data: all, error: null };
         }
  
         async function pullFromSupabaseSQL() {
             if (!supabaseClient) return;
             try {
                 const [pResult, cResult, sResult] = await Promise.all([
-                    supabaseClient.from('subha_products').select('*').order('name', { ascending: true }),
-                    supabaseClient.from('subha_categories').select('*'),
+                    fetchAllCloudRows('subha_products'),
+                    fetchAllCloudRows('subha_categories'),
                     supabaseClient.from('subha_settings').select('*').eq('id', '1').maybeSingle()
                 ]);
                 if (pResult.error) {
                     console.error('Product list load failed:', pResult.error);
                     const grid = document.getElementById('products-grid');
-                    if (grid) grid.innerHTML = `<div style="grid-column:1/-1;padding:16px;border:1px solid #f59e0b;border-radius:10px;background:#fffbeb;color:#92400e;"><strong>Products could not be loaded from the cloud.</strong><br>${String(pResult.error.message || 'Check Supabase table permissions and product columns').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>`;
-                } else { products = (pResult.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name); localStorage.setItem('subha_products', JSON.stringify(products)); }
+                    const cached = JSON.parse(localStorage.getItem('subha_products') || '[]');
+                    if (cached.length) { products = cached.map(normalizeCloudProduct); renderStoreProducts(); }
+                    else if (grid) grid.innerHTML = `<div style="grid-column:1/-1;padding:16px;border:1px solid #f59e0b;border-radius:10px;background:#fffbeb;color:#92400e;"><strong>Products are not available from the cloud yet.</strong><br>${String(pResult.error.message || 'Check the public product-read policy in Supabase.').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>`;
+                } else {
+                    products = (pResult.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name).sort((a,b) => a.name.localeCompare(b.name));
+                    localStorage.setItem('subha_products', JSON.stringify(products));
+                }
                 if (cResult.error) console.warn('Category list load failed:', cResult.error);
                 else { categories = cResult.data || []; localStorage.setItem('subha_categories', JSON.stringify(categories)); }
                 if (!sResult.error && sResult.data) {
                     storeSettings = { ...storeSettings, ...sResult.data };
+                    storeSettings.logo_image = resolveSubhaStorageUrl(storeSettings.logo_image || '', PRODUCT_IMAGE_BUCKET);
+                    storeSettings.bg_image = resolveSubhaStorageUrl(storeSettings.bg_image || '', PRODUCT_IMAGE_BUCKET);
+                    storeSettings.promo_image = resolveSubhaStorageUrl(storeSettings.promo_image || '', PRODUCT_IMAGE_BUCKET);
+                    storeSettings.promo_video = resolveSubhaStorageUrl(storeSettings.promo_video || '', PRODUCT_VIDEO_BUCKET);
+                } else if (sResult.error) {
+                    console.warn('Store appearance settings could not be read from cloud:', sResult.error);
                 }
                 // Fixed pharmacist WhatsApp order destination requested by the store owner.
                 storeSettings.whatsapp = '918072956113';
@@ -1902,37 +1955,31 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         }
  
         async function restoreInventoryStockForCancelledOrder(orderItems) {
-            const supabaseUpdates = [];
- 
-            (orderItems || []).forEach(cartItem => {
-                const prodIndex = products.findIndex(p => p.id === cartItem.id);
-                if (prodIndex !== -1) {
-                    const currentStock = Number(products[prodIndex].stock) || 0;
-                    const restoredStock = currentStock + (Number(cartItem.qty) || 1);
-                    products[prodIndex].stock = restoredStock;
- 
-                    if (supabaseClient) {
-                        supabaseUpdates.push(
-                            supabaseClient
-                                .from('subha_products')
-                                .update({ stock: restoredStock, updated_at: new Date().toISOString() })
-                                .eq('id', cartItem.id)
-                        );
-                    }
+            const changed = [];
+            const updates = [];
+            for (const cartItem of (orderItems || [])) {
+                const idx = products.findIndex(p => String(p.id) === String(cartItem.id));
+                if (idx < 0) continue;
+                const oldStock = Number(products[idx].stock) || 0;
+                const restored = oldStock + (Number(cartItem.qty) || 1);
+                changed.push({ idx, oldStock });
+                products[idx].stock = restored;
+                if (supabaseClient) updates.push(supabaseClient.from('subha_products').update({ stock: restored, updated_at: new Date().toISOString() }).eq('id', cartItem.id));
+            }
+            if (updates.length) {
+                const results = await Promise.all(updates);
+                const failures = results.filter(r => r?.error);
+                if (failures.length) {
+                    changed.forEach(x => { products[x.idx].stock = x.oldStock; });
+                    saveStateLocal();
+                    renderStoreProducts();
+                    return { ok: false, error: failures.map(x => x.error.message).join('; ') };
                 }
-            });
- 
+            }
             saveStateLocal();
             renderStoreProducts();
             renderWishlist();
- 
-            if (supabaseUpdates.length > 0) {
-                try {
-                    await Promise.all(supabaseUpdates);
-                } catch (err) {
-                    console.warn('Supabase stock restore sync warning:', err);
-                }
-            }
+            return { ok: true };
         }
  
         /* =========================================================================
@@ -2399,32 +2446,85 @@ body { background-color:#f7f8fb; }
         async function updateOrderStatusAdmin(orderId, newStatus) {
             const ord = orders.find(o => String(o.id) === String(orderId));
             if (!ord) return;
-            const previousStatus = ord.status || 'Confirmed';
-            if (previousStatus === newStatus) return;
- 
-            // Persist first so the UI never falsely reports a cloud update as successful.
-            if (supabaseClient) {
-                const cloudUpdate = { status: newStatus };
-                if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) cloudUpdate.stock_restored = true;
-                const { error } = await supabaseClient.from('subha_orders').update(cloudUpdate).eq('id', orderId);
-                if (error) {
-                    console.error('Order status update failed:', error);
-                    showToast('Could not update order in cloud: ' + error.message, 'error');
-                    renderOrders();
-                    return;
-                }
+            const previousStatus = ord.status || 'Order Placed';
+            if (previousStatus === newStatus && !(newStatus === 'Cancelled' && !ord.stock_restored)) return;
+            if (previousStatus === 'Delivered' && newStatus !== 'Delivered') {
+                showToast('Delivered orders are locked and cannot be changed.', 'error');
+                renderOrders(); return;
             }
- 
+            if (!supabaseClient) { showToast('Cloud connection unavailable. Status was not changed.', 'error'); renderOrders(); return; }
+            const { error } = await supabaseClient.from('subha_orders').update({ status: newStatus }).eq('id', orderId);
+            if (error) {
+                console.error('Order status update failed:', error);
+                showToast('Could not update order in cloud: ' + error.message, 'error');
+                renderOrders(); return;
+            }
             ord.status = newStatus;
-            if (newStatus === 'Cancelled' && previousStatus !== 'Cancelled' && !ord.stock_restored) {
-                await restoreInventoryStockForCancelledOrder(ord.items);
-                ord.stock_restored = true;
-                showToast(`Order #${orderId} cancelled. Stock restoration was requested.`);
+            if (newStatus === 'Cancelled' && !ord.stock_restored) {
+                const restored = await restoreInventoryStockForCancelledOrder(ord.items);
+                if (!restored.ok) {
+                    showToast('Order cancelled, but stock restoration failed. Select Cancelled again to retry: ' + restored.error, 'error');
+                } else {
+                    const flagUpdate = await supabaseClient.from('subha_orders').update({ stock_restored: true }).eq('id', orderId);
+                    if (flagUpdate.error) showToast('Order cancelled and stock restored, but the restoration flag could not be saved: ' + flagUpdate.error.message, 'error');
+                    else ord.stock_restored = true;
+                    if (ord.stock_restored) showToast(`Order #${orderId} cancelled. Stock restored successfully.`);
+                }
             } else {
-                showToast(`Order #${orderId} marked as ${newStatus}`);
+                showToast(`Order #${orderId} updated to ${newStatus}.`);
             }
             saveStateLocal();
             renderOrders();
+        }
+ 
+        async function requestOrderNotificationPermission() {
+            if (!('Notification' in window)) return showToast('This browser does not support order notifications.', 'error');
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') showToast('Order notifications enabled on this device.');
+                else showToast('Notifications are blocked. Allow them in Brave site settings.', 'error');
+            } catch (err) { showToast(err?.message || 'Could not enable notifications.', 'error'); }
+        }
+ 
+        let subhaOrderRealtimeChannel = null;
+        function setupSubhaOrderRealtime() {
+            if (!supabaseClient || !appCurrentUser?.id || subhaOrderRealtimeChannel) return;
+            subhaOrderRealtimeChannel = supabaseClient.channel('subha-medical-order-alerts')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'subha_orders' }, payload => {
+                    const freshOrder = payload.new || {};
+                    if (!freshOrder.id || !appCurrentUser?.isAdmin) return;
+                    orders = [freshOrder, ...orders.filter(o => String(o.id) !== String(freshOrder.id))];
+                    saveStateLocal(); renderOrders();
+                    const title = `New Subha Medical Order #${freshOrder.id}`;
+                    const body = `${freshOrder.customer_name || 'Customer'} • ₹${Number(freshOrder.total || 0).toFixed(2)} • ${freshOrder.customer_phone || ''}`;
+                    showToast(title + ' received. Tap Orders to view details.');
+                    try {
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            const n = new Notification(title, { body, tag: `subha-order-${freshOrder.id}`, renotify: false });
+                            n.onclick = () => { window.focus(); switchView('admin'); const tabBtn = document.querySelectorAll('.admin-tab')[3]; if (tabBtn) openAdminTab('tab-orders', tabBtn); n.close(); };
+                        }
+                    } catch (err) { console.warn('Order notification unavailable:', err); }
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'subha_orders' }, payload => {
+                    const changed = payload.new || {};
+                    if (!changed.id) return;
+                    const belongsToCustomer = !appCurrentUser?.isAdmin && String(changed.customer_email || '').toLowerCase() === String(appCurrentUser?.email || '').toLowerCase();
+                    if (!appCurrentUser?.isAdmin && !belongsToCustomer) return;
+                    const idx = orders.findIndex(o => String(o.id) === String(changed.id));
+                    if (idx >= 0) orders[idx] = { ...orders[idx], ...changed };
+                    else orders.unshift(changed);
+                    saveStateLocal(); renderOrders();
+                    if (belongsToCustomer) {
+                        const message = `Your Subha Medical order #${changed.id} is now ${changed.status || 'updated'}.`;
+                        showToast(message);
+                        try {
+                            if ('Notification' in window && Notification.permission === 'granted') {
+                                const n = new Notification('Subha Medical – Order Update', { body: message, tag: `subha-order-status-${changed.id}` });
+                                n.onclick = () => { window.focus(); switchView('account'); n.close(); };
+                            }
+                        } catch (_) {}
+                    }
+                }).subscribe();
         }
  
         /* =========================================================================
@@ -2451,16 +2551,17 @@ body { background-color:#f7f8fb; }
             const logoBadge = document.getElementById('nav-logo-badge');
             if (logoBadge) {
                 if (storeSettings.logo_image) {
+                    storeSettings.logo_image = resolveSubhaStorageUrl(storeSettings.logo_image, PRODUCT_IMAGE_BUCKET);
                     logoBadge.innerHTML = `<img src="${storeSettings.logo_image}" alt="Subha Medical logo" style="display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;border-radius:inherit;" onerror="this.onerror=null;this.remove();this.parentElement.innerHTML='<i class=\'ri-capsule-fill\'></i>'">`;
                 } else {
                     logoBadge.innerHTML = '<i class="ri-capsule-fill"></i>';
                 }
             }
             const heroPromoImg = document.getElementById('hero-promo-img');
-            if (heroPromoImg) { heroPromoImg.style.display = 'block'; heroPromoImg.style.width = '100%'; heroPromoImg.style.height = '100%'; heroPromoImg.style.minHeight = '120px'; heroPromoImg.style.objectFit = 'cover'; heroPromoImg.src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80'; heroPromoImg.onerror = () => { heroPromoImg.onerror = null; heroPromoImg.src = 'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=1200&q=80'; }; }
+            if (heroPromoImg) { storeSettings.promo_image = resolveSubhaStorageUrl(storeSettings.promo_image || '', PRODUCT_IMAGE_BUCKET); heroPromoImg.style.display = 'block'; heroPromoImg.style.width = '100%'; heroPromoImg.style.height = '100%'; heroPromoImg.style.minHeight = '120px'; heroPromoImg.style.objectFit = 'cover'; heroPromoImg.src = storeSettings.promo_image || 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1200&q=80'; heroPromoImg.onerror = () => { heroPromoImg.onerror = null; heroPromoImg.src = 'https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=1200&q=80'; }; }
             const promoVideoWrap = document.getElementById('hero-promo-video-wrap');
             const promoVideo = document.getElementById('hero-promo-video');
-            if (promoVideoWrap && promoVideo) { if (storeSettings.promo_video) { promoVideoWrap.classList.remove('hidden'); if (promoVideo.src !== storeSettings.promo_video) { promoVideo.src = storeSettings.promo_video; promoVideo.load(); } } else { promoVideo.pause(); promoVideo.removeAttribute('src'); promoVideo.load(); promoVideoWrap.classList.add('hidden'); } }
+            if (promoVideoWrap && promoVideo) { storeSettings.promo_video = resolveSubhaStorageUrl(storeSettings.promo_video || '', PRODUCT_VIDEO_BUCKET); if (storeSettings.promo_video) { promoVideoWrap.classList.remove('hidden'); if (promoVideo.src !== storeSettings.promo_video) { promoVideo.src = storeSettings.promo_video; promoVideo.load(); } } else { promoVideo.pause(); promoVideo.removeAttribute('src'); promoVideo.load(); promoVideoWrap.classList.add('hidden'); } }
             document.getElementById('hero-promo-title').textContent = storeSettings.promo_title;
             document.getElementById('hero-promo-sub').textContent = storeSettings.promo_sub;
             const bgInput = document.getElementById('adm-bg-image'); if (bgInput && !bgInput.value) bgInput.value = storeSettings.bg_image || '';
@@ -2609,8 +2710,119 @@ body { background-color:#f7f8fb; }
             let list = product?.images;
             if (typeof list === 'string') { try { list = JSON.parse(list); } catch (_) { list = []; } }
             if (!Array.isArray(list)) list = [];
-            const combined = [product?.image, ...list].filter(v => typeof v === 'string' && /^https?:\/\//i.test(v));
+            const combined = [product?.image, ...list].filter(v => typeof v === 'string' && /^(https?:|data:|blob:)/i.test(v));
             return [...new Set(combined)];
+        }
+ 
+        function subhaTamilLatin(text) {
+            const chars = Array.from(String(text || '').normalize('NFC'));
+            const vowels = {'அ':'a','ஆ':'aa','இ':'i','ஈ':'ii','உ':'u','ஊ':'uu','எ':'e','ஏ':'ee','ஐ':'ai','ஒ':'o','ஓ':'oo','ஔ':'au'};
+            const cons = {'க':'k','ங':'ng','ச':'c','ஞ':'ny','ட':'d','ண':'n','த':'th','ந':'n','ப':'p','ம':'m','ய':'y','ர':'r','ல':'l','வ':'v','ழ':'zh','ள':'l','ற':'r','ன':'n','ஜ':'j','ஷ':'sh','ஸ':'s','ஹ':'h','ஸ்ரீ':'sri'};
+            const signs = {'ா':'aa','ி':'i','ீ':'ii','ு':'u','ூ':'uu','ெ':'e','ே':'ee','ை':'ai','ொ':'o','ோ':'oo','ௌ':'au'};
+            let out='';
+            for (let i=0;i<chars.length;i++) {
+                const c=chars[i];
+                if (vowels[c]) { out+=vowels[c]; continue; }
+                if (cons[c]) {
+                    out+=cons[c];
+                    const next=chars[i+1];
+                    if (next==='்') { i++; continue; }
+                    if (signs[next]) { out+=signs[next]; i++; }
+                    else out+='a';
+                    continue;
+                }
+                if (signs[c]) { out+=signs[c]; continue; }
+                if (c==='்') continue;
+                out+=c;
+            }
+            return out;
+        }
+        function subhaHindiLatin(text) {
+            const chars = Array.from(String(text || '').normalize('NFC'));
+            const vowels = {'अ':'a','आ':'aa','इ':'i','ई':'ii','उ':'u','ऊ':'uu','ऋ':'ri','ए':'e','ऐ':'ai','ओ':'o','औ':'au'};
+            const cons = {'क':'k','ख':'kh','ग':'g','घ':'gh','ङ':'ng','च':'ch','छ':'chh','ज':'j','झ':'jh','ञ':'ny','ट':'t','ठ':'th','ड':'d','ढ':'dh','ण':'n','त':'t','थ':'th','द':'d','ध':'dh','न':'n','प':'p','फ':'ph','ब':'b','भ':'bh','म':'m','य':'y','र':'r','ल':'l','व':'v','श':'sh','ष':'sh','स':'s','ह':'h','क़':'q','ख़':'kh','ज़':'z','फ़':'f'};
+            const matras = {'ा':'aa','ि':'i','ी':'ii','ु':'u','ू':'uu','ृ':'ri','े':'e','ै':'ai','ो':'o','ौ':'au'};
+            let out='';
+            for(let i=0;i<chars.length;i++){
+                const c=chars[i];
+                if(vowels[c]){out+=vowels[c];continue;}
+                if(cons[c]){
+                    out+=cons[c];
+                    const next=chars[i+1];
+                    if(next==='्'){i++;continue;}
+                    if(matras[next]){out+=matras[next];i++;}
+                    else if(next==='ं'||next==='ँ'){out+='n';i++;}
+                    else out+='a';
+                    continue;
+                }
+                if(matras[c]){out+=matras[c];continue;}
+                if(c==='्'||c==='ं'||c==='ँ')continue;
+                out+=c;
+            }
+            return out;
+        }
+        function subhaOtherIndicLatin(text) {
+            const scripts = [
+                { vowels: {'അ':'a','ആ':'aa','ഇ':'i','ഈ':'ii','ഉ':'u','ഊ':'uu','ഋ':'ri','എ':'e','ഏ':'ee','ഐ':'ai','ഒ':'o','ഓ':'oo','ഔ':'au'}, cons: {'ക':'k','ഖ':'kh','ഗ':'g','ഘ':'gh','ങ':'ng','ച':'c','ഛ':'chh','ജ':'j','ഝ':'jh','ഞ':'ny','ട':'t','ഠ':'th','ഡ':'d','ഢ':'dh','ണ':'n','ത':'th','ഥ':'th','ദ':'d','ധ':'dh','ന':'n','പ':'p','ഫ':'ph','ബ':'b','ഭ':'bh','മ':'m','യ':'y','ര':'r','ല':'l','വ':'v','ശ':'sh','ഷ':'sh','സ':'s','ഹ':'h','ള':'l','ഴ':'zh','റ':'r'}, matras: {'ാ':'aa','ി':'i','ീ':'ii','ു':'u','ൂ':'uu','ൃ':'ri','െ':'e','േ':'ee','ൈ':'ai','ൊ':'o','ോ':'oo','ൌ':'au'}, virama:'്' },
+                { vowels: {'అ':'a','ఆ':'aa','ఇ':'i','ఈ':'ii','ఉ':'u','ఊ':'uu','ఋ':'ri','ఎ':'e','ఏ':'ee','ఐ':'ai','ఒ':'o','ఓ':'oo','ఔ':'au'}, cons: {'క':'k','ఖ':'kh','గ':'g','ఘ':'gh','ఙ':'ng','చ':'c','ఛ':'chh','జ':'j','ఝ':'jh','ఞ':'ny','ట':'t','ఠ':'th','డ':'d','ఢ':'dh','ణ':'n','త':'th','థ':'th','ద':'d','ధ':'dh','న':'n','ప':'p','ఫ':'ph','బ':'b','భ':'bh','మ':'m','య':'y','ర':'r','ల':'l','వ':'v','శ':'sh','ష':'sh','స':'s','హ':'h','ళ':'l','ఱ':'r'}, matras: {'ా':'aa','ి':'i','ీ':'ii','ు':'u','ూ':'uu','ృ':'ri','ె':'e','ే':'ee','ై':'ai','ొ':'o','ో':'oo','ౌ':'au'}, virama:'్' },
+                { vowels: {'ಅ':'a','ಆ':'aa','ಇ':'i','ಈ':'ii','ಉ':'u','ಊ':'uu','ಋ':'ri','ಎ':'e','ಏ':'ee','ಐ':'ai','ಒ':'o','ಓ':'oo','ಔ':'au'}, cons: {'ಕ':'k','ಖ':'kh','ಗ':'g','ಘ':'gh','ಙ':'ng','ಚ':'c','ಛ':'chh','ಜ':'j','ಝ':'jh','ಞ':'ny','ಟ':'t','ಠ':'th','ಡ':'d','ಢ':'dh','ಣ':'n','ತ':'th','ಥ':'th','ದ':'d','ಧ':'dh','ನ':'n','ಪ':'p','ಫ':'ph','ಬ':'b','ಭ':'bh','ಮ':'m','ಯ':'y','ರ':'r','ಲ':'l','ವ':'v','ಶ':'sh','ಷ':'sh','ಸ':'s','ಹ':'h','ಳ':'l','ೞ':'zh','ಱ':'r'}, matras: {'ಾ':'aa','ಿ':'i','ೀ':'ii','ು':'u','ೂ':'uu','ೃ':'ri','ೆ':'e','ೇ':'ee','ೈ':'ai','ೊ':'o','ೋ':'oo','ೌ':'au'}, virama:'್' }
+            ];
+            let result = '';
+            for (const cfg of scripts) {
+                const chars = Array.from(String(text || '').normalize('NFC'));
+                let out = '';
+                for (let i=0;i<chars.length;i++) {
+                    const c=chars[i];
+                    if(cfg.vowels[c]) { out+=cfg.vowels[c]; continue; }
+                    if(cfg.cons[c]) {
+                        out+=cfg.cons[c]; const next=chars[i+1];
+                        if(next===cfg.virama) { i++; continue; }
+                        if(cfg.matras[next]) { out+=cfg.matras[next]; i++; } else out+='a';
+                        continue;
+                    }
+                    if(cfg.matras[c]) { out+=cfg.matras[c]; continue; }
+                    if(c===cfg.virama) continue;
+                    out+=c;
+                }
+                result += ' ' + out;
+            }
+            return result.trim();
+        }
+ 
+        function subhaSoundKey(value) {
+            let x=String(value||'').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+            x=x.replace(/ph/g,'f').replace(/th/g,'t').replace(/dh/g,'d').replace(/kh/g,'k').replace(/gh/g,'g').replace(/chh?/g,'c').replace(/sh/g,'s').replace(/zh/g,'l').replace(/aa|ii|uu|ee|oo|ai|au/g,'a').replace(/s/g,'c');
+            return x.replace(/[^a-z0-9]/g,'').replace(/[aeiou]/g,'').replace(/(.)\1+/g,'$1');
+        }
+        function subhaEditDistance(a,b) {
+            if(!a||!b)return 99;
+            const prev=Array.from({length:b.length+1},(_,i)=>i);
+            let row;
+            for(let i=1;i<=a.length;i++){
+                row=[i];
+                for(let j=1;j<=b.length;j++) row[j]=Math.min(row[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+                for(let j=0;j<=b.length;j++)prev[j]=row[j];
+            }
+            return prev[b.length];
+        }
+        function subhaSearchMatch(query, fields) {
+            if(!query) return true;
+            const rawQ=query.normalize('NFC').toLocaleLowerCase().trim().replace(/\s+/g,' ');
+            const joined=fields.map(v=>String(v||'').normalize('NFC').toLocaleLowerCase()).join(' ');
+            if(joined.includes(rawQ)) return true;
+            const qLatin=(subhaTamilLatin(rawQ)+' '+subhaHindiLatin(rawQ)+' '+subhaOtherIndicLatin(rawQ)).toLocaleLowerCase();
+            const allLatin=fields.map(v=>subhaTamilLatin(v)+' '+subhaHindiLatin(v)+' '+subhaOtherIndicLatin(v)+' '+String(v||'')).join(' ').toLocaleLowerCase();
+            if(allLatin.includes(rawQ) || allLatin.includes(qLatin.trim())) return true;
+            const qTokens=rawQ.split(/\s+/).filter(Boolean);
+            const fTokens=allLatin.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+            const qKeys=qTokens.map(t=>subhaSoundKey(t)||subhaSoundKey(subhaTamilLatin(t))||subhaSoundKey(subhaHindiLatin(t))||subhaSoundKey(subhaOtherIndicLatin(t))).filter(Boolean);
+            const fKeys=fTokens.map(t=>subhaSoundKey(t)).filter(Boolean);
+            if(!qKeys.length)return false;
+            return qKeys.every(qk=>fKeys.some(fk=>{
+                if(fk.includes(qk)||qk.includes(fk))return Math.min(fk.length,qk.length)>=3;
+                if(Math.min(fk.length,qk.length)<4)return false;
+                return subhaEditDistance(qk,fk)<=Math.max(1,Math.floor(Math.max(qk.length,fk.length)*0.24));
+            }));
         }
  
         function renderStoreProducts() {
@@ -2619,10 +2831,8 @@ body { background-color:#f7f8fb; }
             const norm = value => String(value ?? '').toLocaleLowerCase().trim().replace(/\s+/g, ' ');
             let list = products.filter(p => {
                 const matchCat = activeCategory === 'ALL' || norm(p.category) === norm(activeCategory);
-                // Search all useful catalog fields, including category, expiry and alternate DB column names.
-                const searchable = [p.name, p.salt, p.brand, p.batch, p.category, p.expiry, p.generic_name, p.description, p.manufacturer, p.medicine_name]
-                    .map(norm).filter(Boolean).join(' ');
-                const matchQ = !q || searchable.includes(q) || q.split(' ').every(part => searchable.includes(part));
+                const searchableFields = [p.name, p.salt, p.brand, p.batch, p.category, p.expiry, p.generic_name, p.description, p.manufacturer, p.medicine_name, p.alternative_names, p.search_keywords, p.video];
+                const matchQ = subhaSearchMatch(q, searchableFields);
                 return matchCat && matchQ;
             });
  
@@ -2691,12 +2901,12 @@ body { background-color:#f7f8fb; }
             try {
                 if (subhaSpeechRecognition) subhaSpeechRecognition.abort();
                 subhaSpeechRecognition = new SpeechRecognitionAPI();
-                subhaSpeechRecognition.lang = 'ta-IN';
+                subhaSpeechRecognition.lang = document.getElementById('voice-search-language')?.value || 'ta-IN';
                 subhaSpeechRecognition.continuous = false;
                 subhaSpeechRecognition.interimResults = false;
                 subhaSpeechRecognition.maxAlternatives = 1;
                 if (btn) { btn.classList.add('listening'); btn.innerHTML = '<i class="ri-mic-fill"></i>'; }
-                showToast('கேட்கிறது... மருந்தின் பெயரைச் சொல்லுங்கள்.', 'success');
+                showToast('Voice search is listening. Say a medicine name.', 'success');
                 subhaSpeechRecognition.onresult = event => {
                     const phrase = event.results?.[0]?.[0]?.transcript || '';
                     const input = document.getElementById('search-input');
@@ -3151,6 +3361,7 @@ body { background-color:#f7f8fb; }
             const mrp = parseFloat(document.getElementById('adm-prod-mrp').value) || 0;
             const price = parseFloat(document.getElementById('adm-prod-price').value) || 0;
             const stock = parseInt(document.getElementById('adm-prod-stock').value) || 0;
+            const searchKeywords = document.getElementById('adm-prod-search-keywords')?.value.trim() || '';
             let image = document.getElementById('adm-prod-img').value.trim();
             let video = document.getElementById('adm-prod-video').value.trim();
             const imageFiles = Array.from(document.getElementById('adm-prod-image-file')?.files || []);
@@ -3176,7 +3387,7 @@ body { background-color:#f7f8fb; }
             if (!name || price <= 0) return showToast('Please enter Medicine Name and valid Price', 'error');
  
             const gallery = images.length ? images : (existingProduct?.images || (image ? [image] : []));
-            const item = { id, name, salt, brand, category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, rx, featured, updated_at: new Date().toISOString() };
+            const item = { id, name, salt, brand, category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, video_url: video, search_keywords: searchKeywords, rx, featured, updated_at: new Date().toISOString() };
             const idx = products.findIndex(p => p.id === id);
             if (idx >= 0) products[idx] = item;
             else products.unshift(item);
@@ -3190,7 +3401,7 @@ body { background-color:#f7f8fb; }
                 let result = await supabaseClient.from('subha_products').upsert(item);
                 if (result.error) {
                     // Retry using the known Online Pharmacy schema aliases (selling_price/image_url/batch_number/expiry_date).
-                    const schemaItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, images: gallery, batch_number: batch || null, expiry_date: expiry || null };
+                    const schemaItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, images: gallery, video_url: video || null, search_keywords: searchKeywords || null, batch_number: batch || null, expiry_date: expiry || null };
                     result = await supabaseClient.from('subha_products').upsert(schemaItem);
                 }
                 if (result.error) {
@@ -3216,6 +3427,7 @@ body { background-color:#f7f8fb; }
             document.getElementById('adm-prod-mrp').value = p.mrp;
             document.getElementById('adm-prod-price').value = p.price;
             document.getElementById('adm-prod-stock').value = p.stock;
+            if (document.getElementById('adm-prod-search-keywords')) document.getElementById('adm-prod-search-keywords').value = p.search_keywords || '';
             document.getElementById('adm-prod-img').value = p.image || '';
             document.getElementById('adm-prod-video').value = p.video || '';
             document.getElementById('adm-prod-image-file').value = '';
@@ -3236,7 +3448,7 @@ body { background-color:#f7f8fb; }
         }
  
         function resetProductForm() {
-            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img', 'adm-prod-video'].forEach(k => {
+            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img', 'adm-prod-video', 'adm-prod-search-keywords'].forEach(k => {
                 document.getElementById(k).value = '';
             });
             document.getElementById('adm-prod-image-file').value = '';
@@ -3333,12 +3545,6 @@ body { background-color:#f7f8fb; }
             storeSettings.coupons = parsedCoupons.length ? parsedCoupons : [{ code: storeSettings.coupon_code, discount: storeSettings.coupon_discount, enabled: storeSettings.coupon_enabled }];
             saveStateLocal();
             applyStoreBranding();
-            if (document.getElementById('adm-logo-file')) document.getElementById('adm-logo-file').value = '';
-            if (document.getElementById('adm-brand-image-file')) document.getElementById('adm-brand-image-file').value = '';
-            if (document.getElementById('adm-bg-file')) document.getElementById('adm-bg-file').value = '';
-            if (document.getElementById('adm-promo-file')) document.getElementById('adm-promo-file').value = '';
-            if (document.getElementById('adm-promo-video-file')) document.getElementById('adm-promo-video-file').value = '';
-            ['adm-logo-preview','adm-brand-preview','adm-promo-preview','adm-promo-video-preview'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=''; });
             if (supabaseClient) {
                 const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
                 if (error) {
@@ -3346,7 +3552,9 @@ body { background-color:#f7f8fb; }
                     return showToast('Saved on this device only. Cloud save failed: ' + error.message + '. Run the supplied SQL migration in Supabase.', 'error');
                 }
             }
-            showToast('Logo, background, promo image/video settings saved. Check the customer home page.', 'success');
+            ['adm-logo-file','adm-brand-image-file','adm-bg-file','adm-promo-file','adm-promo-video-file'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+            ['adm-logo-preview','adm-brand-preview','adm-promo-preview','adm-promo-video-preview'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=''; });
+            showToast('Logo, background, promo image/video settings saved to cloud. Refresh customer devices to see updates.', 'success');
         }
  
         async function saveCoreSettings() {
@@ -3616,14 +3824,23 @@ body { background-color:#f7f8fb; }
             }
             if (['Delivered', 'Cancelled'].includes(order.status)) return showToast('This order can no longer be cancelled.', 'error');
             if (!confirm('Cancel this order?')) return;
+            if (!supabaseClient) return showToast('Cloud connection unavailable. Your order was not cancelled.', 'error');
+            const { error } = await supabaseClient.from('subha_orders').update({ status: 'Cancelled' }).eq('id', orderId).eq('customer_email', appCurrentUser.email);
+            if (error) { console.error(error); return showToast('Order cancellation failed: ' + error.message, 'error'); }
             order.status = 'Cancelled';
-            saveStateLocal();
-            if (supabaseClient) {
-                const { error } = await supabaseClient.from('subha_orders').update({ status: 'Cancelled' }).eq('id', orderId).eq('customer_email', appCurrentUser.email);
-                if (error) { console.error(error); showToast('Updated locally, but cloud cancellation failed: ' + error.message, 'error'); }
+            if (!order.stock_restored) {
+                const restored = await restoreInventoryStockForCancelledOrder(order.items);
+                if (restored.ok) {
+                    const flag = await supabaseClient.from('subha_orders').update({ stock_restored: true }).eq('id', orderId).eq('customer_email', appCurrentUser.email);
+                    if (!flag.error) order.stock_restored = true;
+                    else showToast('Order cancelled and stock restored, but the stock-restored marker failed: ' + flag.error.message, 'error');
+                } else {
+                    showToast('Order cancelled, but stock restoration needs admin attention: ' + restored.error, 'error');
+                }
             }
+            saveStateLocal();
             renderOrders();
-            showToast('Order cancelled.');
+            if (order.stock_restored) showToast('Order cancelled successfully. Stock restored.');
         }
  
         function renderOrders() {
@@ -3664,10 +3881,12 @@ body { background-color:#f7f8fb; }
                             </div>
                             <div class="muted">Address: ${o.customer_address}</div>
                             <div style="font-size:12px;margin-top:4px;">${(o.items || []).map(i => `${i.name} [B: ${i.batch || '--'}] (x${i.qty})`).join(', ')}</div>
+                            <details style="margin-top:7px;"><summary class="order-detail-toggle">View full order details</summary><div class="order-detail-panel"><strong>Customer:</strong> ${o.customer_name || '-'}<br><strong>Phone:</strong> ${o.customer_phone || '-'}<br><strong>Email:</strong> ${o.customer_email || '-'}<br><strong>Delivery address:</strong> ${o.customer_address || o.address || '-'}<br><strong>Order date:</strong> ${o.created_at ? new Date(o.created_at).toLocaleString('en-IN') : '-'}<br><strong>Payment:</strong> ${o.payment_mode || 'Cash on Delivery'} / ${o.payment_status || 'pending'}<hr style="border:0;border-top:1px solid var(--border-color);">${(o.items || []).map(i => `${i.name || 'Item'} — Qty ${i.qty || 1} × ₹${Number(i.price || 0).toFixed(2)}`).join('<br>')}<br><strong>Total: ₹${Number(o.total || 0).toFixed(2)}</strong></div></details>
                         </div>
  
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                             <select class="sort-select" style="padding:5px 8px;font-size:11px;" onchange="updateOrderStatusAdmin('${o.id}', this.value)">
+                                <option value="Order Placed" ${(!o.status || o.status === 'Order Placed') ? 'selected' : ''}>Order Placed</option>
                                 <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
                                 <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
                                 <option value="Out for Delivery" ${o.status === 'Out for Delivery' ? 'selected' : ''}>Out for Delivery</option>
@@ -3962,6 +4181,7 @@ body { background-color:#f7f8fb; }
                             appCurrentUser = { id: session.user.id, name: session.user.user_metadata?.name || session.user.user_metadata?.full_name || (session.user.email || session.user.phone || '').split('@')[0], email: (session.user.email || '').toLowerCase(), phone: session.user.phone || '', isAdmin: session.user.id === ADMIN_USER_ID };
                             localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                             updateUserAuthUI();
+                            setupSubhaOrderRealtime();
                             setTimeout(() => pullFromSupabaseSQL(), 0);
                         }
                     });
