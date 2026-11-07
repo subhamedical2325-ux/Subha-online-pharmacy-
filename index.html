@@ -1307,6 +1307,8 @@ img { -webkit-user-drag: none; }
        </div>
       </div>
       <button class="primary-btn" style="width: 100%; margin-top: 12px; background: #7c3aed;" onclick="addDoseReminder()">Save Daily Reminder</button>
+      <button type="button" class="secondary-btn" style="width:100%;margin-top:8px;" onclick="enableTamilReminderAlerts()">🔔 Enable Tamil Voice &amp; Notifications</button>
+      <p class="muted" style="font-size:11px;line-height:1.45;margin:8px 0 0;">At reminder time, your phone can show an alert and speak in Tamil: “சுபா மெடிக்கல். தயவுசெய்து உங்கள் மருந்தை எடுத்துக்கொள்ளுங்கள்.” Keep this website open in Brave for reminders to ring. Browser alarms may not work after the tab/browser is closed.</p>
       <div id="reminders-list" style="margin-top: 10px; font-size: 12px;"></div>
      </div>
     </div>
@@ -1744,7 +1746,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
  
         let storeSettings = JSON.parse(localStorage.getItem('subha_settings') || JSON.stringify({
             store_name: 'Subha Medical | சுபா மருந்தகம்',
-            whatsapp: '919487165045',
+            whatsapp: '918072956113',
             address: 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103',
             gstin: '33AAAAA0000A1Z5',
             dl_no: 'TN-TPR-20/21-00000',
@@ -1809,8 +1811,10 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                 else { categories = cResult.data || []; localStorage.setItem('subha_categories', JSON.stringify(categories)); }
                 if (!sResult.error && sResult.data) {
                     storeSettings = { ...storeSettings, ...sResult.data };
-                    localStorage.setItem('subha_settings', JSON.stringify(storeSettings));
                 }
+                // Fixed pharmacist WhatsApp order destination requested by the store owner.
+                storeSettings.whatsapp = '918072956113';
+                localStorage.setItem('subha_settings', JSON.stringify(storeSettings));
  
                 // Orders are private: admins fetch all orders; customers fetch only their own.
                 // Do not silently keep stale local orders when the cloud request fails.
@@ -1842,7 +1846,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         // Never send admin_pin or other local-only fields to Supabase.
         function cloudSettingsPayload() {
             const allowed = ['store_name','whatsapp','address','gstin','dl_no','gst_rate','admin_email','theme_color','dark_mode','bg_image','logo_image','promo_image','promo_video','promo_title','promo_sub','coupon_enabled','coupon_code','coupon_discount','coupons'];
-            const payload = { id: 1 };
+            const payload = { id: 1, whatsapp: '918072956113' };
             allowed.forEach(key => { if (Object.prototype.hasOwnProperty.call(storeSettings, key)) payload[key] = storeSettings[key]; });
             return payload;
         }
@@ -2284,7 +2288,7 @@ body { background-color:#f7f8fb; }
                                 <h1 class="store-title">${storeSettings.store_name || 'Subha Medical | சுபா மருந்தகம்'}</h1>
                                 <div class="store-sub">
                                     ${storeSettings.address || 'பெருமாநல்லூர் – குன்னத்தூர் சாலை, வள்ளிபுரம், திருப்பூர் - 638103'}<br>
-                                    <strong>Phone / WhatsApp:</strong> +${storeSettings.whatsapp || '919487165045'}<br>
+                                    <strong>Phone / WhatsApp:</strong> +${storeSettings.whatsapp || '918072956113'}<br>
                                     <strong>GSTIN:</strong> ${storeSettings.gstin || '33AAAAA0000A1Z5'} &nbsp;|&nbsp;
                                     <strong>D.L. No:</strong> ${storeSettings.dl_no || 'TN-TPR-20/21-00000'}
                                 </div>
@@ -3301,7 +3305,7 @@ body { background-color:#f7f8fb; }
  
         async function saveCoreSettings() {
             storeSettings.store_name = document.getElementById('adm-store-name').value.trim() || 'Subha Medical';
-            storeSettings.whatsapp = document.getElementById('adm-whatsapp').value.trim() || '919487165045';
+            storeSettings.whatsapp = document.getElementById('adm-whatsapp').value.trim() || '918072956113';
             storeSettings.gstin = document.getElementById('adm-gstin').value.trim() || '33AAAAA0000A1Z5';
             storeSettings.dl_no = document.getElementById('adm-dl-no').value.trim() || 'TN-TPR-20/21-00000';
             storeSettings.gst_rate = parseFloat(document.getElementById('adm-gst-rate').value) || 12;
@@ -3537,7 +3541,7 @@ body { background-color:#f7f8fb; }
                 const lines = orderedItemsSnapshot.map(i => `• ${i.name} [Batch: ${i.batch || 'N/A'}] (x${i.qty}) - ₹${(i.price * i.qty).toFixed(2)}`).join('\\n');
                 const rxNote = orderObj.rx_image ? `\\n📄 Prescription: Attached in Store Order #${orderObj.id}` : '';
                 const msg = `New Medicine Order - ${storeSettings.store_name}\\nOrder ID: ${orderObj.id}\\nPatient: ${name}\\nPhone: ${phone}\\nAddress: ${address}\\n\\nItems:\\n${lines}${rxNote}\\n\\nTotal Payable: ₹${total.toFixed(2)}`;
-                const number = String(storeSettings.whatsapp || '919487165045').replace(/[^0-9]/g, '');
+                const number = String(storeSettings.whatsapp || '918072956113').replace(/[^0-9]/g, '');
                 const waUrl = `https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
                 if (whatsappTab && !whatsappTab.closed) whatsappTab.location.href = waUrl;
                 else window.location.href = waUrl;
@@ -3710,25 +3714,108 @@ body { background-color:#f7f8fb; }
             res.innerHTML = `Reading: <strong>${sys}/${dia} mmHg</strong> → <span style="color:${col};font-weight:800;">${cat}</span>`;
         }
  
+        const SUBHA_TAMIL_REMINDER_VOICE = 'சுபா மெடிக்கல். தயவுசெய்து உங்கள் மருந்தை எடுத்துக்கொள்ளுங்கள்.';
+        let subhaReminderAlarmTimer = null;
+ 
+        async function enableTamilReminderAlerts() {
+            try {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    await Notification.requestPermission();
+                }
+                // Prime speech/audio after the customer's tap; Android may otherwise block playback.
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const testUtterance = new SpeechSynthesisUtterance('சுபா மெடிக்கல்');
+                    testUtterance.lang = 'ta-IN';
+                    testUtterance.volume = 0;
+                    window.speechSynthesis.speak(testUtterance);
+                }
+                showToast('Tamil reminder alerts enabled. Keep this website open.', 'success');
+            } catch (err) {
+                console.warn('Reminder permission/audio setup:', err);
+                showToast('Voice setup could not be completed. Please allow notifications in Brave settings.', 'error');
+            }
+        }
+ 
+        function playSubhaReminderAlert(reminder) {
+            const spokenMessage = `${SUBHA_TAMIL_REMINDER_VOICE} ${reminder.name}.`;
+            try {
+                if ('vibrate' in navigator) navigator.vibrate([500, 250, 500]);
+            } catch (_) {}
+            try {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const notice = new Notification('Subha Medical – Medicine Reminder', {
+                        body: `${reminder.name}: தயவுசெய்து மருந்தை எடுத்துக்கொள்ளுங்கள்.`,
+                        tag: `subha-dose-${reminder.id}-${new Date().toISOString().slice(0,10)}`,
+                        renotify: false
+                    });
+                    notice.onclick = () => { window.focus(); notice.close(); };
+                }
+            } catch (err) { console.warn('Notification display unavailable:', err); }
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(spokenMessage);
+                    utterance.lang = 'ta-IN';
+                    utterance.rate = 0.88;
+                    utterance.pitch = 1;
+                    utterance.volume = 1;
+                    const tamilVoice = window.speechSynthesis.getVoices().find(v => /^ta(-|_)/i.test(v.lang) || /tamil/i.test(v.name));
+                    if (tamilVoice) utterance.voice = tamilVoice;
+                    window.speechSynthesis.speak(utterance);
+                }
+            } catch (err) { console.warn('Tamil voice playback unavailable:', err); }
+            showToast(`Medicine reminder: ${reminder.name}`, 'success');
+        }
+ 
+        function checkSubhaDoseReminders() {
+            const now = new Date();
+            const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            let changed = false;
+            reminders.forEach(reminder => {
+                if (reminder.time === hhmm && reminder.lastFiredDate !== today) {
+                    reminder.lastFiredDate = today;
+                    changed = true;
+                    playSubhaReminderAlert(reminder);
+                }
+            });
+            if (changed) localStorage.setItem('subha_reminders', JSON.stringify(reminders));
+        }
+ 
+        function startSubhaDoseReminderChecker() {
+            if (subhaReminderAlarmTimer) clearInterval(subhaReminderAlarmTimer);
+            checkSubhaDoseReminders();
+            subhaReminderAlarmTimer = window.setInterval(checkSubhaDoseReminders, 15000);
+        }
+ 
         function addDoseReminder() {
             const name = document.getElementById('rem-name').value.trim();
             const time = document.getElementById('rem-time').value;
             if (!name || !time) return showToast('Enter medicine name and time', 'error');
-            reminders.push({ id: Date.now(), name, time });
+            reminders.push({ id: Date.now(), name, time, lastFiredDate: '' });
             localStorage.setItem('subha_reminders', JSON.stringify(reminders));
             document.getElementById('rem-name').value = '';
             renderReminders();
-            showToast('Daily dose reminder added!');
+            enableTamilReminderAlerts();
+            showToast('Daily dose reminder saved!');
         }
  
         function renderReminders() {
             const box = document.getElementById('reminders-list');
+            if (!box) return;
             box.innerHTML = reminders.map(r => `
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-color);">
-                    <span>⏰ <strong>${r.time}</strong> -- ${r.name}</span>
-                    <span style="color:var(--danger);cursor:pointer;" onclick="reminders=reminders.filter(x=>x.id!==${r.id});localStorage.setItem('subha_reminders',JSON.stringify(reminders));renderReminders();">Remove</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-color);gap:8px;">
+                    <span>⏰ <strong>${r.time}</strong> -- ${String(r.name).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]))}</span>
+                    <button type="button" style="color:var(--danger);background:transparent;border:0;cursor:pointer;" onclick="removeDoseReminder(${Number(r.id)})">Remove</button>
                 </div>
             `).join('') || '<span class="muted">No active reminders set.</span>';
+        }
+ 
+        function removeDoseReminder(id) {
+            reminders = reminders.filter(item => Number(item.id) !== Number(id));
+            localStorage.setItem('subha_reminders', JSON.stringify(reminders));
+            renderReminders();
         }
  
         /* =========================================================================
@@ -3765,7 +3852,7 @@ body { background-color:#f7f8fb; }
  
         function openDirectWhatsApp() {
             try {
-                const configured = (storeSettings && storeSettings.whatsapp) || '919487165045';
+                const configured = (storeSettings && storeSettings.whatsapp) || '918072956113';
                 const number = String(configured).replace(/[^0-9]/g, '');
                 if (!number || number.length < 10) {
                     showToast('WhatsApp number is not configured correctly. Please contact the store.', 'error');
@@ -3811,6 +3898,7 @@ body { background-color:#f7f8fb; }
             }
             applyStoreBranding();
             renderAll();
+            startSubhaDoseReminderChecker();
             initSupabase().then(() => {
                 if (supabaseClient?.auth?.onAuthStateChange) {
                     supabaseClient.auth.onAuthStateChange((event, session) => {
