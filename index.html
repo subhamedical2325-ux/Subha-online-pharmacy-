@@ -1389,10 +1389,10 @@ img { -webkit-user-drag: none; }
     <!-- Sign In Box -->
     <div id="account-login-box" class="panel-card">
      <h4 style="margin: 0 0 6px;">Sign in to Subha Medical</h4>
-     <p class="muted" style="margin: 0 0 12px;">Use your registered email or mobile number with password. Customer OTP verification is by email; admin access opens automatically for the authorized admin account.</p>
+     <p class="muted" style="margin: 0 0 12px;">Use your registered email or mobile number. Admin access opens automatically for the authorized admin account.</p>
      <label class="form-label">Email address or mobile number *</label> <input type="text" id="login-email" class="form-control" placeholder="Email address or mobile number" autocomplete="username" inputmode="email"> <label class="form-label">Password (Admin / password accounts)</label> <input type="password" id="login-pass" class="form-control" placeholder="Enter password" autocomplete="current-password">
      <button class="primary-btn" style="width: 100%; margin-top: 10px;" onclick="handleUnifiedSignIn()">Sign In</button>
-     <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="sendAccountLoginOtp()">Sign in with Email OTP</button>
+     <button type="button" class="link-btn" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="sendAccountLoginOtp()">Sign in with OTP</button>
      <button type="button" class="link-btn" style="display:block;margin:5px auto 0;background:none;border:0;color:var(--brand);font-weight:700;" onclick="showForgotPasswordOtp()">Forgot Password?</button>
      <div style="text-align:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--brand-border);">
       <span class="muted">New to Subha Medical?</span>
@@ -1401,8 +1401,8 @@ img { -webkit-user-drag: none; }
      </div>
      <div id="signup-details-box" class="hidden" style="margin-top:14px;padding:14px;border:1px solid var(--brand-border);border-radius:12px;background:var(--brand-light);">
       <strong>Create your account</strong>
-      <p class="muted" style="margin:5px 0 8px;">Enter your details. We will send a one-time verification code to your email. Your mobile number is saved in your customer profile.</p>
-      <label class="form-label" for="signup-name">Full name *</label><input type="text" id="signup-name" class="form-control" autocomplete="name" placeholder="Your full name"> <label class="form-label" for="signup-place">Place / City *</label><input type="text" id="signup-place" class="form-control" autocomplete="address-level2" placeholder="Your place or city"> <label class="form-label" for="signup-mobile">Mobile number *</label><input type="tel" id="signup-mobile" class="form-control" autocomplete="tel" inputmode="tel" placeholder="Enter mobile number"> <label class="form-label" for="signup-email">Email ID * (OTP will be sent here)</label><input type="email" id="signup-email" class="form-control" autocomplete="email" placeholder="Enter your email address">
+      <p class="muted" style="margin:5px 0 8px;">Enter your details and create a password. Verification code will be sent to your email address.</p>
+      <label class="form-label" for="signup-name">Full name *</label><input type="text" id="signup-name" class="form-control" autocomplete="name" placeholder="Your full name"> <label class="form-label" for="signup-place">Place / City *</label><input type="text" id="signup-place" class="form-control" autocomplete="address-level2" placeholder="Your place or city"> <label class="form-label" for="signup-identifier">Email ID for OTP verification *</label><input type="email" id="signup-identifier" class="form-control" autocomplete="email" placeholder="Enter your email address"><label class="form-label" for="signup-new-password">Create password *</label><input type="password" id="signup-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"><label class="form-label" for="signup-confirm-password">Confirm password *</label><input type="password" id="signup-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter password">
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="sendCustomerSignupOtp()">Send Verification OTP</button>
      </div>
      <div id="signup-otp-box" class="hidden" style="margin-top:14px;padding:12px;border:1px solid var(--brand-border);border-radius:10px;background:var(--brand-light);">
@@ -1419,7 +1419,7 @@ img { -webkit-user-drag: none; }
       <label class="form-label" for="recovery-otp">Email OTP</label><input type="text" id="recovery-otp" class="form-control" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Enter recovery OTP"> <label class="form-label" for="recovery-new-password">New Password</label><input type="password" id="recovery-new-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="At least 6 characters"> <label class="form-label" for="recovery-confirm-password">Confirm New Password</label><input type="password" id="recovery-confirm-password" class="form-control" autocomplete="new-password" minlength="6" placeholder="Re-enter new password">
       <button class="primary-btn" type="button" style="width:100%;margin-top:10px;" onclick="verifyRecoveryOtpAndSetPassword()">Verify OTP &amp; Reset Password</button>
      </div>
-     <p class="muted" style="font-size:11px;margin:8px 0 0;">Customer account creation and OTP sign-in use email only. Email delivery depends on your Supabase email / SMTP configuration. Mobile number is collected for the customer profile; no SMS provider is required.</p>
+     <p class="muted" style="font-size:11px;margin:8px 0 0;">Customer registration uses email OTP. After verification, sign in normally using your email ID and password.</p>
     </div>
     <!-- Logged In Profile Card -->
     <div id="account-profile-box" class="panel-card hidden">
@@ -1773,6 +1773,25 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         /* =========================================================================
            3. AUTOMATIC BACKGROUND SQL SYNC
         ========================================================================= */
+        function normalizeCloudProduct(row) {
+            const p = { ...(row || {}) };
+            p.id = String(p.id ?? p.product_id ?? p.uuid ?? '');
+            p.name = p.name || p.product_name || p.medicine_name || p.title || '';
+            p.salt = p.salt || p.generic_name || p.composition || '';
+            p.brand = p.brand || p.manufacturer || p.company || '';
+            p.category = p.category || p.category_name || 'General';
+            p.price = Number(p.price ?? p.selling_price ?? p.sale_price ?? p.offer_price ?? 0);
+            p.mrp = Number(p.mrp ?? p.mrp_price ?? p.price ?? p.selling_price ?? 0);
+            p.stock = Number(p.stock ?? p.quantity ?? p.qty ?? 0);
+            p.image = p.image || p.image_url || p.photo_url || p.thumbnail || '';
+            p.batch = p.batch || p.batch_number || p.batch_no || '';
+            p.expiry = p.expiry || p.expiry_date || p.exp_date || '';
+            if (typeof p.images === 'string') { try { p.images = JSON.parse(p.images); } catch (_) { p.images = []; } }
+            if (!Array.isArray(p.images)) p.images = p.image ? [p.image] : [];
+            if (!p.image && p.images.length) p.image = p.images[0];
+            return p;
+        }
+ 
         async function pullFromSupabaseSQL() {
             if (!supabaseClient) return;
             try {
@@ -1781,8 +1800,11 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                     supabaseClient.from('subha_categories').select('*'),
                     supabaseClient.from('subha_settings').select('*').eq('id', '1').maybeSingle()
                 ]);
-                if (pResult.error) console.error('Product list load failed:', pResult.error);
-                else { products = pResult.data || []; localStorage.setItem('subha_products', JSON.stringify(products)); }
+                if (pResult.error) {
+                    console.error('Product list load failed:', pResult.error);
+                    const grid = document.getElementById('products-grid');
+                    if (grid) grid.innerHTML = `<div style="grid-column:1/-1;padding:16px;border:1px solid #f59e0b;border-radius:10px;background:#fffbeb;color:#92400e;"><strong>Products could not be loaded from the cloud.</strong><br>${String(pResult.error.message || 'Check Supabase table permissions and product columns').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>`;
+                } else { products = (pResult.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name); localStorage.setItem('subha_products', JSON.stringify(products)); }
                 if (cResult.error) console.warn('Category list load failed:', cResult.error);
                 else { categories = cResult.data || []; localStorage.setItem('subha_categories', JSON.stringify(categories)); }
                 if (!sResult.error && sResult.data) {
@@ -2515,8 +2537,8 @@ body { background-color:#f7f8fb; }
         }
  
         function createProductCardHTML(p) {
-            const mrp = Number(p.mrp) || 0;
-            const price = Number(p.price) || 0;
+            const price = Number(p.price ?? p.selling_price ?? p.sale_price ?? 0) || 0;
+            const mrp = Number(p.mrp ?? p.mrp_price ?? price) || price;
             const stockCount = Number(p.stock) || 0;
             const disc = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
             const wished = wishlist.includes(p.id);
@@ -2698,7 +2720,7 @@ body { background-color:#f7f8fb; }
             }
         }
  
-        let pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '' };
+        let pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '', password: '' };
  
         function classifyAccountIdentifier(value) {
             const raw = String(value || '').trim();
@@ -2722,24 +2744,26 @@ body { background-color:#f7f8fb; }
         async function sendCustomerSignupOtp() {
             const name = document.getElementById('signup-name').value.trim();
             const place = document.getElementById('signup-place').value.trim();
-            const mobile = normalizeLoginPhone(document.getElementById('signup-mobile').value);
-            const email = document.getElementById('signup-email').value.trim().toLowerCase();
+            const classified = classifyAccountIdentifier(document.getElementById('signup-identifier').value);
+            const password = document.getElementById('signup-new-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
             if (!name) return showToast('Enter your full name.', 'error');
             if (!place) return showToast('Enter your place or city.', 'error');
-            if (!/^\+?[1-9]\d{7,14}$/.test(mobile)) return showToast('Enter a valid mobile number with country code.', 'error');
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter a valid email address for OTP verification.', 'error');
-            if (email === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
+            if (!classified || classified.kind !== 'email') return showToast('Enter a valid email address. Customer registration verification is by email OTP.', 'error');
+            if (classified.value === ADMIN_EMAIL) return showToast('Use the administrator sign-in for this email.', 'error');
+            if (password.length < 6) return showToast('Create a password with at least 6 characters.', 'error');
+            if (password !== confirmPassword) return showToast('Passwords do not match.', 'error');
             try {
                 await ensureAuthClient();
-                const options = { shouldCreateUser: true, data: { name, full_name: name, place, mobile } };
-                const { error } = await supabaseClient.auth.signInWithOtp({ email, options });
+                const options = { shouldCreateUser: true, data: { name, full_name: name, place } };
+                const { error } = await supabaseClient.auth.signInWithOtp({ email: classified.value, options });
                 if (error) throw error;
-                pendingAccountOtp = { identifier: email, kind: 'email', value: email, purpose: 'signup', name, place, mobile };
+                pendingAccountOtp = { ...classified, purpose: 'signup', name, place, password };
                 document.getElementById('signup-otp-title').textContent = 'Verify your email address';
-                document.getElementById('signup-otp-help').textContent = 'Enter the OTP sent to ' + email + '. If it does not arrive, use Resend OTP.';
+                document.getElementById('signup-otp-help').textContent = 'Enter the numeric OTP sent to ' + classified.value + '. If it does not arrive, use Resend OTP.';
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
                 document.getElementById('signup-otp')?.focus();
-                showToast('Email OTP request submitted. Check your inbox and spam folder.', 'success');
+                showToast('Email OTP requested. Check your inbox and spam folder.', 'success');
             } catch (err) {
                 console.error('Customer OTP request failed:', err);
                 showToast(err?.message || 'Could not send verification OTP.', 'error');
@@ -2747,56 +2771,71 @@ body { background-color:#f7f8fb; }
         }
  
         async function sendAccountLoginOtp() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter your registered email address. Email OTP is the only OTP sign-in method.', 'error');
-            if (email === ADMIN_EMAIL) return showToast('Admin must sign in using the admin password.', 'error');
+            const classified = classifyAccountIdentifier(document.getElementById('login-email').value);
+            if (!classified) return showToast('Enter a valid registered email address or mobile number first.', 'error');
+            if (classified.kind === 'email' && classified.value === ADMIN_EMAIL) return showToast('Admin must sign in using the admin password.', 'error');
             try {
                 await ensureAuthClient();
-                const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+                const request = classified.kind === 'email'
+                    ? { email: classified.value, options: { shouldCreateUser: false } }
+                    : { phone: classified.value, options: { shouldCreateUser: false } };
+                const { error } = await supabaseClient.auth.signInWithOtp(request);
                 if (error) throw error;
-                pendingAccountOtp = { identifier: email, kind: 'email', value: email, purpose: 'login', name: '', place: '', mobile: '' };
-                document.getElementById('signup-otp-title').textContent = 'Email sign-in verification';
-                document.getElementById('signup-otp-help').textContent = 'Enter the login OTP sent to ' + email + '.';
+                pendingAccountOtp = { ...classified, purpose: 'login', name: '', place: '' };
+                document.getElementById('signup-otp-title').textContent = 'Sign in verification';
+                document.getElementById('signup-otp-help').textContent = 'Enter the login OTP sent to ' + classified.value + '.';
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
                 document.getElementById('signup-otp')?.focus();
-                showToast('Email login OTP request submitted.', 'success');
-            } catch (err) { console.error('Login OTP failed:', err); showToast(err?.message || 'Could not send email OTP.', 'error'); }
+                showToast('Login OTP request submitted.', 'success');
+            } catch (err) { console.error('Login OTP failed:', err); showToast(err?.message || 'Could not send login OTP.', 'error'); }
         }
  
         async function resendVerificationEmail() {
-            let target = pendingAccountOtp;
-            if (!target?.value || target.kind !== 'email') {
-                const email = document.getElementById('signup-email')?.value.trim().toLowerCase() || document.getElementById('login-email')?.value.trim().toLowerCase();
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showToast('Enter the same registered email address first.', 'error');
-                target = { value: email, kind: 'email', purpose: 'signup', name: document.getElementById('signup-name')?.value.trim() || '', place: document.getElementById('signup-place')?.value.trim() || '', mobile: normalizeLoginPhone(document.getElementById('signup-mobile')?.value || '') };
-                pendingAccountOtp = target;
+            const pending = pendingAccountOtp;
+            if (!pending?.identifier && !pending?.value) {
+                const signupValue = document.getElementById('signup-identifier')?.value || document.getElementById('login-email')?.value;
+                const classified = classifyAccountIdentifier(signupValue);
+                if (!classified) return showToast('Enter the same email or mobile number used for registration.', 'error');
+                pendingAccountOtp = { ...classified, purpose: 'signup', name: document.getElementById('signup-name')?.value.trim() || '', place: document.getElementById('signup-place')?.value.trim() || '' };
             }
+            const target = pendingAccountOtp;
             try {
                 await ensureAuthClient();
-                const options = { shouldCreateUser: target.purpose === 'signup', data: { name: target.name || '', full_name: target.name || '', place: target.place || '', mobile: target.mobile || '' } };
-                const { error } = await supabaseClient.auth.signInWithOtp({ email: target.value, options });
+                const request = target.kind === 'email'
+                    ? { email: target.value, options: { shouldCreateUser: target.purpose === 'signup', data: { name: target.name, full_name: target.name, place: target.place } } }
+                    : { phone: target.value, options: { shouldCreateUser: target.purpose === 'signup', data: { name: target.name, full_name: target.name, place: target.place } } };
+                const { error } = await supabaseClient.auth.signInWithOtp(request);
                 if (error) throw error;
                 document.getElementById('signup-otp-box')?.classList.remove('hidden');
-                showToast('A new email OTP was requested. Check your inbox and spam folder.', 'success');
-            } catch (err) { console.error('Resend OTP failed:', err); showToast(err?.message || 'Could not resend email OTP.', 'error'); }
+                showToast('A new OTP request was submitted. Check your email or SMS.', 'success');
+            } catch (err) { console.error('Resend OTP failed:', err); showToast(err?.message || 'Could not resend OTP.', 'error'); }
         }
  
         async function verifyCustomerSignupOtp() {
             const pending = pendingAccountOtp;
             const token = document.getElementById('signup-otp').value.trim().replace(/\s+/g, '');
-            if (!pending?.value || pending.kind !== 'email') return showToast('First request an email OTP.', 'error');
-            if (!token) return showToast('Enter the OTP you received by email.', 'error');
+            if (!pending?.value || !pending?.kind) return showToast('First request an OTP using your email address.', 'error');
+            if (!token) return showToast('Enter the OTP you received.', 'error');
             try {
                 await ensureAuthClient();
-                const { data, error } = await supabaseClient.auth.verifyOtp({ email: pending.value, token, type: 'email' });
+                const verifyArgs = pending.kind === 'email'
+                    ? { email: pending.value, token, type: 'email' }
+                    : { phone: pending.value, token, type: 'sms' };
+                const { data, error } = await supabaseClient.auth.verifyOtp(verifyArgs);
                 if (error) throw error;
                 if (!data?.user || !data?.session) throw new Error('OTP was accepted but no active session was returned. Please request a new OTP.');
+                // A verified signup now receives the password the customer created before OTP.
+                if (pending.purpose === 'signup') {
+                    if (!pending.password || pending.password.length < 6) throw new Error('Verification succeeded, but the password was not retained. Please sign in with OTP and use Forgot Password to set a password.');
+                    const { error: passwordError } = await supabaseClient.auth.updateUser({ password: pending.password });
+                    if (passwordError) throw passwordError;
+                }
                 const user = data.user;
-                const email = (user.email || pending.value).toLowerCase();
-                const phone = pending.mobile || user.user_metadata?.mobile || user.phone || '';
+                const email = (user.email || (pending.kind === 'email' ? pending.value : '')).toLowerCase();
+                const phone = user.phone || (pending.kind === 'phone' ? pending.value : '');
                 appCurrentUser = {
                     id: user.id,
-                    name: user.user_metadata?.name || user.user_metadata?.full_name || pending.name || email.split('@')[0],
+                    name: user.user_metadata?.name || user.user_metadata?.full_name || pending.name || email.split('@')[0] || phone,
                     email, phone, place: user.user_metadata?.place || pending.place || '',
                     isAdmin: user.id === ADMIN_USER_ID
                 };
@@ -2804,12 +2843,14 @@ body { background-color:#f7f8fb; }
                 document.getElementById('signup-otp-box')?.classList.add('hidden');
                 document.getElementById('signup-details-box')?.classList.add('hidden');
                 document.getElementById('signup-otp').value = '';
-                pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '' };
+                document.getElementById('signup-new-password').value = '';
+                document.getElementById('signup-confirm-password').value = '';
+                pendingAccountOtp = { identifier: '', kind: '', purpose: 'signup', name: '', place: '', password: '' };
                 updateUserAuthUI();
                 await pullFromSupabaseSQL();
-                showToast(pending.purpose === 'login' ? 'You are now signed in.' : 'Your email is verified and your account is ready.', 'success');
+                showToast(pending.purpose === 'login' ? 'You are now signed in.' : 'Email verified. Your password is set. You can sign in with email and password next time.', 'success');
                 if (appCurrentUser.isAdmin) switchView('admin'); else switchView('home');
-            } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'Email OTP verification failed. Check the code and try again.', 'error'); }
+            } catch (err) { console.error('OTP verification failed:', err); showToast(err?.message || 'OTP verification failed. Check the code and try again.', 'error'); }
         }
  
         function showForgotPasswordOtp() {
@@ -3084,7 +3125,8 @@ body { background-color:#f7f8fb; }
  
             if (!name || price <= 0) return showToast('Please enter Medicine Name and valid Price', 'error');
  
-            const item = { id, name, salt, brand, category, batch, expiry, mrp: mrp || price, price, stock, image, images: images.length ? images : (products.find(p => p.id === id)?.images || (image ? [image] : [])), video, rx, featured, updated_at: new Date().toISOString() };
+            const gallery = images.length ? images : (existingProduct?.images || (image ? [image] : []));
+            const item = { id, name, salt, brand, category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, rx, featured, updated_at: new Date().toISOString() };
             const idx = products.findIndex(p => p.id === id);
             if (idx >= 0) products[idx] = item;
             else products.unshift(item);
@@ -3095,18 +3137,18 @@ body { background-color:#f7f8fb; }
             showToast('Medicine (with Batch, Expiry & Stock) saved!');
  
             if (supabaseClient) {
-                let { error: saveError } = await supabaseClient.from('subha_products').upsert(item);
-                // Older databases may not yet have the optional images JSON/array column.
-                // Retry the legacy-compatible product fields so existing inventory still saves.
-                if (saveError && /images|column/i.test(saveError.message || '')) {
-                    const legacyItem = { ...item }; delete legacyItem.images;
-                    const retry = await supabaseClient.from('subha_products').upsert(legacyItem);
-                    saveError = retry.error;
-                    if (!saveError) showToast('Product saved. Multiple-photo gallery needs the optional images column in subha_products.', 'error');
+                let result = await supabaseClient.from('subha_products').upsert(item);
+                if (result.error) {
+                    // Retry using the known Online Pharmacy schema aliases (selling_price/image_url/batch_number/expiry_date).
+                    const schemaItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, images: gallery, batch_number: batch || null, expiry_date: expiry || null };
+                    result = await supabaseClient.from('subha_products').upsert(schemaItem);
                 }
-                if (saveError) {
-                    console.error('Product SQL save failed:', saveError);
-                    showToast('Saved locally, but Supabase SQL save failed: ' + saveError.message, 'error');
+                if (result.error) {
+                    console.error('Supabase product save failed:', result.error);
+                    showToast('Product is visible only on this device because Supabase rejected the save: ' + result.error.message, 'error');
+                } else {
+                    const fresh = await supabaseClient.from('subha_products').select('*').order('name', { ascending: true });
+                    if (!fresh.error) { products = (fresh.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name); saveStateLocal(); renderStoreProducts(); }
                 }
             }
         }
