@@ -1146,6 +1146,11 @@ img { -webkit-user-drag: none; }
  </head>
  <body>
   <!-- Toast Notifications -->
+  <div id="login-heart-overlay" aria-hidden="true">
+   <div class="heart">
+    <i class="ri-heart-3-fill"></i>
+   </div>
+  </div>
   <div id="toast-container" class="toast-container"></div>
   <!-- Prescription Image Lightbox Modal -->
   <div id="rx-lightbox-modal" class="rx-modal-backdrop hidden" onclick="closeRxModal(event)">
@@ -1188,6 +1193,7 @@ img { -webkit-user-drag: none; }
      </div>
      <div class="search-bar">
       <i class="ri-search-line"></i> <input type="search" id="search-input" placeholder="Search for medicines, generic salt, brand, or batch..." oninput="renderStoreProducts()">
+      <button type="button" id="voice-search-btn" class="voice-search-btn" aria-label="Search by voice" title="Search by voice" onclick="startSubhaVoiceSearch()"><i class="ri-mic-line"></i></button>
      </div>
      <select id="sort-select" class="sort-select" onchange="renderStoreProducts()"> <option value="featured">Sort: Relevance</option> <option value="az">Name: A to Z</option> <option value="price-asc">Price: Low to High</option> <option value="price-desc">Price: High to Low</option> </select>
     </div>
@@ -2667,6 +2673,45 @@ body { background-color:#f7f8fb; }
             }).join('') || `<tr><td colspan="6" class="muted">No products in inventory. Add your first product above.</td></tr>`;
         }
  
+        function showLoginHeartAnimation() {
+            const overlay = document.getElementById('login-heart-overlay');
+            if (!overlay) return;
+            overlay.classList.add('show');
+            window.setTimeout(() => overlay.classList.remove('show'), 1700);
+        }
+ 
+        let subhaSpeechRecognition = null;
+        function startSubhaVoiceSearch() {
+            const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const btn = document.getElementById('voice-search-btn');
+            if (!SpeechRecognitionAPI) {
+                showToast('Voice search is not supported in this browser. Try Chrome or update Brave.', 'error');
+                return;
+            }
+            try {
+                if (subhaSpeechRecognition) subhaSpeechRecognition.abort();
+                subhaSpeechRecognition = new SpeechRecognitionAPI();
+                subhaSpeechRecognition.lang = 'ta-IN';
+                subhaSpeechRecognition.continuous = false;
+                subhaSpeechRecognition.interimResults = false;
+                subhaSpeechRecognition.maxAlternatives = 1;
+                if (btn) { btn.classList.add('listening'); btn.innerHTML = '<i class="ri-mic-fill"></i>'; }
+                showToast('கேட்கிறது... மருந்தின் பெயரைச் சொல்லுங்கள்.', 'success');
+                subhaSpeechRecognition.onresult = event => {
+                    const phrase = event.results?.[0]?.[0]?.transcript || '';
+                    const input = document.getElementById('search-input');
+                    if (input) { input.value = phrase; renderStoreProducts(); }
+                    showToast(phrase ? `Voice search: ${phrase}` : 'மருந்தின் பெயர் தெளிவாக கேட்கவில்லை.', phrase ? 'success' : 'error');
+                };
+                subhaSpeechRecognition.onerror = event => showToast(`Voice search: ${event.error || 'Could not hear you.'}`, 'error');
+                subhaSpeechRecognition.onend = () => { if (btn) { btn.classList.remove('listening'); btn.innerHTML = '<i class="ri-mic-line"></i>'; } };
+                subhaSpeechRecognition.start();
+            } catch (err) {
+                if (btn) { btn.classList.remove('listening'); btn.innerHTML = '<i class="ri-mic-line"></i>'; }
+                showToast(err?.message || 'Could not start voice search. Allow microphone access.', 'error');
+            }
+        }
+ 
         /* =========================================================================
            8. UNIFIED ACCOUNT SIGN-IN
         ========================================================================= */
@@ -2678,7 +2723,7 @@ body { background-color:#f7f8fb; }
         }
  
         async function handleUnifiedSignIn() {
-            const name = document.getElementById('login-name').value.trim() || 'User';
+            const name = document.getElementById('login-name')?.value?.trim() || 'User';
             const identifier = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value;
             if (!identifier || !pass) return showToast('Enter your email address or mobile number and password.', 'error');
@@ -2713,6 +2758,7 @@ body { background-color:#f7f8fb; }
                 localStorage.setItem('subha_user', JSON.stringify(appCurrentUser));
                 updateUserAuthUI();
                 await pullFromSupabaseSQL();
+                showLoginHeartAnimation();
                 showToast(isAdmin ? 'Admin signed in securely.' : `Signed in as ${appCurrentUser.name}`, 'success');
                 if (isAdmin) switchView('admin');
                 else switchView('home');
@@ -3738,14 +3784,16 @@ body { background-color:#f7f8fb; }
         }
  
         function playSubhaReminderAlert(reminder) {
-            const spokenMessage = `${SUBHA_TAMIL_REMINDER_VOICE} ${reminder.name}.`;
+            const customerName = String(reminder.customerName || appCurrentUser?.name || 'வாடிக்கையாளர்').trim();
+            const medicineName = String(reminder.name || 'மருந்து').trim();
+            const spokenMessage = `வணக்கம் ${customerName}. சுபா மெடிக்கல் நினைவூட்டுகிறது. தயவுசெய்து ${medicineName} மருந்தை இப்போது எடுத்துக்கொள்ளுங்கள். மீண்டும் நினைவூட்டுகிறோம்.`;
             try {
                 if ('vibrate' in navigator) navigator.vibrate([500, 250, 500]);
             } catch (_) {}
             try {
                 if ('Notification' in window && Notification.permission === 'granted') {
                     const notice = new Notification('Subha Medical – Medicine Reminder', {
-                        body: `${reminder.name}: தயவுசெய்து மருந்தை எடுத்துக்கொள்ளுங்கள்.`,
+                        body: `${reminder.customerName || appCurrentUser?.name || ''} – ${reminder.name}: தயவுசெய்து மருந்தை எடுத்துக்கொள்ளுங்கள்.`,
                         tag: `subha-dose-${reminder.id}-${new Date().toISOString().slice(0,10)}`,
                         renotify: false
                     });
@@ -3755,14 +3803,18 @@ body { background-color:#f7f8fb; }
             try {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(spokenMessage);
-                    utterance.lang = 'ta-IN';
-                    utterance.rate = 0.88;
-                    utterance.pitch = 1;
-                    utterance.volume = 1;
                     const tamilVoice = window.speechSynthesis.getVoices().find(v => /^ta(-|_)/i.test(v.lang) || /tamil/i.test(v.name));
-                    if (tamilVoice) utterance.voice = tamilVoice;
-                    window.speechSynthesis.speak(utterance);
+                    let repetition = 0;
+                    const speakNext = () => {
+                        if (repetition >= 3) return;
+                        const utterance = new SpeechSynthesisUtterance(spokenMessage);
+                        utterance.lang = 'ta-IN'; utterance.rate = 0.88; utterance.pitch = 1; utterance.volume = 1;
+                        if (tamilVoice) utterance.voice = tamilVoice;
+                        utterance.onend = () => { repetition += 1; if (repetition < 3) window.setTimeout(speakNext, 900); };
+                        utterance.onerror = () => { repetition = 3; };
+                        window.speechSynthesis.speak(utterance);
+                    };
+                    speakNext();
                 }
             } catch (err) { console.warn('Tamil voice playback unavailable:', err); }
             showToast(`Medicine reminder: ${reminder.name}`, 'success');
@@ -3793,7 +3845,7 @@ body { background-color:#f7f8fb; }
             const name = document.getElementById('rem-name').value.trim();
             const time = document.getElementById('rem-time').value;
             if (!name || !time) return showToast('Enter medicine name and time', 'error');
-            reminders.push({ id: Date.now(), name, time, lastFiredDate: '' });
+            reminders.push({ id: Date.now(), name, time, customerName: appCurrentUser?.name || '', lastFiredDate: '' });
             localStorage.setItem('subha_reminders', JSON.stringify(reminders));
             document.getElementById('rem-name').value = '';
             renderReminders();
