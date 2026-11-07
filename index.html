@@ -1515,12 +1515,12 @@ img { -webkit-user-drag: none; }
         <label class="form-label">Stock Quantity *</label> <input type="number" id="adm-prod-stock" class="form-control" placeholder="e.g. 50">
        </div>
        <div>
-        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" multiple> <small class="muted">Choose several photos at once. The first photo becomes the main image; the rest appear as selectable gallery thumbnails on the product card.</small>
+        <label class="form-label">Product Image (upload from device)</label> <input type="file" id="adm-prod-image-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" multiple> <small class="muted">Choose several photos at once. The first photo becomes the main image; the rest appear as selectable gallery thumbnails on the product card.</small>
         <div id="adm-prod-image-preview" aria-live="polite" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
         <input type="url" id="adm-prod-img" class="form-control hidden" aria-hidden="true" tabindex="-1">
        </div>
        <div>
-        <label class="form-label">Product Video (optional)</label> <input type="file" id="adm-prod-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime"> <small class="muted">MP4, WEBM or MOV video. Maximum 50 MB. Leave empty to keep the current video.</small> <input type="url" id="adm-prod-video" class="form-control hidden" aria-hidden="true" tabindex="-1">
+        <label class="form-label">Product Video (optional)</label> <input type="file" id="adm-prod-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v"> <small class="muted">MP4, WEBM or MOV video. Maximum 50 MB. Leave empty to keep the current video.</small> <input type="url" id="adm-prod-video" class="form-control hidden" aria-hidden="true" tabindex="-1">
        </div>
       </div>
       <div style="margin-top:10px;">
@@ -1561,7 +1561,7 @@ img { -webkit-user-drag: none; }
         <label class="form-label">Category Name *</label> <input type="text" id="adm-cat-name" class="form-control" placeholder="e.g. Diabetes Care">
        </div>
        <div>
-        <label class="form-label">Category Image URL (Optional)</label> <input type="url" id="adm-cat-img" class="form-control" placeholder="https://... (or upload below)"> <label class="form-label" style="margin-top:8px;">Upload Category Image from Device</label> <input type="file" id="adm-cat-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif">
+        <label class="form-label">Category Image URL (Optional)</label> <input type="url" id="adm-cat-img" class="form-control" placeholder="https://... (or upload below)"> <label class="form-label" style="margin-top:8px;">Upload Category Image from Device</label> <input type="file" id="adm-cat-image-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif">
        </div>
       </div>
       <div style="display: flex; gap: 10px; margin-top: 12px;">
@@ -1588,15 +1588,15 @@ img { -webkit-user-drag: none; }
       </div>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Subha Medical Logo &amp; Brand Image</h4>
-      <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-logo-preview')"> <small class="muted">JPG, PNG, WEBP or AVIF, maximum 8 MB. This logo is shown in the customer header.</small>
+      <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-logo-preview')"> <small class="muted">JPG, PNG, WEBP or AVIF, maximum 8 MB. This logo is shown in the customer header.</small>
       <div id="adm-logo-preview" style="margin:8px 0;"></div>
-      <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-brand-preview')">
+      <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-brand-preview')">
       <div id="adm-brand-preview" style="margin:8px 0;"></div>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Global Background Image &amp; Promotional Banner Setup</h4>
-      <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Promo Banner Image from Phone</label> <input type="file" id="adm-promo-file" class="form-control" accept="image/jpeg,image/png,image/webp,image/avif" onchange="previewAdminImageFile(this,'adm-promo-preview')">
+      <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Promo Banner Image from Phone</label> <input type="file" id="adm-promo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-promo-preview')">
       <div id="adm-promo-preview" style="margin:8px 0;"></div>
-      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/mp4,video/webm,video/quicktime" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')"> <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Customers can play it below the home banner.</small>
+      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')"> <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Customers can play it below the home banner.</small>
       <div id="adm-promo-video-preview" style="margin:8px 0;"></div>
       <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
@@ -1616,7 +1616,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
        <h4 style="margin: 0;">📦 Customer Orders, Attached Rx &amp; Printable GST Invoices</h4>
        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span class="muted">Changing status to Cancelled restores deducted stock. Out for Delivery can still be cancelled by admin.</span>
-        <button type="button" class="order-notify-btn" onclick="requestOrderNotificationPermission()"><i class="ri-notification-3-line"></i> Enable order alerts</button>
+        <button type="button" class="order-notify-btn" onclick="requestOrderNotificationPermission()"><i class="ri-notification-3-line"></i> Enable order sound &amp; alerts</button>
        </div>
       </div>
       <div id="adm-orders-container"></div>
@@ -1822,9 +1822,9 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             p.search_keywords = p.search_keywords || p.alternative_names || p.search_terms || '';
             p.batch = p.batch || p.batch_number || p.batch_no || '';
             p.expiry = p.expiry || p.expiry_date || p.exp_date || '';
-            if (typeof p.images === 'string') { try { p.images = JSON.parse(p.images); } catch (_) { p.images = []; } }
+            if (typeof p.images === 'string') { try { p.images = JSON.parse(p.images); } catch (_) { p.images = p.images.split(',').map(v=>v.trim()).filter(Boolean); } }
             if (!Array.isArray(p.images)) p.images = p.image ? [p.image] : [];
-            p.images = p.images.map(x => typeof x === 'string' ? resolveSubhaStorageUrl(x, PRODUCT_IMAGE_BUCKET) : '').filter(Boolean);
+            p.images = p.images.map(x => typeof x === 'string' ? resolveSubhaStorageUrl(x, PRODUCT_IMAGE_BUCKET) : (x?.url ? resolveSubhaStorageUrl(x.url, PRODUCT_IMAGE_BUCKET) : '')).filter(Boolean);
             if (!p.image && p.images.length) p.image = p.images[0];
             return p;
         }
@@ -2448,10 +2448,8 @@ body { background-color:#f7f8fb; }
             if (!ord) return;
             const previousStatus = ord.status || 'Order Placed';
             if (previousStatus === newStatus && !(newStatus === 'Cancelled' && !ord.stock_restored)) return;
-            if (previousStatus === 'Delivered' && newStatus !== 'Delivered') {
-                showToast('Delivered orders are locked and cannot be changed.', 'error');
-                renderOrders(); return;
-            }
+            // Admin may correct any status, including Delivered -> Cancelled.
+            if (!appCurrentUser?.isAdmin) { showToast('Only the admin can change order status.', 'error'); renderOrders(); return; }
             if (!supabaseClient) { showToast('Cloud connection unavailable. Status was not changed.', 'error'); renderOrders(); return; }
             const { error } = await supabaseClient.from('subha_orders').update({ status: newStatus }).eq('id', orderId);
             if (error) {
@@ -2481,7 +2479,7 @@ body { background-color:#f7f8fb; }
             if (!('Notification' in window)) return showToast('This browser does not support order notifications.', 'error');
             try {
                 const permission = await Notification.requestPermission();
-                if (permission === 'granted') showToast('Order notifications enabled on this device.');
+                if (permission === 'granted') showToast('Order notifications enabled. Keep this site signed in and allow Brave notifications.');
                 else showToast('Notifications are blocked. Allow them in Brave site settings.', 'error');
             } catch (err) { showToast(err?.message || 'Could not enable notifications.', 'error'); }
         }
@@ -2493,14 +2491,32 @@ body { background-color:#f7f8fb; }
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'subha_orders' }, payload => {
                     const freshOrder = payload.new || {};
                     if (!freshOrder.id || !appCurrentUser?.isAdmin) return;
-                    orders = [freshOrder, ...orders.filter(o => String(o.id) !== String(freshOrder.id))];
+                    if (orders.some(o => String(o.id) === String(freshOrder.id))) return;
+                    orders = [freshOrder, ...orders];
                     saveStateLocal(); renderOrders();
-                    const title = `New Subha Medical Order #${freshOrder.id}`;
-                    const body = `${freshOrder.customer_name || 'Customer'} • ₹${Number(freshOrder.total || 0).toFixed(2)} • ${freshOrder.customer_phone || ''}`;
-                    showToast(title + ' received. Tap Orders to view details.');
+                    const title = `New order received – #${freshOrder.id}`;
+                    const body = `${freshOrder.customer_name || 'Customer'} • ₹${Number(freshOrder.total || freshOrder.total_amount || 0).toFixed(2)} • ${freshOrder.customer_phone || ''}`;
+                    showToast(`🔔 ${title}. Open Orders to view customer and item details.`);
+                    // Audible and vibration alert while the admin page is open.
+                    try {
+                        if (navigator.vibrate) navigator.vibrate([250,120,250,120,500]);
+                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                        if (AudioCtx) {
+                            const ctx = new AudioCtx();
+                            [0,0.22,0.44].forEach((delay, i) => {
+                                const osc = ctx.createOscillator(), gain = ctx.createGain();
+                                osc.type = 'sine'; osc.frequency.value = i === 2 ? 1040 : 880;
+                                gain.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
+                                gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + delay + 0.02);
+                                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.16);
+                                osc.connect(gain); gain.connect(ctx.destination); osc.start(ctx.currentTime + delay); osc.stop(ctx.currentTime + delay + 0.18);
+                            });
+                            setTimeout(() => ctx.close().catch(()=>{}), 1200);
+                        }
+                    } catch (soundErr) { console.warn('Order sound unavailable:', soundErr); }
                     try {
                         if ('Notification' in window && Notification.permission === 'granted') {
-                            const n = new Notification(title, { body, tag: `subha-order-${freshOrder.id}`, renotify: false });
+                            const n = new Notification(title, { body: body + '\nTap to open order details.', tag: `subha-order-${freshOrder.id}`, renotify: true, requireInteraction: true });
                             n.onclick = () => { window.focus(); switchView('admin'); const tabBtn = document.querySelectorAll('.admin-tab')[3]; if (tabBtn) openAdminTab('tab-orders', tabBtn); n.close(); };
                         }
                     } catch (err) { console.warn('Order notification unavailable:', err); }
@@ -3243,79 +3259,45 @@ body { background-color:#f7f8fb; }
         /* =========================================================================
            9. ADMIN CRUD OPERATIONS
         ========================================================================= */
-        async function uploadProductImage(file) {
-            if (!file) return null;
-            if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) throw new Error('Choose a JPG, PNG, WEBP or AVIF image.');
-            if (file.size > 8 * 1024 * 1024) throw new Error('Image must be 8 MB or smaller.');
-            if (!supabaseClient) throw new Error('Cloud storage is not configured.');
-            const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-            const path = `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-            const { error } = await supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
-            if (error) throw error;
-            const { data } = supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(path);
-            return data.publicUrl;
+        function subhaFileMime(file, kind) {
+            const ext = String(file?.name || '').split('.').pop().toLowerCase();
+            const map = kind === 'video'
+                ? { mp4:'video/mp4', webm:'video/webm', mov:'video/quicktime', m4v:'video/x-m4v' }
+                : { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', avif:'image/avif' };
+            return file?.type || map[ext] || '';
         }
+        async function subhaUploadStorage(file, bucket, prefix, kind) {
+            if (!file) return null;
+            if (!supabaseClient) throw new Error('Please sign in as admin and wait until cloud connection is ready.');
+            const mime = subhaFileMime(file, kind);
+            const allowed = kind === 'video' ? ['video/mp4','video/webm','video/quicktime','video/x-m4v'] : ['image/jpeg','image/png','image/webp','image/avif'];
+            const max = kind === 'video' ? 50*1024*1024 : 8*1024*1024;
+            if (!allowed.includes(mime)) throw new Error(kind === 'video' ? 'Choose MP4, WEBM or MOV video.' : 'Choose JPG, PNG, WEBP or AVIF image.');
+            if (file.size > max) throw new Error(kind === 'video' ? 'Video must be 50 MB or smaller.' : 'Each image must be 8 MB or smaller.');
+            const clean = String(file.name || (kind === 'video' ? 'video.mp4' : 'image.jpg')).toLowerCase().replace(/[^a-z0-9._-]+/g,'-');
+            const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}-${clean}`;
+            const { data, error } = await supabaseClient.storage.from(bucket).upload(path, file, { upsert:false, contentType:mime, cacheControl:'3600' });
+            if (error) throw new Error(`Storage upload failed (${bucket}): ${error.message}. Check bucket and Storage policies in Supabase.`);
+            const publicResult = supabaseClient.storage.from(bucket).getPublicUrl(data?.path || path);
+            const url = publicResult?.data?.publicUrl;
+            if (!url) throw new Error(`Upload finished but a public URL could not be created for ${bucket}.`);
+            return url;
+        }
+        async function uploadProductImage(file) { return subhaUploadStorage(file, PRODUCT_IMAGE_BUCKET, 'products', 'image'); }
+        async function uploadAdminImage(file, prefix='admin-image') { return subhaUploadStorage(file, PRODUCT_IMAGE_BUCKET, prefix, 'image'); }
+        async function uploadProductVideo(file) { return subhaUploadStorage(file, PRODUCT_VIDEO_BUCKET, 'videos', 'video'); }
  
         function previewAdminImageFile(input, targetId) {
-            const target = document.getElementById(targetId);
-            if (!target) return;
-            target.innerHTML = '';
-            const file = input?.files?.[0];
-            if (!file) return;
-            if (!['image/jpeg','image/png','image/webp','image/avif'].includes(file.type) || file.size > 8 * 1024 * 1024) {
-                input.value = '';
-                return showToast('Choose JPG, PNG, WEBP or AVIF image up to 8 MB.', 'error');
-            }
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.alt = 'Selected image preview';
-            img.style.cssText = 'max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;';
-            target.appendChild(img);
+            const target=document.getElementById(targetId); if(!target)return; target.innerHTML='';
+            const file=input?.files?.[0]; if(!file)return;
+            const mime=subhaFileMime(file,'image');
+            if(!['image/jpeg','image/png','image/webp','image/avif'].includes(mime)||file.size>8*1024*1024){input.value='';return showToast('Choose JPG, PNG, WEBP or AVIF image up to 8 MB.','error');}
+            const img=document.createElement('img'); img.src=URL.createObjectURL(file); img.alt='Selected image preview'; img.style.cssText='max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;'; target.appendChild(img);
         }
- 
-        function previewAdminVideoFile(input, targetId) {
-            const target = document.getElementById(targetId);
-            if (!target) return;
-            target.innerHTML = '';
-            const file = input?.files?.[0];
-            if (!file) return;
-            if (!['video/mp4','video/webm','video/quicktime'].includes(file.type) || file.size > 50 * 1024 * 1024) {
-                input.value = '';
-                return showToast('Choose MP4, WEBM or MOV video up to 50 MB.', 'error');
-            }
-            const video = document.createElement('video');
-            video.src = URL.createObjectURL(file);
-            video.controls = true;
-            video.playsInline = true;
-            video.style.cssText = 'width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';
-            target.appendChild(video);
-        }
- 
-        async function uploadAdminImage(file, prefix = 'admin-image') {
-            if (!file) return null;
-            if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) throw new Error('Choose a JPG, PNG, WEBP or AVIF image.');
-            if (file.size > 8 * 1024 * 1024) throw new Error('Image must be 8 MB or smaller.');
-            if (!supabaseClient) throw new Error('Cloud storage is not configured. Please sign in and check Supabase Storage.');
-            const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-            const path = `${prefix}/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-            const { error } = await supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
-            if (error) throw error;
-            const { data } = supabaseClient.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(path);
-            return data.publicUrl;
-        }
- 
-        async function uploadProductVideo(file) {
-            if (!file) return null;
-            const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
-            if (!allowedTypes.includes(file.type)) throw new Error('Choose an MP4, WEBM or MOV video.');
-            if (file.size > 50 * 1024 * 1024) throw new Error('Video must be 50 MB or smaller.');
-            if (!supabaseClient) throw new Error('Cloud storage is not configured.');
-            const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-            const path = `${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-            const { error } = await supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).upload(path, file, { upsert: false, contentType: file.type, cacheControl: '3600' });
-            if (error) throw error;
-            const { data } = supabaseClient.storage.from(PRODUCT_VIDEO_BUCKET).getPublicUrl(path);
-            return data.publicUrl;
+        function previewAdminVideoFile(input,targetId){
+            const target=document.getElementById(targetId);if(!target)return;target.innerHTML='';const file=input?.files?.[0];if(!file)return;
+            const mime=subhaFileMime(file,'video');if(!['video/mp4','video/webm','video/quicktime','video/x-m4v'].includes(mime)||file.size>50*1024*1024){input.value='';return showToast('Choose MP4, WEBM or MOV video up to 50 MB.','error');}
+            const video=document.createElement('video');video.src=URL.createObjectURL(file);video.controls=true;video.playsInline=true;video.style.cssText='width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';target.appendChild(video);
         }
  
         function renderAdminProductImagePreview(urls) {
@@ -3348,6 +3330,7 @@ body { background-color:#f7f8fb; }
                 return showToast('Choose JPG, PNG, WEBP or AVIF photos, each 8 MB or smaller.', 'error');
             }
             renderAdminProductImagePreview(files.map(file => URL.createObjectURL(file)));
+            showToast(`${files.length} product photo(s) selected. They will upload when you save the medicine.`, 'success');
         }
  
         async function saveProductAdmin() {
@@ -3370,10 +3353,15 @@ body { background-color:#f7f8fb; }
             const videoFile = document.getElementById('adm-prod-video-file')?.files?.[0];
             if (imageFiles.length) {
                 try {
-                    showToast(`Uploading ${imageFiles.length} product photo(s)…`);
-                    const uploadedImages = await Promise.all(imageFiles.map(file => uploadProductImage(file)));
+                    const uploadedImages = [];
+                    for (let i=0;i<imageFiles.length;i++) {
+                        showToast(`Uploading product photo ${i+1} of ${imageFiles.length}…`);
+                        uploadedImages.push(await uploadProductImage(imageFiles[i]));
+                    }
                     images = uploadedImages;
                     image = uploadedImages[0] || image;
+                    renderAdminProductImagePreview(images);
+                    showToast(`${images.length} photo(s) uploaded. Saving medicine…`, 'success');
                 } catch (err) { return showToast(err.message || 'One or more image uploads failed. Product was not saved.', 'error'); }
             }
             if (!images.length && image) images = [image];
@@ -3389,8 +3377,14 @@ body { background-color:#f7f8fb; }
             const gallery = images.length ? images : (existingProduct?.images || (image ? [image] : []));
             const item = { id, name, salt, brand, category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, video_url: video, search_keywords: searchKeywords, rx, featured, updated_at: new Date().toISOString() };
             const idx = products.findIndex(p => p.id === id);
-            if (idx >= 0) products[idx] = item;
-            else products.unshift(item);
+            if (idx >= 0) {
+                const oldStock = Number(products[idx].stock || 0);
+                if (oldStock !== stock) {
+                    const confirmed = window.confirm(`Overwrite stock for ${name}?\nCurrent stock: ${oldStock}\nNew stock: ${stock}\n\nThis will replace the current quantity in the cloud.`);
+                    if (!confirmed) return showToast('Product save cancelled. Existing stock was not changed.', 'error');
+                }
+                products[idx] = item;
+            } else products.unshift(item);
  
             saveStateLocal();
             resetProductForm();
@@ -3400,9 +3394,13 @@ body { background-color:#f7f8fb; }
             if (supabaseClient) {
                 let result = await supabaseClient.from('subha_products').upsert(item);
                 if (result.error) {
-                    // Retry using the known Online Pharmacy schema aliases (selling_price/image_url/batch_number/expiry_date).
                     const schemaItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, images: gallery, video_url: video || null, search_keywords: searchKeywords || null, batch_number: batch || null, expiry_date: expiry || null };
                     result = await supabaseClient.from('subha_products').upsert(schemaItem);
+                }
+                if (result.error) {
+                    const legacyItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, batch_number: batch || null, expiry_date: expiry || null };
+                    result = await supabaseClient.from('subha_products').upsert(legacyItem);
+                    if (!result.error && (gallery.length > 1 || video)) showToast('Medicine saved, but this database is missing images/video columns. Run the SQL upgrade to publish the full gallery/video.', 'error');
                 }
                 if (result.error) {
                     console.error('Supabase product save failed:', result.error);
@@ -3432,6 +3430,7 @@ body { background-color:#f7f8fb; }
             document.getElementById('adm-prod-video').value = p.video || '';
             document.getElementById('adm-prod-image-file').value = '';
             document.getElementById('adm-prod-video-file').value = '';
+            renderAdminProductImagePreview(getProductGalleryImages(p));
             document.getElementById('adm-prod-rx').checked = !!p.rx;
             document.getElementById('adm-prod-featured').checked = !!p.featured;
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3519,42 +3518,40 @@ body { background-color:#f7f8fb; }
         }
  
         async function saveAppearanceSettings() {
-            const logoFile = document.getElementById('adm-logo-file')?.files?.[0];
-            const brandImageFile = document.getElementById('adm-brand-image-file')?.files?.[0];
-            const bgFile = document.getElementById('adm-bg-file')?.files?.[0];
-            const promoFile = document.getElementById('adm-promo-file')?.files?.[0];
-            const promoVideoFile = document.getElementById('adm-promo-video-file')?.files?.[0];
+            if (!supabaseClient) return showToast('Cloud is not connected. Sign in as admin and check your internet connection.', 'error');
+            const logoFile=document.getElementById('adm-logo-file')?.files?.[0];
+            const brandImageFile=document.getElementById('adm-brand-image-file')?.files?.[0];
+            const bgFile=document.getElementById('adm-bg-file')?.files?.[0];
+            const promoFile=document.getElementById('adm-promo-file')?.files?.[0];
+            const promoVideoFile=document.getElementById('adm-promo-video-file')?.files?.[0];
             try {
-                if (bgFile) storeSettings.bg_image = await uploadAdminImage(bgFile, 'brand-images');
-                if (logoFile) storeSettings.logo_image = await uploadAdminImage(logoFile, 'store-logo');
-                if (brandImageFile) { storeSettings.promo_image = await uploadAdminImage(brandImageFile, 'brand-images'); document.getElementById('adm-promo-image').value = storeSettings.promo_image; }
-                if (promoFile) { storeSettings.promo_image = await uploadAdminImage(promoFile, 'promo-banners'); document.getElementById('adm-promo-image').value = storeSettings.promo_image; }
-                if (promoVideoFile) { storeSettings.promo_video = await uploadProductVideo(promoVideoFile); }
-            } catch (err) {
-                return showToast(err.message || 'Logo / brand image upload failed.', 'error');
-            }
-            storeSettings.bg_image = document.getElementById('adm-bg-image').value.trim() || storeSettings.bg_image || '';
-            storeSettings.promo_image = document.getElementById('adm-promo-image').value.trim() || storeSettings.promo_image || '';
-            storeSettings.promo_title = document.getElementById('adm-promo-title').value.trim();
-            storeSettings.promo_sub = document.getElementById('adm-promo-sub').value.trim();
-            storeSettings.coupon_enabled = !!document.getElementById('adm-coupon-enabled')?.checked;
-            storeSettings.coupon_code = (document.getElementById('adm-coupon-code')?.value || 'SUBHA10').trim().toUpperCase();
-            storeSettings.coupon_discount = Math.min(90, Math.max(1, Number(document.getElementById('adm-coupon-discount')?.value) || 10));
-            const couponText = document.getElementById('adm-coupons-list')?.value || '';
-            const parsedCoupons = couponText.split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => { const parts = line.split(',').map(v => v.trim()); return { code: (parts[0] || '').toUpperCase(), discount: Math.min(90, Math.max(1, Number(parts[1]) || 10)), enabled: !['false','no','0','off'].includes((parts[2] || 'true').toLowerCase()) }; }).filter(c => /^[A-Z0-9_-]{3,32}$/.test(c.code));
-            storeSettings.coupons = parsedCoupons.length ? parsedCoupons : [{ code: storeSettings.coupon_code, discount: storeSettings.coupon_discount, enabled: storeSettings.coupon_enabled }];
-            saveStateLocal();
-            applyStoreBranding();
-            if (supabaseClient) {
-                const { error } = await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
-                if (error) {
-                    console.error('Appearance settings cloud save failed:', error);
-                    return showToast('Saved on this device only. Cloud save failed: ' + error.message + '. Run the supplied SQL migration in Supabase.', 'error');
-                }
-            }
-            ['adm-logo-file','adm-brand-image-file','adm-bg-file','adm-promo-file','adm-promo-video-file'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-            ['adm-logo-preview','adm-brand-preview','adm-promo-preview','adm-promo-video-preview'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=''; });
-            showToast('Logo, background, promo image/video settings saved to cloud. Refresh customer devices to see updates.', 'success');
+                if(bgFile){showToast('Uploading background image…');storeSettings.bg_image=await uploadAdminImage(bgFile,'backgrounds');}
+                if(logoFile){showToast('Uploading store logo…');storeSettings.logo_image=await uploadAdminImage(logoFile,'store-logo');}
+                if(brandImageFile){showToast('Uploading brand image…');storeSettings.promo_image=await uploadAdminImage(brandImageFile,'brand-images');}
+                if(promoFile){showToast('Uploading promotional banner…');storeSettings.promo_image=await uploadAdminImage(promoFile,'promo-banners');}
+                if(promoVideoFile){showToast('Uploading promotional video…');storeSettings.promo_video=await uploadProductVideo(promoVideoFile);}
+            } catch(err){console.error('Media upload failed',err);return showToast(err.message||'Media upload failed. Nothing was published.', 'error');}
+            const bgValue=document.getElementById('adm-bg-image')?.value.trim();
+            const promoValue=document.getElementById('adm-promo-image')?.value.trim();
+            if(bgValue)storeSettings.bg_image=bgValue;
+            if(promoValue)storeSettings.promo_image=promoValue;
+            storeSettings.promo_title=document.getElementById('adm-promo-title')?.value.trim()||'';
+            storeSettings.promo_sub=document.getElementById('adm-promo-sub')?.value.trim()||'';
+            storeSettings.coupon_enabled=!!document.getElementById('adm-coupon-enabled')?.checked;
+            storeSettings.coupon_code=(document.getElementById('adm-coupon-code')?.value||'SUBHA10').trim().toUpperCase();
+            storeSettings.coupon_discount=Math.min(90,Math.max(1,Number(document.getElementById('adm-coupon-discount')?.value)||10));
+            const couponText=document.getElementById('adm-coupons-list')?.value||'';
+            const parsedCoupons=couponText.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{const parts=line.split(',').map(v=>v.trim());return{code:(parts[0]||'').toUpperCase(),discount:Math.min(90,Math.max(1,Number(parts[1])||10)),enabled:!['false','no','0','off'].includes((parts[2]||'true').toLowerCase())};}).filter(c=>/^[A-Z0-9_-]{3,32}$/.test(c.code));
+            storeSettings.coupons=parsedCoupons.length?parsedCoupons:[{code:storeSettings.coupon_code,discount:storeSettings.coupon_discount,enabled:storeSettings.coupon_enabled}];
+            showToast('Saving media links and settings to cloud…');
+            const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
+            if(error){console.error('Appearance settings cloud save failed:',error);return showToast('Upload completed but settings were not saved: '+error.message+'. Check subha_settings columns and RLS policy.', 'error');}
+            saveStateLocal();applyStoreBranding();
+            // Keep saved media visible in the admin panel after save/reopen.
+            const showSaved=(id,url,isVideo=false)=>{const box=document.getElementById(id);if(!box)return;box.innerHTML='';if(!url)return;if(isVideo){const v=document.createElement('video');v.src=url;v.controls=true;v.playsInline=true;v.style.cssText='width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';box.appendChild(v);}else{const im=document.createElement('img');im.src=url;im.alt='Saved image';im.style.cssText='max-width:180px;max-height:110px;object-fit:contain;border:1px solid var(--border-color);border-radius:8px;background:#fff;padding:4px;';box.appendChild(im);}};
+            showSaved('adm-logo-preview',storeSettings.logo_image);showSaved('adm-brand-preview',storeSettings.promo_image);showSaved('adm-promo-preview',storeSettings.promo_image);showSaved('adm-promo-video-preview',storeSettings.promo_video,true);
+            ['adm-logo-file','adm-brand-image-file','adm-bg-file','adm-promo-file','adm-promo-video-file'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+            showToast('Saved successfully. Logo, banner image and video are published to the customer store.', 'success');
         }
  
         async function saveCoreSettings() {
