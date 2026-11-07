@@ -2667,9 +2667,9 @@ body { background-color:#f7f8fb; }
            8. UNIFIED ACCOUNT SIGN-IN
         ========================================================================= */
         function normalizeLoginPhone(value) {
-            let phone = String(value || '').trim().replace(/[\\s().-]/g, '');
-            if (/^\\d{10}$/.test(phone)) phone = '+91' + phone;
-            else if (/^91\\d{10}$/.test(phone)) phone = '+' + phone;
+            let phone = String(value || '').trim().replace(/[\s().-]/g, '');
+            if (/^\d{10}$/.test(phone)) phone = '+91' + phone;
+            else if (/^91\d{10}$/.test(phone)) phone = '+' + phone;
             return phone;
         }
  
@@ -2682,9 +2682,9 @@ body { background-color:#f7f8fb; }
                 await initSupabase();
                 if (!supabaseClient) return showToast('Cloud service unavailable. Check internet, Supabase project status, and public key.', 'error');
             }
-            const isEmail = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(identifier);
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
             const phone = normalizeLoginPhone(identifier);
-            if (!isEmail && !/^\\+?[1-9]\\d{7,14}$/.test(phone)) {
+            if (!isEmail && !/^\+?[1-9]\d{7,14}$/.test(phone)) {
                 return showToast('Enter a valid email address or mobile number with country code.', 'error');
             }
             try {
