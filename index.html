@@ -1861,6 +1861,27 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             return { data: all, error: null };
         }
  
+        // Retry only when this Supabase table does not contain an optional field.
+        // This keeps supported product details (category/manufacturer, etc.) instead
+        // of falling back to a tiny payload that silently drops them.
+        async function upsertWithSchemaFallback(tableName, sourcePayload) {
+            let payload = { ...sourcePayload };
+            for (let attempt = 0; attempt < 16; attempt++) {
+                const { error } = await supabaseClient.from(tableName).upsert(payload);
+                if (!error) return { error: null, savedFields: Object.keys(payload) };
+                const message = String(error.message || '');
+                const missing = message.match(/Could not find the ['"]([^'"]+)['"] column/i)
+                    || message.match(/column ['"]?([a-zA-Z0-9_]+)['"]? does not exist/i)
+                    || message.match(/The field ['"]([^'"]+)['"] is not present/i);
+                if (missing && Object.prototype.hasOwnProperty.call(payload, missing[1])) {
+                    delete payload[missing[1]];
+                    continue;
+                }
+                return { error, savedFields: Object.keys(payload) };
+            }
+            return { error: { message: 'The database schema could not be matched after checking optional fields.' }, savedFields: Object.keys(payload) };
+        }
+ 
         async function pullFromSupabaseSQL() {
             if (!supabaseClient) return;
             try {
@@ -3422,8 +3443,7 @@ body { background-color:#f7f8fb; }
                     images = uploadedImages;
                     image = uploadedImages[0] || image;
                     renderAdminProductImagePreview(images);
-                    showToast(`${images.length} photo(s) uploaded. Saving medicine…`, 'success');
-                } catch (err) { return showToast(err.message || 'One or more image uploads failed. Product was not saved.', 'error'); }
+                } catch (err) { return showToast(err.message || 'Product photo upload failed. Product was not saved.', 'error'); }
             }
             if (!images.length && image) images = [image];
             if (videoFile) {
@@ -3432,43 +3452,35 @@ body { background-color:#f7f8fb; }
             }
             const rx = document.getElementById('adm-prod-rx').checked;
             const featured = document.getElementById('adm-prod-featured').checked;
- 
             if (!name || price <= 0) return showToast('Please enter Medicine Name and valid Price', 'error');
- 
+            if (existingProduct && Number(existingProduct.stock || 0) !== stock) {
+                const confirmed = window.confirm(`Overwrite stock for ${name}?\nCurrent stock: ${Number(existingProduct.stock || 0)}\nNew stock: ${stock}\n\nThis will replace the current quantity in the cloud.`);
+                if (!confirmed) return showToast('Product save cancelled. Existing stock was not changed.', 'error');
+            }
             const gallery = images.length ? images : (existingProduct?.images || (image ? [image] : []));
-            const item = { id, name, salt, brand, category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, video_url: video, search_keywords: searchKeywords, rx, featured, updated_at: new Date().toISOString() };
-            const idx = products.findIndex(p => p.id === id);
-            if (idx >= 0) {
-                const oldStock = Number(products[idx].stock || 0);
-                if (oldStock !== stock) {
-                    const confirmed = window.confirm(`Overwrite stock for ${name}?\nCurrent stock: ${oldStock}\nNew stock: ${stock}\n\nThis will replace the current quantity in the cloud.`);
-                    if (!confirmed) return showToast('Product save cancelled. Existing stock was not changed.', 'error');
-                }
-                products[idx] = item;
-            } else products.unshift(item);
+            const item = { id, name, salt, generic_name: salt, brand, manufacturer: brand, category, category_name: category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, video_url: video, search_keywords: searchKeywords, rx, featured, updated_at: new Date().toISOString() };
  
+            // Persist to Supabase first. Do not clear the form or announce success if rejected.
+            if (supabaseClient) {
+                showToast('Saving medicine to cloud…');
+                const result = await upsertWithSchemaFallback('subha_products', item);
+                if (result.error) {
+                    console.error('Supabase product save failed:', result.error);
+                    return showToast('Cloud save failed; your form is still available. ' + (result.error.message || 'Check the product table permissions.'), 'error');
+                }
+            }
+            const idx = products.findIndex(p => String(p.id) === String(id));
+            if (idx >= 0) products[idx] = item; else products.unshift(item);
             saveStateLocal();
             resetProductForm();
             renderStoreProducts();
-            showToast('Medicine (with Batch, Expiry & Stock) saved!');
- 
+            showToast(supabaseClient ? 'Medicine saved to cloud successfully.' : 'Medicine saved on this device. Connect to cloud to sync across devices.', 'success');
             if (supabaseClient) {
-                let result = await supabaseClient.from('subha_products').upsert(item);
-                if (result.error) {
-                    const schemaItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, images: gallery, video_url: video || null, search_keywords: searchKeywords || null, batch_number: batch || null, expiry_date: expiry || null };
-                    result = await supabaseClient.from('subha_products').upsert(schemaItem);
-                }
-                if (result.error) {
-                    const legacyItem = { id, name, mrp: mrp || price, selling_price: price, stock, image_url: image, batch_number: batch || null, expiry_date: expiry || null };
-                    result = await supabaseClient.from('subha_products').upsert(legacyItem);
-                    if (!result.error && (gallery.length > 1 || video)) showToast('Medicine saved, but this database is missing images/video columns. Run the SQL upgrade to publish the full gallery/video.', 'error');
-                }
-                if (result.error) {
-                    console.error('Supabase product save failed:', result.error);
-                    showToast('Product is visible only on this device because Supabase rejected the save: ' + result.error.message, 'error');
-                } else {
-                    const fresh = await supabaseClient.from('subha_products').select('*').order('name', { ascending: true });
-                    if (!fresh.error) { products = (fresh.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name); saveStateLocal(); renderStoreProducts(); }
+                const fresh = await fetchAllCloudRows('subha_products');
+                if (!fresh.error) {
+                    products = (fresh.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name).sort((a,b) => a.name.localeCompare(b.name));
+                    saveStateLocal();
+                    renderStoreProducts();
                 }
             }
         }
@@ -3523,25 +3535,25 @@ body { background-color:#f7f8fb; }
             let image = document.getElementById('adm-cat-img').value.trim();
             const imageFile = document.getElementById('adm-cat-image-file')?.files?.[0];
             if (imageFile) { try { image = await uploadAdminImage(imageFile, 'categories'); } catch (err) { return showToast(err.message || 'Category image upload failed.', 'error'); } }
- 
             if (!name) return showToast('Enter Category Name', 'error');
- 
-            const catObj = { id, name, image };
-            const idx = categories.findIndex(c => c.id === id);
-            if (idx >= 0) categories[idx] = catObj;
-            else categories.push(catObj);
- 
+            const catObj = { id, name, image, category_name: name, image_url: image };
+            if (supabaseClient) {
+                showToast('Saving category to cloud…');
+                const result = await upsertWithSchemaFallback('subha_categories', catObj);
+                if (result.error) {
+                    console.error('Supabase category save failed:', result.error);
+                    return showToast('Category was not saved to cloud; the form is still available. ' + (result.error.message || 'Check category table permissions.'), 'error');
+                }
+            }
+            const idx = categories.findIndex(c => String(c.id) === String(id));
+            if (idx >= 0) categories[idx] = { ...catObj }; else categories.push({ ...catObj });
             saveStateLocal();
             document.getElementById('adm-cat-id').value = '';
             document.getElementById('adm-cat-name').value = '';
             document.getElementById('adm-cat-img').value = '';
             if (document.getElementById('adm-cat-image-file')) document.getElementById('adm-cat-image-file').value = '';
             renderCategories();
-            showToast('Category updated!');
- 
-            if (supabaseClient) {
-                await supabaseClient.from('subha_categories').upsert(catObj);
-            }
+            showToast(supabaseClient ? 'Category saved to cloud successfully.' : 'Category saved on this device only.', 'success');
         }
  
         function editCategoryAdmin(id) {
