@@ -304,6 +304,10 @@
         .subha-search-suggestion:last-child { border-bottom:0; }
         .subha-search-suggestion:active { background:var(--input-bg); }
         .subha-search-suggestion strong { display:block; font-size:13px; }
+        .subha-search-suggestion img { width:48px;height:48px;object-fit:contain;background:#fff;border:1px solid var(--border-color);border-radius:7px;flex:0 0 48px; }
+        .subha-search-suggestion .suggestion-meta { min-width:0;flex:1; }
+        .subha-search-suggestion .suggestion-price { color:var(--brand);font-weight:800;font-size:12px;white-space:nowrap; }
+        .subha-search-suggestion .suggestion-add { border:1px solid var(--brand);border-radius:7px;padding:5px 8px;color:var(--brand);font-size:11px;font-weight:800;white-space:nowrap; }
         .subha-search-suggestion small { display:block; color:var(--text-light); font-size:11px; margin-top:2px; }
         .subha-search-suggestion .ri-search-line { margin-left:auto; }
         .search-bar input {
@@ -1214,7 +1218,7 @@ img { -webkit-user-drag: none; }
       <i class="ri-map-pin-2-fill"></i><span id="nav-location-short">Vallipuram, Tiruppur</span>
      </div>
      <div class="search-bar">
-      <i class="ri-search-line"></i> <input type="search" id="search-input" placeholder="Search for medicines, generic salt, brand, or batch..." oninput="renderStoreProducts()">
+      <i class="ri-search-line"></i> <input type="search" id="search-input" placeholder="Search medicines, brand, salt, strength, or batch..." oninput="handleSubhaSearchInput()" onfocus="handleSubhaSearchInput()" autocomplete="off">
       <div id="subha-search-suggestions" class="subha-search-suggestions" role="listbox"></div>
       <button type="button" id="voice-search-btn" class="voice-search-btn" aria-label="Search by voice" title="Search by voice" onclick="startSubhaVoiceSearch()"><i class="ri-mic-line"></i></button>
      </div>
@@ -1644,6 +1648,7 @@ img { -webkit-user-drag: none; }
        <button class="swatch-btn" onclick="updateThemeSettings('#16a34a', false)"><span class="swatch-dot" style="background:#16a34a;"></span> Herbal Emerald</button>
        <button class="swatch-btn" onclick="updateThemeSettings('#ff6f61', true)"><span class="swatch-dot" style="background:#0f172a;"></span> Night Dark Mode</button>
       </div>
+      <button type="button" class="secondary-btn" style="margin-top:8px;" onclick="saveThemeOnly()"><i class="ri-save-line"></i> Save Theme Settings</button>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Subha Medical Logo &amp; Brand Image</h4>
       <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-logo-preview')"> <small class="muted">JPG, PNG, WEBP or AVIF, maximum 8 MB. This logo is shown in the customer header.</small>
@@ -1652,12 +1657,14 @@ img { -webkit-user-drag: none; }
       <div id="adm-logo-save-status" class="muted" aria-live="polite"></div>
       <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-brand-preview')">
       <div id="adm-brand-preview" style="margin:8px 0;"></div>
+      <button type="button" class="primary-btn" style="margin:6px 0 10px;" onclick="saveBrandImageOnly()"><i class="ri-save-line"></i> Save Brand Image</button>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
       <h4 style="margin: 0 0 8px;">🖼️ Global Background Image &amp; Promotional Banner Setup</h4>
       <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Promo Banner Image from Phone</label> <input type="file" id="adm-promo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-promo-preview')">
       <div id="adm-promo-preview" style="margin:8px 0;"></div>
+      <button type="button" class="primary-btn" style="margin:6px 0 10px;" onclick="saveBackgroundBannerOnly()"><i class="ri-save-line"></i> Save Background / Banner</button>
       <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')">
-      <button type="button" class="primary-btn" style="margin-top:8px;padding:8px 12px;" onclick="saveAppearanceSettings()"><i class="ri-save-line"></i> Save Promotional Video</button>
+      <button type="button" class="primary-btn" style="margin-top:8px;padding:8px 12px;" onclick="savePromoVideoOnly()"><i class="ri-save-line"></i> Save Promotional Video</button>
       <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Upload progress will be shown here; after saving, the uploaded video will remain visible below.</small>
       <div id="adm-promo-video-progress" style="display:none;margin:10px 0;padding:10px;border:1px solid var(--border-color);border-radius:10px;">
        <div id="adm-promo-video-progress-label" style="font-size:13px;margin-bottom:6px;">Waiting to upload…</div>
@@ -1671,21 +1678,24 @@ img { -webkit-user-drag: none; }
        <div class="muted">Saved videos will appear here after cloud loading.</div>
       </div>
       <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
+      <button type="button" class="primary-btn" style="margin-top:8px;" onclick="savePromoTextOnly()"><i class="ri-save-line"></i> Save Promo Heading / Text</button>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+       <h4 style="margin:0;">🎟️ Coupon Code</h4>
+       <button type="button" class="secondary-btn" onclick="openAdminTab('tab-coupons',document.querySelector('[onclick*=tab-coupons]'))">Open Coupon Settings</button>
+      </div>
+     </div>
+    </div>
+    <div id="tab-coupons" class="admin-tab-pane hidden">
+     <div class="panel-card">
       <h4>🎟️ Coupon Code Settings</h4>
-      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled"> Enable coupon code for customers</label> <label class="form-label">Coupon Code</label><input type="text" id="adm-coupon-code" class="form-control" placeholder="SUBHA10" maxlength="32"> <label class="form-label" style="margin-top:8px;">Discount Percentage</label><input type="number" id="adm-coupon-discount" class="form-control" min="1" max="90" value="10">
+      <p class="muted">Create one customer coupon code. Save the code and discount separately from enabling or disabling it.</p>
+      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled"> Enable coupon code for customers</label> <label class="form-label">Coupon Code</label><input type="text" id="adm-coupon-code" class="form-control" placeholder="SUBHA10" maxlength="32" autocomplete="off"> <label class="form-label" style="margin-top:8px;">Discount Percentage</label><input type="number" id="adm-coupon-discount" class="form-control" min="1" max="90" value="10">
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
        <button class="primary-btn" type="button" onclick="saveSingleCoupon()"><i class="ri-save-line"></i> Save Coupon</button>
        <button class="secondary-btn" type="button" onclick="toggleSingleCoupon()"><i class="ri-toggle-line"></i> Save Enable / Disable</button>
       </div>
       <div id="adm-single-coupon-status" class="muted" style="margin-top:8px;" aria-live="polite"></div>
-     </div>
-    </div>
-    <div id="tab-coupons" class="admin-tab-pane hidden">
-     <div class="panel-card">
-      <h4>🎟️ Coupon Code</h4>
-      <p class="muted">Manage one active coupon code at a time from the Theme, BG &amp; Promo tab.</p>
-      <button type="button" class="primary-btn" onclick="openAdminTab('tab-appearance',document.querySelector('[onclick*=tab-appearance]'))">Open Coupon Settings</button>
      </div>
     </div>
     <!-- ADMIN TAB 4: ORDERS, RX & GST BILLING -->
@@ -3001,7 +3011,7 @@ body { background-color:#f7f8fb; }
             }).filter(Boolean).sort((a,b)=>b.score-a.score).slice(0,8);
             subhaSearchSuggestionProducts=ranked.map(x=>x.p);
             if(!ranked.length){box.innerHTML='<div class="subha-search-suggestion"><span><strong>No matching medicines found</strong><small>Try a brand, salt, strength, manufacturer or another spelling</small></span></div>';box.classList.add('show');return;}
-            box.innerHTML=ranked.map((x,i)=>`<button type="button" class="subha-search-suggestion" role="option" onclick="selectSubhaSearchSuggestion(${i})"><span><strong>${subhaSearchEscape(x.p.name||'Medicine')}</strong><small>${subhaSearchEscape(x.detail||x.p.description||'Medicine')}</small></span><i class="ri-arrow-up-left-line"></i></button>`).join('');
+            box.innerHTML='<div style="padding:8px 12px;font-size:11px;font-weight:800;color:var(--text-light);border-bottom:1px solid var(--border-color);">MATCHING MEDICINES</div>'+ranked.map((x,i)=>{const p=x.p;const img=(getProductGalleryImages(p)[0]||p.image||p.image_url||'');const price=Number(p.price||p.selling_price||0);return `<div class="subha-search-suggestion" role="option"><img src="${subhaSearchEscape(img)}" alt="" onerror="this.style.visibility='hidden'"><button type="button" class="suggestion-meta" style="border:0;background:transparent;text-align:left;color:inherit;padding:0;min-width:0;" onclick="selectSubhaSearchSuggestion(${i})"><strong>${subhaSearchEscape(p.name||'Medicine')}</strong><small>${subhaSearchEscape(x.detail||p.description||'Brand • Salt • Strength')}</small><small>${Number(p.stock)||0} in stock</small></button><span class="suggestion-price">₹${price.toFixed(2)}</span><button type="button" class="suggestion-add" onclick="addToCart('${String(p.id).replace(/'/g, "\\'")}')">ADD</button></div>`;}).join('');
             box.classList.add('show');
         }
         function selectSubhaSearchSuggestion(index) {
@@ -3009,6 +3019,7 @@ body { background-color:#f7f8fb; }
             const input=document.getElementById('search-input'); if(input) input.value=p.name||'';
             const box=document.getElementById('subha-search-suggestions'); if(box)box.classList.remove('show');
             renderStoreProducts();
+            document.getElementById('products-grid')?.scrollIntoView({behavior:'smooth',block:'start'});
         }
         document.addEventListener('click',event=>{const box=document.getElementById('subha-search-suggestions');const bar=document.querySelector('.search-bar');if(box&&bar&&!bar.contains(event.target))box.classList.remove('show');});
  
@@ -3882,6 +3893,63 @@ body { background-color:#f7f8fb; }
             const discount=document.getElementById('adm-coupon-discount');if(discount)discount.value=storeSettings.coupon_discount||10;
         }
  
+        async function persistCouponSettings(showMessage=true){
+            if(!supabaseClient)return {ok:false,error:'Cloud is not connected. Sign in as admin.'};
+            const code=String(document.getElementById('adm-coupon-code')?.value||'').trim().toUpperCase();
+            const discount=Number(document.getElementById('adm-coupon-discount')?.value||10);
+            if(!/^[A-Z0-9_-]{3,32}$/.test(code))return {ok:false,error:'Enter a valid coupon code (3–32 letters or numbers).'};
+            if(!Number.isFinite(discount)||discount<1||discount>90)return {ok:false,error:'Discount must be between 1% and 90%.'};
+            storeSettings.coupon_code=code;storeSettings.coupon_discount=discount;
+            storeSettings.coupons=[{code,discount,enabled:!!storeSettings.coupon_enabled}];
+            const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());
+            if(error)return {ok:false,error:error.message};
+            saveStateLocal();applyStoreBranding();
+            if(showMessage)showToast('Coupon code and discount saved successfully.');
+            return {ok:true};
+        }
+        async function saveSingleCoupon(){
+            const status=document.getElementById('adm-single-coupon-status');if(status)status.textContent='Saving coupon code…';
+            const r=await persistCouponSettings(false);
+            if(status)status.textContent=r.ok?'Coupon code and discount saved to cloud.':('Save failed: '+r.error);
+            showToast(r.ok?'Coupon code saved successfully.':'Coupon save failed: '+r.error,r.ok?'success':'error');
+        }
+        async function toggleSingleCoupon(){
+            if(!supabaseClient)return showToast('Cloud is not connected. Sign in as admin.','error');
+            const checkbox=document.getElementById('adm-coupon-enabled');
+            const status=document.getElementById('adm-single-coupon-status');
+            const previous=!!storeSettings.coupon_enabled;storeSettings.coupon_enabled=!!checkbox?.checked;
+            const r=await persistCouponSettings(false);
+            if(!r.ok){storeSettings.coupon_enabled=previous;if(checkbox)checkbox.checked=previous;showToast('Coupon enable setting failed: '+r.error,'error');if(status)status.textContent='Enable setting not saved.';return;}
+            if(status)status.textContent=storeSettings.coupon_enabled?'Coupon is enabled for customers.':'Coupon is disabled for customers.';
+            showToast(storeSettings.coupon_enabled?'Coupon enabled for customers.':'Coupon disabled for customers.');
+        }
+        async function savePromoVideoOnly(){
+            if(!supabaseClient||!appCurrentUser?.isAdmin)return showToast('Admin sign-in and cloud connection are required.','error');
+            const file=document.getElementById('adm-promo-video-file')?.files?.[0];if(!file)return showToast('Choose a promotional video first.','error');
+            if(file.size>50*1024*1024)return showToast('Promotional video must be 50 MB or smaller.','error');
+            const progress=document.getElementById('adm-promo-video-progress'),bar=document.getElementById('adm-promo-video-progress-bar'),label=document.getElementById('adm-promo-video-progress-label');
+            try{if(progress)progress.style.display='block';if(bar)bar.style.width='0%';if(label)label.textContent='Uploading '+file.name+' — 0%';const url=await subhaUploadStorage(file,PRODUCT_VIDEO_BUCKET,'videos','video',(percent,loaded,total)=>{if(bar)bar.style.width=percent+'%';if(label)label.textContent=`Uploading ${file.name} — ${percent}% (${(loaded/1048576).toFixed(1)} / ${(total/1048576).toFixed(1)} MB)`;});storeSettings.promo_video=url;const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)throw error;saveStateLocal();applyStoreBranding();const preview=document.getElementById('adm-promo-video-preview');if(preview){preview.innerHTML='';const v=document.createElement('video');v.src=url;v.controls=true;v.playsInline=true;v.style.cssText='width:100%;max-width:320px;max-height:180px;background:#111;border-radius:8px;';preview.appendChild(v);}document.getElementById('adm-promo-video-file').value='';if(bar)bar.style.width='100%';if(label)label.textContent='Saved successfully — video is published.';await loadSavedPromoVideoLibrary();showToast('Promotional video uploaded and saved.');}catch(e){if(label)label.textContent='Upload/save failed: '+(e.message||e);showToast('Promotional video save failed: '+(e.message||e),'error');}
+        }
+ 
+        async function saveBrandImageOnly(){
+            if(!supabaseClient||!appCurrentUser?.isAdmin)return showToast('Admin sign-in and cloud connection are required.','error');
+            const file=document.getElementById('adm-brand-image-file')?.files?.[0];if(!file)return showToast('Choose a brand image first.','error');
+            try{storeSettings.promo_image=await uploadAdminImage(file,'brand-images');const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)throw error;saveStateLocal();applyStoreBranding();document.getElementById('adm-brand-image-file').value='';showToast('Brand image saved and published.');}catch(e){showToast('Brand image save failed: '+(e.message||e),'error');}
+        }
+        async function saveBackgroundBannerOnly(){
+            if(!supabaseClient||!appCurrentUser?.isAdmin)return showToast('Admin sign-in and cloud connection are required.','error');
+            try{const bgFile=document.getElementById('adm-bg-file')?.files?.[0],bannerFile=document.getElementById('adm-promo-file')?.files?.[0];const bgUrl=document.getElementById('adm-bg-image')?.value.trim(),bannerUrl=document.getElementById('adm-promo-image')?.value.trim();if(bgFile)storeSettings.bg_image=await uploadAdminImage(bgFile,'backgrounds');else if(bgUrl)storeSettings.bg_image=bgUrl;if(bannerFile)storeSettings.promo_image=await uploadAdminImage(bannerFile,'promo-banners');else if(bannerUrl)storeSettings.promo_image=bannerUrl;const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)throw error;saveStateLocal();applyStoreBranding();['adm-bg-file','adm-promo-file'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});showToast('Background and promotional banner settings saved.');}catch(e){showToast('Background/banner save failed: '+(e.message||e),'error');}
+        }
+        async function savePromoTextOnly(){
+            if(!supabaseClient||!appCurrentUser?.isAdmin)return showToast('Admin sign-in and cloud connection are required.','error');
+            storeSettings.promo_title=document.getElementById('adm-promo-title')?.value.trim()||'';storeSettings.promo_sub=document.getElementById('adm-promo-sub')?.value.trim()||'';
+            const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)return showToast('Promo text save failed: '+error.message,'error');saveStateLocal();applyStoreBranding();showToast('Promo heading and subtitle saved.');
+        }
+        async function saveThemeOnly(){
+            if(!supabaseClient||!appCurrentUser?.isAdmin)return showToast('Admin sign-in and cloud connection are required.','error');
+            const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)return showToast('Theme save failed: '+error.message,'error');saveStateLocal();applyStoreBranding();showToast('Theme settings saved to cloud.');
+        }
+ 
         async function saveLogoOnly(){
             if(!appCurrentUser?.isAdmin||!supabaseClient)return showToast('Admin sign-in and cloud connection are required to save the logo.','error');
             const input=document.getElementById('adm-logo-file');const file=input?.files?.[0];const status=document.getElementById('adm-logo-save-status');
@@ -4458,10 +4526,11 @@ body { background-color:#f7f8fb; }
         }
  
         function openAdminTab(tabId, btnEl) {
+            const target=document.getElementById(tabId);
+            const wasOpen=target && !target.classList.contains('hidden') && btnEl?.classList.contains('active');
             document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
-            btnEl.classList.add('active');
+            if(!wasOpen && target){target.classList.remove('hidden');btnEl?.classList.add('active');}
         }
  
         function copyCouponCode() {
