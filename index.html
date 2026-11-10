@@ -1502,7 +1502,9 @@ img { -webkit-user-drag: none; }
      <strong style="display:block;margin:10px 0 6px;">Reward History</strong>
      <div id="customer-reward-history" class="muted">Loading rewards…</div>
     </div>
-    <style>@keyframes subhaCoinFloat{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-7px) rotate(8deg)}}</style>
+    <style>@keyframes subhaCoinFloat{0%,100%{transform:translateY(0) rotate(-8deg);filter:drop-shadow(0 2px 2px #b7791f55)}50%{transform:translateY(-9px) rotate(8deg);filter:drop-shadow(0 8px 8px #b7791f66)}}
+    @keyframes subhaCoinShine{0%,100%{text-shadow:0 0 0 rgba(245,158,11,0)}50%{text-shadow:0 0 18px rgba(245,158,11,.8)}}
+    #rewards-coin-animation{display:inline-block;animation:subhaCoinFloat 1.8s ease-in-out infinite,subhaCoinShine 2.4s ease-in-out infinite;transform-origin:center;}</style>
     <div id="account-change-password-box" class="panel-card hidden">
      <h4>Change Account Password</h4>
      <p class="muted">Enter your current password and choose a new password.</p>
@@ -4175,43 +4177,64 @@ body { background-color:#f7f8fb; }
             `).join('') || 'No orders recorded yet.';
  
             if (admBox) {
-                const activeOrderCount = orders.filter(o => !['Delivered', 'Cancelled'].includes(o.status)).length;
-                admBox.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--surface-secondary,#fff7f5);border:1px solid var(--border-color);border-radius:10px;padding:11px 12px;margin-bottom:12px;"><strong><i class="ri-notification-3-line"></i> Order Notifications</strong><span style="background:var(--brand);color:#fff;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;">${activeOrderCount} active</span><button type="button" class="secondary-btn" onclick="pullFromSupabaseSQL()" style="padding:6px 10px;font-size:12px;"><i class="ri-refresh-line"></i> Refresh</button></div>` + (orders.map(o => `
-                    <div style="border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                        <div style="flex:1;min-width:220px;">
-                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                                <strong>#${o.id} • ${o.customer_name} (${o.customer_phone})</strong>
-                                <strong style="color:var(--brand)">₹${Number(o.total).toFixed(2)}</strong>
+                const statuses = ['Order Placed','Confirmed','Packed','Out for Delivery','Delivered','Cancelled'];
+                const counts = Object.fromEntries(statuses.map(st => [st, orders.filter(o => (o.status || 'Order Placed') === st).length]));
+                const activeCount = orders.filter(o => !['Delivered','Cancelled'].includes(o.status)).length;
+                const filters = ['Active','All',...statuses];
+                const filterButtons = filters.map(st => {
+                    const count = st === 'Active' ? activeCount : st === 'All' ? orders.length : counts[st];
+                    const selected = adminOrderFilter === st;
+                    return `<button type="button" onclick="setAdminOrderFilter('${st}')" style="border:1px solid ${selected?'var(--brand)':'var(--border-color)'};background:${selected?'var(--brand)':'var(--surface,#fff)'};color:${selected?'#fff':'var(--text-color)'};border-radius:20px;padding:7px 11px;font-size:12px;font-weight:700;white-space:nowrap;">${st} <span style="opacity:.8">(${count})</span></button>`;
+                }).join('');
+                let visibleOrders = [...orders].sort((a,b) => new Date(b.created_at || b.created_timestamp || 0) - new Date(a.created_at || a.created_timestamp || 0));
+                if (adminOrderFilter === 'Active') visibleOrders = visibleOrders.filter(o => !['Delivered','Cancelled'].includes(o.status));
+                else if (adminOrderFilter !== 'All') visibleOrders = visibleOrders.filter(o => (o.status || 'Order Placed') === adminOrderFilter);
+                const orderCards = visibleOrders.map(o => `
+                    <div style="border:1px solid var(--border-color);border-radius:13px;padding:13px;margin:9px 0;background:var(--surface,#fff);box-shadow:0 2px 8px rgba(15,23,42,.045);">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+                            <div style="min-width:0;flex:1;">
+                                <strong style="overflow-wrap:anywhere;">#${o.id} · ${o.customer_name || 'Customer'}</strong>
+                                <div class="muted" style="font-size:12px;margin-top:3px;">${o.customer_phone || '-'} · ${o.created_at ? new Date(o.created_at).toLocaleString('en-IN') : '-'}</div>
                             </div>
-                            <div class="muted">Address: ${o.customer_address}</div>
-                            <div style="font-size:12px;margin-top:4px;">${(o.items || []).map(i => `${i.name} [B: ${i.batch || '--'}] (x${i.qty})`).join(', ')}</div>
-                            <details style="margin-top:7px;"><summary class="order-detail-toggle">View full order details</summary><div class="order-detail-panel"><strong>Customer:</strong> ${o.customer_name || '-'}<br><strong>Phone:</strong> ${o.customer_phone || '-'}<br><strong>Email:</strong> ${o.customer_email || '-'}<br><strong>Delivery address:</strong> ${o.customer_address || o.address || '-'}<br><strong>Order date:</strong> ${o.created_at ? new Date(o.created_at).toLocaleString('en-IN') : '-'}<br><strong>Payment:</strong> ${o.payment_mode || 'Cash on Delivery'} / ${o.payment_status || 'pending'}<hr style="border:0;border-top:1px solid var(--border-color);">${(o.items || []).map(i => `${i.name || 'Item'} — Qty ${i.qty || 1} × ₹${Number(i.price || 0).toFixed(2)}`).join('<br>')}<br><strong>Total: ₹${Number(o.total || 0).toFixed(2)}</strong></div></details>
+                            <div style="text-align:right;"><strong style="color:var(--brand);font-size:17px;">₹${Number(o.total || 0).toFixed(2)}</strong><div style="font-size:11px;font-weight:700;margin-top:3px;">${o.status || 'Order Placed'}</div></div>
                         </div>
- 
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                            <select class="sort-select" style="padding:5px 8px;font-size:11px;" ${['Delivered','Cancelled'].includes(o.status)?'disabled':''} onchange="updateOrderStatusAdmin('${o.id}', this.value)">
-                                <option value="Order Placed" ${(!o.status || o.status === 'Order Placed') ? 'selected' : ''}>Order Placed</option>
-                                <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
-                                <option value="Out for Delivery" ${o.status === 'Out for Delivery' ? 'selected' : ''}>Out for Delivery</option>
-                                <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled (Restore Stock)</option>
+                        <div class="muted" style="font-size:12px;margin-top:7px;">${o.customer_address || o.address || 'Address not available'}</div>
+                        <div style="font-size:12px;margin-top:7px;line-height:1.5;">${(o.items || []).map(i => `${i.name || 'Item'} × ${i.qty || 1}`).join(' · ')}</div>
+                        <details style="margin-top:8px;"><summary class="order-detail-toggle">View full order details</summary><div class="order-detail-panel" style="margin-top:7px;"><strong>Customer:</strong> ${o.customer_name || '-'}<br><strong>Phone:</strong> ${o.customer_phone || '-'}<br><strong>Email:</strong> ${o.customer_email || '-'}<br><strong>Address:</strong> ${o.customer_address || o.address || '-'}<br><strong>Payment:</strong> ${o.payment_mode || 'Cash on Delivery'} / ${o.payment_status || 'pending'}<hr style="border:0;border-top:1px solid var(--border-color);">${(o.items || []).map(i => `${i.name || 'Item'} — Qty ${i.qty || 1} × ₹${Number(i.price || 0).toFixed(2)}`).join('<br>')}<br><strong>Total: ₹${Number(o.total || 0).toFixed(2)}</strong>${Number(o.reward_coins_used||0)>0?`<br><strong>Reward coins used:</strong> ${Number(o.reward_coins_used)}`:''}</div></details>
+                        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+                            <select class="sort-select" style="padding:8px;min-width:150px;flex:1;" ${['Delivered','Cancelled'].includes(o.status)?'disabled':''} onchange="updateOrderStatusAdmin('${o.id}', this.value)">
+                                <option value="Order Placed" ${(!o.status || o.status === 'Order Placed')?'selected':''}>Order Placed</option>
+                                <option value="Confirmed" ${o.status === 'Confirmed'?'selected':''}>Confirmed</option>
+                                <option value="Packed" ${o.status === 'Packed'?'selected':''}>Packed</option>
+                                <option value="Out for Delivery" ${o.status === 'Out for Delivery'?'selected':''}>Out for Delivery</option>
+                                <option value="Delivered" ${o.status === 'Delivered'?'selected':''}>Delivered</option>
+                                <option value="Cancelled" ${o.status === 'Cancelled'?'selected':''}>Cancelled</option>
                             </select>
- 
-                            ${o.rx_image ? `
-                                <img src="${o.rx_image}" class="rx-preview-thumb" style="width:40px;height:40px;" onclick="viewOrderRxById('${o.id}')" title="Click to inspect full Rx">
-                                <button class="secondary-btn" style="padding:6px 10px;font-size:11.5px;" onclick="viewOrderRxById('${o.id}')">
-                                    <i class="ri-eye-line"></i> View Rx
-                                </button>
-                            ` : `<span class="muted" style="font-size:11px;">No Rx</span>`}
- 
-                            <button class="invoice-btn" onclick="printOrderGSTBill('${o.id}')">
-                                <i class="ri-printer-fill"></i> 🧾 Print GST Bill
-                            </button>
+                            ${o.rx_image ? `<button class="secondary-btn" style="padding:7px 10px;font-size:12px;" onclick="viewOrderRxById('${o.id}')"><i class="ri-eye-line"></i> View Rx</button>` : ''}
+                            <button class="invoice-btn" onclick="printOrderGSTBill('${o.id}')"><i class="ri-printer-fill"></i> GST Bill</button>
                         </div>
                     </div>
-                `).join('') || '<div class="muted">No customer orders yet.</div>');
+                `).join('');
+                admBox.innerHTML = `
+                    <div style="border:1px solid var(--border-color);border-radius:14px;padding:12px;margin-bottom:12px;background:var(--surface-secondary,#fff7f5);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <strong><i class="ri-shopping-bag-3-line"></i> Orders · newest first</strong>
+                            <button type="button" class="secondary-btn" onclick="pullFromSupabaseSQL()" style="padding:7px 11px;font-size:12px;"><i class="ri-refresh-line"></i> Refresh orders</button>
+                        </div>
+                        <div style="display:flex;gap:7px;overflow-x:auto;padding:11px 0 2px;">${filterButtons}</div>
+                        <div class="muted" style="font-size:12px;">Showing ${visibleOrders.length} of ${orders.length} orders</div>
+                    </div>
+                    ${orderCards || '<div class="muted" style="padding:20px;text-align:center;border:1px dashed var(--border-color);border-radius:12px;">No orders in this section.</div>'}
+                `;
             }
+        }
+ 
+        let adminOrderFilter = 'Active';
+        function setAdminOrderFilter(filter) {
+            adminOrderFilter = filter;
+            renderOrders();
+            const box = document.getElementById('adm-orders-container');
+            if (box) box.scrollIntoView({behavior:'smooth',block:'start'});
         }
  
         function toggleWishlist(id) {
