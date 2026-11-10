@@ -1593,6 +1593,7 @@ img { -webkit-user-drag: none; }
       <table class="admin-table">
        <thead>
         <tr>
+         <th>Image</th>
          <th>Medicine</th>
          <th>Batch &amp; Expiry</th>
          <th>Category</th>
@@ -1644,6 +1645,8 @@ img { -webkit-user-drag: none; }
       <h4 style="margin: 0 0 8px;">🖼️ Subha Medical Logo &amp; Brand Image</h4>
       <label class="form-label">Upload Subha Medical Logo from Device</label> <input type="file" id="adm-logo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-logo-preview')"> <small class="muted">JPG, PNG, WEBP or AVIF, maximum 8 MB. This logo is shown in the customer header.</small>
       <div id="adm-logo-preview" style="margin:8px 0;"></div>
+      <button type="button" class="primary-btn" style="margin:6px 0 10px;" onclick="saveLogoOnly()"><i class="ri-save-line"></i> Save Logo Separately</button>
+      <div id="adm-logo-save-status" class="muted" aria-live="polite"></div>
       <label class="form-label" style="margin-top:10px;">Upload Brand / Store Banner Image from Device</label> <input type="file" id="adm-brand-image-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-brand-preview')">
       <div id="adm-brand-preview" style="margin:8px 0;"></div>
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
@@ -1679,10 +1682,19 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
      <div class="panel-card">
       <h4>🎟️ Separate Coupon Management</h4>
       <p class="muted">Add one coupon per line in CODE,DISCOUNT%,ENABLED format. Save here independently from banner and video settings.</p>
-      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled-separate"> Enable coupon banner</label> <label class="form-label">Coupon codes</label> <textarea id="adm-coupons-list-separate" class="form-control" rows="7" placeholder="SUBHA10,10,true
-WELCOME15,15,true"></textarea> <label class="form-label" style="margin-top:10px;">Default coupon code</label><input id="adm-coupon-code-separate" class="form-control" type="text"> <label class="form-label" style="margin-top:10px;">Default discount (%)</label><input id="adm-coupon-discount-separate" class="form-control" type="number" min="1" max="90" value="10">
-      <button class="primary-btn" style="margin-top:12px;" onclick="saveCouponsOnly()"><i class="ri-save-line"></i> Save Coupons</button>
-      <div id="adm-coupons-save-status" class="muted" style="margin-top:8px;"></div>
+      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled-separate"> Enable coupon system for customers</label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0;">
+       <input id="adm-coupon-new-code" class="form-control" type="text" maxlength="32" placeholder="New code e.g. SUBHA20"> <input id="adm-coupon-new-discount" class="form-control" type="number" min="1" max="90" value="10" placeholder="Discount %">
+       <button type="button" class="secondary-btn" onclick="addCouponToList()"><i class="ri-add-line"></i> Add Coupon</button>
+      </div>
+      <strong style="display:block;margin:10px 0 6px;">Saved coupon codes</strong>
+      <div id="adm-coupon-rows" style="display:grid;gap:8px;"></div>
+      <textarea id="adm-coupons-list-separate" class="form-control hidden" rows="7" aria-hidden="true" tabindex="-1"></textarea> <label class="form-label" style="margin-top:10px;">Default coupon code</label><input id="adm-coupon-code-separate" class="form-control" type="text"> <label class="form-label" style="margin-top:10px;">Default discount (%)</label><input id="adm-coupon-discount-separate" class="form-control" type="number" min="1" max="90" value="10">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+       <button class="primary-btn" onclick="saveCouponsOnly()"><i class="ri-save-line"></i> Save Coupon List</button>
+       <button class="secondary-btn" onclick="saveCouponEnableOnly()"><i class="ri-toggle-line"></i> Save Enable Setting</button>
+      </div>
+      <div id="adm-coupons-save-status" class="muted" style="margin-top:8px;" aria-live="polite"></div>
      </div>
     </div>
     <!-- ADMIN TAB 4: ORDERS, RX & GST BILLING -->
@@ -3041,6 +3053,7 @@ body { background-color:#f7f8fb; }
                 const sColor = s <= 0 ? 'var(--danger)' : (s <= 5 ? 'var(--warning)' : 'var(--success)');
                 return `
                     <tr>
+                        <td><img src="${(getProductGalleryImages(p)[0] || p.image || p.image_url || '').replace(/"/g,'&quot;')}" alt="${String(p.name||'Product').replace(/"/g,'&quot;')}" onclick="openProductImageZoom(this.src,this.alt)" onerror="this.style.display='none'" style="width:54px;height:54px;object-fit:contain;background:#fff;border:1px solid var(--border-color);border-radius:8px;cursor:zoom-in;"></td>
                         <td>
                             <strong>${p.name}</strong> ${p.rx ? '<span class="rx-badge">Rx</span>' : ''}<br>
                             <span class="muted">${p.salt || ''}</span>
@@ -3061,7 +3074,7 @@ body { background-color:#f7f8fb; }
                         </td>
                     </tr>
                 `;
-            }).join('') || `<tr><td colspan="6" class="muted">No products in inventory. Add your first product above.</td></tr>`;
+            }).join('') || `<tr><td colspan="7" class="muted">No products in inventory. Add your first product above.</td></tr>`;
         }
  
         function showLoginHeartAnimation() {
@@ -3866,25 +3879,60 @@ body { background-color:#f7f8fb; }
             renderCart();
         }
  
-        async function saveCouponsOnly(){
-            if(!appCurrentUser?.isAdmin || !supabaseClient) return showToast('Admin sign-in and cloud connection are required.','error');
-            const enabled=!!document.getElementById('adm-coupon-enabled-separate')?.checked;
+        function readCouponEditorList(){
             const raw=document.getElementById('adm-coupons-list-separate')?.value||'';
-            const list=raw.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{const a=line.split(',').map(v=>v.trim());return{code:(a[0]||'').toUpperCase(),discount:Math.min(90,Math.max(1,Number(a[1])||10)),enabled:!['false','no','0','off'].includes((a[2]||'true').toLowerCase())};}).filter(c=>/^[A-Z0-9_-]{3,32}$/.test(c.code));
-            if(raw.trim() && !list.length) return showToast('Enter at least one valid coupon code.','error');
-            storeSettings.coupon_enabled=enabled;
-            storeSettings.coupons=list;
-            storeSettings.coupon_code=(document.getElementById('adm-coupon-code-separate')?.value||list[0]?.code||'SUBHA10').trim().toUpperCase();
-            storeSettings.coupon_discount=Math.min(90,Math.max(1,Number(document.getElementById('adm-coupon-discount-separate')?.value)||10));
-            try{const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)throw error;saveStateLocal();applyStoreBranding();const status=document.getElementById('adm-coupons-save-status');if(status)status.textContent='Coupons saved successfully.';showToast('Coupon settings saved.','success');}
-            catch(e){showToast('Could not save coupons: '+(e.message||e),'error');}
+            const seen=new Set();
+            return raw.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{const a=line.split(',').map(v=>v.trim());return{code:(a[0]||'').toUpperCase(),discount:Math.min(90,Math.max(1,Number(a[1])||10)),enabled:!['false','no','0','off'].includes((a[2]||'true').toLowerCase())};}).filter(c=>/^[A-Z0-9_-]{3,32}$/.test(c.code)).filter(c=>{if(seen.has(c.code))return false;seen.add(c.code);return true;});
         }
+        function writeCouponEditorList(list){const ta=document.getElementById('adm-coupons-list-separate');if(ta)ta.value=(list||[]).map(c=>`${c.code},${c.discount},${c.enabled?'true':'false'}`).join('\n');renderCouponAdminRows();}
+        function renderCouponAdminRows(){
+            const box=document.getElementById('adm-coupon-rows');if(!box)return;const list=readCouponEditorList();box.innerHTML='';
+            if(!list.length){box.innerHTML='<div class="muted" style="padding:10px;border:1px dashed var(--border-color);border-radius:10px;">No coupons saved yet. Add a coupon above.</div>';return;}
+            list.forEach((c,i)=>{const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid var(--border-color);border-radius:10px;background:var(--card-bg,#fff);';
+                const info=document.createElement('div');info.style.cssText='flex:1;min-width:115px;';info.innerHTML=`<strong>${c.code}</strong><div class="muted" style="font-size:12px;">${c.discount}% discount</div>`;
+                const toggle=document.createElement('label');toggle.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;';const cb=document.createElement('input');cb.type='checkbox';cb.checked=c.enabled;cb.addEventListener('change',()=>{const a=readCouponEditorList();a[i].enabled=cb.checked;writeCouponEditorList(a);});toggle.append(cb,document.createTextNode(c.enabled?'Enabled':'Disabled'));
+                const edit=document.createElement('button');edit.type='button';edit.className='secondary-btn';edit.textContent='Edit';edit.onclick=()=>{const code=prompt('Coupon code',c.code);if(code===null)return;const discount=prompt('Discount percentage',String(c.discount));if(discount===null)return;const a=readCouponEditorList();a[i]={...a[i],code:code.trim().toUpperCase(),discount:Number(discount)||c.discount};if(!/^[A-Z0-9_-]{3,32}$/.test(a[i].code)||a.some((x,j)=>j!==i&&x.code===a[i].code))return showToast('Invalid or duplicate coupon code.','error');writeCouponEditorList(a);};
+                const del=document.createElement('button');del.type='button';del.className='danger-btn';del.textContent='Delete';del.onclick=()=>{if(!confirm(`Delete coupon ${c.code}?`))return;const a=readCouponEditorList();a.splice(i,1);writeCouponEditorList(a);};
+                const use=document.createElement('button');use.type='button';use.className='secondary-btn';use.textContent='Use / Test';use.onclick=()=>{const input=document.getElementById('coupon-input');if(input)input.value=c.code;showToast(`Coupon ${c.code} ${c.enabled?'is enabled and ready to use':'is disabled; enable it before customers can use it'}.`,c.enabled?'success':'error');};
+                row.append(info,toggle,edit,del,use);box.appendChild(row);
+            });
+        }
+        function addCouponToList(){
+            const code=(document.getElementById('adm-coupon-new-code')?.value||'').trim().toUpperCase();const discount=Math.min(90,Math.max(1,Number(document.getElementById('adm-coupon-new-discount')?.value)||10));
+            if(!/^[A-Z0-9_-]{3,32}$/.test(code))return showToast('Enter a coupon code using 3–32 letters or numbers.','error');
+            const list=readCouponEditorList();if(list.some(c=>c.code===code))return showToast('This coupon code already exists. Use Edit instead.','error');list.push({code,discount,enabled:true});writeCouponEditorList(list);document.getElementById('adm-coupon-new-code').value='';showToast(`${code} added. Press Save Coupon List to publish it.`,'success');
+        }
+        async function persistCouponSettings({saveList=true,saveEnable=true}={}){
+            if(!appCurrentUser?.isAdmin||!supabaseClient)return showToast('Admin sign-in and cloud connection are required.','error');
+            const status=document.getElementById('adm-coupons-save-status');
+            if(saveList){storeSettings.coupons=readCouponEditorList();storeSettings.coupon_code=(document.getElementById('adm-coupon-code-separate')?.value||storeSettings.coupons[0]?.code||'SUBHA10').trim().toUpperCase();storeSettings.coupon_discount=Math.min(90,Math.max(1,Number(document.getElementById('adm-coupon-discount-separate')?.value)||10));}
+            if(saveEnable)storeSettings.coupon_enabled=!!document.getElementById('adm-coupon-enabled-separate')?.checked;
+            try{const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)throw error;saveStateLocal();applyStoreBranding();if(status)status.textContent='Saved successfully to Supabase. Customers can use enabled coupons.';showToast('Coupon settings saved successfully.','success');}
+            catch(e){if(status)status.textContent='Save failed: '+(e.message||e);showToast('Could not save coupons: '+(e.message||e),'error');}
+        }
+        async function saveCouponsOnly(){return persistCouponSettings({saveList:true,saveEnable:false});}
+        async function saveCouponEnableOnly(){return persistCouponSettings({saveList:false,saveEnable:true});}
         function syncSeparateCouponEditor(){
             const en=document.getElementById('adm-coupon-enabled-separate');if(en)en.checked=!!storeSettings.coupon_enabled;
             const list=document.getElementById('adm-coupons-list-separate');if(list)list.value=(storeSettings.coupons||[]).map(c=>`${c.code},${c.discount},${c.enabled?'true':'false'}`).join('\n');
             const code=document.getElementById('adm-coupon-code-separate');if(code)code.value=storeSettings.coupon_code||'';
             const discount=document.getElementById('adm-coupon-discount-separate');if(discount)discount.value=storeSettings.coupon_discount||10;
+            renderCouponAdminRows();
         }
+ 
+        async function saveLogoOnly(){
+            if(!appCurrentUser?.isAdmin||!supabaseClient)return showToast('Admin sign-in and cloud connection are required to save the logo.','error');
+            const input=document.getElementById('adm-logo-file');const file=input?.files?.[0];const status=document.getElementById('adm-logo-save-status');
+            if(!file&&!storeSettings.logo_image)return showToast('Choose a logo image first.','error');
+            try{
+                if(file){const mime=subhaFileMime(file,'image');if(!['image/jpeg','image/png','image/webp','image/avif'].includes(mime)||file.size>8*1024*1024)throw new Error('Choose JPG, PNG, WEBP or AVIF up to 8 MB.');showToast('Uploading logo…');storeSettings.logo_image=await uploadAdminImage(file,'store-logo');}
+                const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)throw error;
+                saveStateLocal();applyStoreBranding();
+                const box=document.getElementById('adm-logo-preview');if(box){box.innerHTML='';const img=document.createElement('img');img.src=resolveSubhaStorageUrl(storeSettings.logo_image,PRODUCT_IMAGE_BUCKET);img.alt='Saved Subha Medical logo';img.style.cssText='max-width:180px;max-height:110px;object-fit:contain;background:#fff;border:1px solid var(--border-color);border-radius:8px;padding:4px;';img.onerror=()=>{if(status)status.textContent='Logo uploaded, but the public image URL could not load. Check product-images bucket public access.';};box.appendChild(img);}
+                if(input)input.value='';if(status)status.textContent='Logo uploaded and saved to Supabase successfully.';showToast('Logo saved and published to the customer header.','success');
+            }catch(e){if(status)status.textContent='Logo save failed: '+(e.message||e);showToast('Logo upload/save failed: '+(e.message||e),'error');}
+        }
+ 
         function openProductImageZoom(src,title){
             if(!src)return;
             let modal=document.getElementById('subha-product-image-zoom');
