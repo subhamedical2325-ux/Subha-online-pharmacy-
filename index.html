@@ -1550,6 +1550,9 @@ img { -webkit-user-drag: none; }
        <div>
         <label class="form-label">Manufacturer / Brand Name</label> <input type="text" id="adm-prod-brand" class="form-control" placeholder="e.g. Micro Labs Ltd">
        </div>
+       <div style="grid-column:1/-1;">
+        <label class="form-label">Medicine Uses / What is it used for?</label> <textarea id="adm-prod-uses" class="form-control" rows="2" placeholder="e.g. Used for fever and mild to moderate pain"></textarea> <small class="muted">Enter a short, factual indication. Customers can view this on the product card.</small>
+       </div>
        <div>
         <label class="form-label">Category *</label> <select id="adm-prod-cat" class="form-control"></select>
        </div>
@@ -1669,32 +1672,20 @@ img { -webkit-user-drag: none; }
       </div>
       <label class="form-label">Hero Promo Heading</label> <input type="text" id="adm-promo-title" class="form-control"> <label class="form-label">Hero Promo Subtitle / Address</label> <input type="text" id="adm-promo-sub" class="form-control">
       <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
-      <h4>🎟️ Multiple Coupon Codes</h4>
-      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled"> Enable coupon banner on main store</label> <label class="form-label">Coupons (one per line: CODE,DISCOUNT%,ENABLED)</label> <textarea id="adm-coupons-list" class="form-control" rows="5" placeholder="SUBHA10,10,true
-WELCOME15,15,true
-HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use true or false to enable/disable each code. Only enabled codes can be applied.</small>
-      <div id="adm-coupons-preview" class="muted" style="margin-top:6px;"></div>
-      <label class="form-label" style="margin-top:10px;">Legacy / default coupon code</label> <input type="text" id="adm-coupon-code" class="form-control" placeholder="Default coupon code"> <label class="form-label">Default discount percentage</label> <input type="number" id="adm-coupon-discount" class="form-control" min="1" max="90" value="10"> <small class="muted">Save settings to publish enabled coupons to the customer store.</small>
-      <button class="primary-btn" style="margin-top: 14px;" onclick="saveAppearanceSettings()"><i class="ri-check-line"></i> Apply &amp; Save Visual Settings</button>
+      <h4>🎟️ Coupon Code Settings</h4>
+      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled"> Enable coupon code for customers</label> <label class="form-label">Coupon Code</label><input type="text" id="adm-coupon-code" class="form-control" placeholder="SUBHA10" maxlength="32"> <label class="form-label" style="margin-top:8px;">Discount Percentage</label><input type="number" id="adm-coupon-discount" class="form-control" min="1" max="90" value="10">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+       <button class="primary-btn" type="button" onclick="saveSingleCoupon()"><i class="ri-save-line"></i> Save Coupon</button>
+       <button class="secondary-btn" type="button" onclick="toggleSingleCoupon()"><i class="ri-toggle-line"></i> Save Enable / Disable</button>
+      </div>
+      <div id="adm-single-coupon-status" class="muted" style="margin-top:8px;" aria-live="polite"></div>
      </div>
     </div>
     <div id="tab-coupons" class="admin-tab-pane hidden">
      <div class="panel-card">
-      <h4>🎟️ Separate Coupon Management</h4>
-      <p class="muted">Add one coupon per line in CODE,DISCOUNT%,ENABLED format. Save here independently from banner and video settings.</p>
-      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled-separate"> Enable coupon system for customers</label>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0;">
-       <input id="adm-coupon-new-code" class="form-control" type="text" maxlength="32" placeholder="New code e.g. SUBHA20"> <input id="adm-coupon-new-discount" class="form-control" type="number" min="1" max="90" value="10" placeholder="Discount %">
-       <button type="button" class="secondary-btn" onclick="addCouponToList()"><i class="ri-add-line"></i> Add Coupon</button>
-      </div>
-      <strong style="display:block;margin:10px 0 6px;">Saved coupon codes</strong>
-      <div id="adm-coupon-rows" style="display:grid;gap:8px;"></div>
-      <textarea id="adm-coupons-list-separate" class="form-control hidden" rows="7" aria-hidden="true" tabindex="-1"></textarea> <label class="form-label" style="margin-top:10px;">Default coupon code</label><input id="adm-coupon-code-separate" class="form-control" type="text"> <label class="form-label" style="margin-top:10px;">Default discount (%)</label><input id="adm-coupon-discount-separate" class="form-control" type="number" min="1" max="90" value="10">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-       <button class="primary-btn" onclick="saveCouponsOnly()"><i class="ri-save-line"></i> Save Coupon List</button>
-       <button class="secondary-btn" onclick="saveCouponEnableOnly()"><i class="ri-toggle-line"></i> Save Enable Setting</button>
-      </div>
-      <div id="adm-coupons-save-status" class="muted" style="margin-top:8px;" aria-live="polite"></div>
+      <h4>🎟️ Coupon Code</h4>
+      <p class="muted">Manage one active coupon code at a time from the Theme, BG &amp; Promo tab.</p>
+      <button type="button" class="primary-btn" onclick="openAdminTab('tab-appearance',document.querySelector('[onclick*=tab-appearance]'))">Open Coupon Settings</button>
      </div>
     </div>
     <!-- ADMIN TAB 4: ORDERS, RX & GST BILLING -->
@@ -1903,6 +1894,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
             p.name = p.name || p.product_name || p.medicine_name || p.title || '';
             p.salt = p.salt || p.generic_name || p.composition || p.active_ingredient || '';
             p.brand = p.brand || p.manufacturer || p.company || '';
+            p.uses = p.uses || p.usage || p.indications || p.description || '';
             p.category = p.category || p.category_name || 'General';
             p.price = Number(p.price ?? p.selling_price ?? p.sale_price ?? p.offer_price ?? 0);
             p.mrp = Number(p.mrp ?? p.mrp_price ?? p.price ?? p.selling_price ?? 0);
@@ -1972,7 +1964,7 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
                     localStorage.setItem('subha_products', JSON.stringify(products));
                 }
                 if (cResult.error) console.warn('Category list load failed:', cResult.error);
-                else { categories = cResult.data || []; localStorage.setItem('subha_categories', JSON.stringify(categories)); }
+                else { categories = (cResult.data || []).map(c => ({...c, id:String(c.id), name:c.name || c.label_en || c.label_ta || c.category_name || 'Category', image:c.image || c.image_url || ''})); localStorage.setItem('subha_categories', JSON.stringify(categories)); }
                 if (!sResult.error && sResult.data) {
                     storeSettings = { ...storeSettings, ...sResult.data };
                     storeSettings.logo_image = resolveSubhaStorageUrl(storeSettings.logo_image || '', PRODUCT_IMAGE_BUCKET);
@@ -2766,8 +2758,9 @@ body { background-color:#f7f8fb; }
                     </div>
                 `;
                 categories.forEach(c => {
-                    const imgPart = c.image
-                        ? `<img src="${c.image}" alt="${c.name}">`
+                    const catImage = resolveSubhaStorageUrl(c.image || c.image_url || '', PRODUCT_IMAGE_BUCKET);
+                    const imgPart = catImage
+                        ? `<img src="${catImage}" alt="${c.name}">`
                         : `<i class="ri-capsule-line"></i>`;
                     html += `
                         <div class="cat-card ${activeCategory === c.name ? 'active' : ''}" onclick="selectCategory('${c.name.replace(/'/g, "\\'")}')">
@@ -2786,7 +2779,7 @@ body { background-color:#f7f8fb; }
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--border-color);border-radius:8px;">
                     <div style="display:flex;align-items:center;gap:8px;">
                         <div class="cat-img-wrap" style="width:36px;height:36px;margin:0;">
-                            ${c.image ? `<img src="${c.image}">` : `<i class="ri-capsule-line" style="font-size:16px;"></i>`}
+                            ${(c.image || c.image_url) ? `<img src="${resolveSubhaStorageUrl(c.image || c.image_url, PRODUCT_IMAGE_BUCKET)}">` : `<i class="ri-capsule-line" style="font-size:16px;"></i>`}
                         </div>
                         <strong style="font-size:12.5px;">${c.name}</strong>
                     </div>
@@ -2841,6 +2834,7 @@ body { background-color:#f7f8fb; }
                     <div class="p-title">${p.name}</div>
                     <div class="p-salt">${p.salt || 'Standard Formulation'}</div>
                     <div class="p-brand-text">${p.brand || 'Subha Verified'} • ${p.category || 'Healthcare'}</div>
+                    ${p.uses ? `<div class="p-uses-text" style="font-size:11px;color:var(--text-muted);margin:5px 0;line-height:1.4;"><strong>Uses:</strong> ${String(p.uses).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
                     ${(p.batch || p.expiry) ? `
                         <div class="p-batch-meta">
                             <span>Batch: <strong>${p.batch || '--'}</strong></span>
@@ -2999,7 +2993,7 @@ body { background-color:#f7f8fb; }
             if(!q){box.classList.remove('show');box.innerHTML='';return;}
             const norm=v=>String(v??'').toLocaleLowerCase();
             const ranked=products.map(p=>{
-                const fields=[p.name,p.salt,p.generic_name,p.brand,p.manufacturer,p.category,p.batch,p.batch_number,p.description,p.medicine_name,p.alternative_names,p.search_keywords,p.strength,p.dosage,p.composition];
+                const fields=[p.name,p.salt,p.generic_name,p.brand,p.manufacturer,p.category,p.uses,p.usage,p.indications,p.batch,p.batch_number,p.description,p.medicine_name,p.alternative_names,p.search_keywords,p.strength,p.dosage,p.composition];
                 if(!subhaSearchMatch(q,fields)) return null;
                 const qn=norm(q), name=norm(p.name), brand=norm(p.brand), salt=norm(p.salt||p.generic_name), detail=[brand,salt,norm(p.manufacturer),norm(p.category),norm(p.strength),norm(p.batch)].filter(Boolean).join(' • ');
                 const score=(name.startsWith(qn)?100: name.includes(qn)?70:0)+(brand.includes(qn)?35:0)+(salt.includes(qn)?30:0)+(norm(p.manufacturer).includes(qn)?20:0)+(norm(p.strength).includes(qn)?25:0);
@@ -3024,7 +3018,7 @@ body { background-color:#f7f8fb; }
             const norm = value => String(value ?? '').toLocaleLowerCase().trim().replace(/\s+/g, ' ');
             let list = products.filter(p => {
                 const matchCat = activeCategory === 'ALL' || norm(p.category) === norm(activeCategory);
-                const searchableFields = [p.name, p.salt, p.brand, p.batch, p.category, p.expiry, p.generic_name, p.description, p.manufacturer, p.medicine_name, p.alternative_names, p.search_keywords, p.video];
+                const searchableFields = [p.name, p.salt, p.brand, p.batch, p.category, p.uses, p.usage, p.indications, p.expiry, p.generic_name, p.description, p.manufacturer, p.medicine_name, p.alternative_names, p.search_keywords, p.video];
                 const matchQ = subhaSearchMatch(q, searchableFields);
                 return matchCat && matchQ;
             });
@@ -3533,6 +3527,7 @@ body { background-color:#f7f8fb; }
             const name = document.getElementById('adm-prod-name').value.trim();
             const salt = document.getElementById('adm-prod-salt').value.trim();
             const brand = document.getElementById('adm-prod-brand').value.trim();
+            const uses = document.getElementById('adm-prod-uses')?.value.trim() || '';
             const category = document.getElementById('adm-prod-cat').value || 'General';
             const batch = document.getElementById('adm-prod-batch').value.trim().toUpperCase();
             const expiry = document.getElementById('adm-prod-expiry').value.trim();
@@ -3571,7 +3566,7 @@ body { background-color:#f7f8fb; }
                 if (!confirmed) return showToast('Product save cancelled. Existing stock was not changed.', 'error');
             }
             const gallery = images.length ? images : (existingProduct?.images || (image ? [image] : []));
-            const item = { id, name, salt, generic_name: salt, brand, manufacturer: brand, category, category_name: category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, video_url: video, search_keywords: searchKeywords, rx, featured, updated_at: new Date().toISOString() };
+            const item = { id, name, salt, generic_name: salt, brand, manufacturer: brand, uses, usage: uses, indications: uses, description: uses, category, category_name: category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, video_url: video, search_keywords: searchKeywords, rx, featured, updated_at: new Date().toISOString() };
  
             // Persist to Supabase first. Do not clear the form or announce success if rejected.
             if (supabaseClient) {
@@ -3605,6 +3600,7 @@ body { background-color:#f7f8fb; }
             document.getElementById('adm-prod-name').value = p.name;
             document.getElementById('adm-prod-salt').value = p.salt || '';
             document.getElementById('adm-prod-brand').value = p.brand || '';
+            if (document.getElementById('adm-prod-uses')) document.getElementById('adm-prod-uses').value = p.uses || p.usage || p.indications || p.description || '';
             document.getElementById('adm-prod-cat').value = p.category || '';
             document.getElementById('adm-prod-batch').value = p.batch || '';
             document.getElementById('adm-prod-expiry').value = p.expiry || '';
@@ -3633,7 +3629,7 @@ body { background-color:#f7f8fb; }
         }
  
         function resetProductForm() {
-            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img', 'adm-prod-video', 'adm-prod-search-keywords'].forEach(k => {
+            ['adm-prod-id', 'adm-prod-name', 'adm-prod-salt', 'adm-prod-brand', 'adm-prod-uses', 'adm-prod-batch', 'adm-prod-expiry', 'adm-prod-mrp', 'adm-prod-price', 'adm-prod-stock', 'adm-prod-img', 'adm-prod-video', 'adm-prod-search-keywords'].forEach(k => {
                 document.getElementById(k).value = '';
             });
             document.getElementById('adm-prod-image-file').value = '';
@@ -3649,7 +3645,7 @@ body { background-color:#f7f8fb; }
             const imageFile = document.getElementById('adm-cat-image-file')?.files?.[0];
             if (imageFile) { try { image = await uploadAdminImage(imageFile, 'categories'); } catch (err) { return showToast(err.message || 'Category image upload failed.', 'error'); } }
             if (!name) return showToast('Enter Category Name', 'error');
-            const catObj = { id, name, image, category_name: name, image_url: image };
+            const catObj = { id, name, label_ta: name, label_en: name, label_hi: name, category_name: name, image, image_url: image, updated_at: new Date().toISOString() };
             if (supabaseClient) {
                 showToast('Saving category to cloud…');
                 const result = await upsertWithSchemaFallback('subha_categories', catObj);
@@ -3659,7 +3655,8 @@ body { background-color:#f7f8fb; }
                 }
             }
             const idx = categories.findIndex(c => String(c.id) === String(id));
-            if (idx >= 0) categories[idx] = { ...catObj }; else categories.push({ ...catObj });
+            const normalizedCategory = {...catObj, id:String(id), name};
+            if (idx >= 0) categories[idx] = normalizedCategory; else categories.push(normalizedCategory);
             saveStateLocal();
             document.getElementById('adm-cat-id').value = '';
             document.getElementById('adm-cat-name').value = '';
@@ -3670,16 +3667,16 @@ body { background-color:#f7f8fb; }
         }
  
         function editCategoryAdmin(id) {
-            const c = categories.find(x => x.id === id);
+            const c = categories.find(x => String(x.id) === String(id));
             if (!c) return;
             document.getElementById('adm-cat-id').value = c.id;
-            document.getElementById('adm-cat-name').value = c.name;
+            document.getElementById('adm-cat-name').value = c.name || c.label_en || c.label_ta || c.category_name || '';
             document.getElementById('adm-cat-img').value = c.image || '';
             if (document.getElementById('adm-cat-image-file')) document.getElementById('adm-cat-image-file').value = '';
         }
  
         async function deleteCategoryAdmin(id) {
-            categories = categories.filter(c => c.id !== id);
+            categories = categories.filter(c => String(c.id) !== String(id));
             saveStateLocal();
             renderCategories();
             showToast('Category deleted');
@@ -3879,45 +3876,10 @@ body { background-color:#f7f8fb; }
             renderCart();
         }
  
-        function readCouponEditorList(){
-            const raw=document.getElementById('adm-coupons-list-separate')?.value||'';
-            const seen=new Set();
-            return raw.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{const a=line.split(',').map(v=>v.trim());return{code:(a[0]||'').toUpperCase(),discount:Math.min(90,Math.max(1,Number(a[1])||10)),enabled:!['false','no','0','off'].includes((a[2]||'true').toLowerCase())};}).filter(c=>/^[A-Z0-9_-]{3,32}$/.test(c.code)).filter(c=>{if(seen.has(c.code))return false;seen.add(c.code);return true;});
-        }
-        function writeCouponEditorList(list){const ta=document.getElementById('adm-coupons-list-separate');if(ta)ta.value=(list||[]).map(c=>`${c.code},${c.discount},${c.enabled?'true':'false'}`).join('\n');renderCouponAdminRows();}
-        function renderCouponAdminRows(){
-            const box=document.getElementById('adm-coupon-rows');if(!box)return;const list=readCouponEditorList();box.innerHTML='';
-            if(!list.length){box.innerHTML='<div class="muted" style="padding:10px;border:1px dashed var(--border-color);border-radius:10px;">No coupons saved yet. Add a coupon above.</div>';return;}
-            list.forEach((c,i)=>{const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid var(--border-color);border-radius:10px;background:var(--card-bg,#fff);';
-                const info=document.createElement('div');info.style.cssText='flex:1;min-width:115px;';info.innerHTML=`<strong>${c.code}</strong><div class="muted" style="font-size:12px;">${c.discount}% discount</div>`;
-                const toggle=document.createElement('label');toggle.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;';const cb=document.createElement('input');cb.type='checkbox';cb.checked=c.enabled;cb.addEventListener('change',()=>{const a=readCouponEditorList();a[i].enabled=cb.checked;writeCouponEditorList(a);});toggle.append(cb,document.createTextNode(c.enabled?'Enabled':'Disabled'));
-                const edit=document.createElement('button');edit.type='button';edit.className='secondary-btn';edit.textContent='Edit';edit.onclick=()=>{const code=prompt('Coupon code',c.code);if(code===null)return;const discount=prompt('Discount percentage',String(c.discount));if(discount===null)return;const a=readCouponEditorList();a[i]={...a[i],code:code.trim().toUpperCase(),discount:Number(discount)||c.discount};if(!/^[A-Z0-9_-]{3,32}$/.test(a[i].code)||a.some((x,j)=>j!==i&&x.code===a[i].code))return showToast('Invalid or duplicate coupon code.','error');writeCouponEditorList(a);};
-                const del=document.createElement('button');del.type='button';del.className='danger-btn';del.textContent='Delete';del.onclick=()=>{if(!confirm(`Delete coupon ${c.code}?`))return;const a=readCouponEditorList();a.splice(i,1);writeCouponEditorList(a);};
-                const use=document.createElement('button');use.type='button';use.className='secondary-btn';use.textContent='Use / Test';use.onclick=()=>{const input=document.getElementById('coupon-input');if(input)input.value=c.code;showToast(`Coupon ${c.code} ${c.enabled?'is enabled and ready to use':'is disabled; enable it before customers can use it'}.`,c.enabled?'success':'error');};
-                row.append(info,toggle,edit,del,use);box.appendChild(row);
-            });
-        }
-        function addCouponToList(){
-            const code=(document.getElementById('adm-coupon-new-code')?.value||'').trim().toUpperCase();const discount=Math.min(90,Math.max(1,Number(document.getElementById('adm-coupon-new-discount')?.value)||10));
-            if(!/^[A-Z0-9_-]{3,32}$/.test(code))return showToast('Enter a coupon code using 3–32 letters or numbers.','error');
-            const list=readCouponEditorList();if(list.some(c=>c.code===code))return showToast('This coupon code already exists. Use Edit instead.','error');list.push({code,discount,enabled:true});writeCouponEditorList(list);document.getElementById('adm-coupon-new-code').value='';showToast(`${code} added. Press Save Coupon List to publish it.`,'success');
-        }
-        async function persistCouponSettings({saveList=true,saveEnable=true}={}){
-            if(!appCurrentUser?.isAdmin||!supabaseClient)return showToast('Admin sign-in and cloud connection are required.','error');
-            const status=document.getElementById('adm-coupons-save-status');
-            if(saveList){storeSettings.coupons=readCouponEditorList();storeSettings.coupon_code=(document.getElementById('adm-coupon-code-separate')?.value||storeSettings.coupons[0]?.code||'SUBHA10').trim().toUpperCase();storeSettings.coupon_discount=Math.min(90,Math.max(1,Number(document.getElementById('adm-coupon-discount-separate')?.value)||10));}
-            if(saveEnable)storeSettings.coupon_enabled=!!document.getElementById('adm-coupon-enabled-separate')?.checked;
-            try{const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)throw error;saveStateLocal();applyStoreBranding();if(status)status.textContent='Saved successfully to Supabase. Customers can use enabled coupons.';showToast('Coupon settings saved successfully.','success');}
-            catch(e){if(status)status.textContent='Save failed: '+(e.message||e);showToast('Could not save coupons: '+(e.message||e),'error');}
-        }
-        async function saveCouponsOnly(){return persistCouponSettings({saveList:true,saveEnable:false});}
-        async function saveCouponEnableOnly(){return persistCouponSettings({saveList:false,saveEnable:true});}
         function syncSeparateCouponEditor(){
-            const en=document.getElementById('adm-coupon-enabled-separate');if(en)en.checked=!!storeSettings.coupon_enabled;
-            const list=document.getElementById('adm-coupons-list-separate');if(list)list.value=(storeSettings.coupons||[]).map(c=>`${c.code},${c.discount},${c.enabled?'true':'false'}`).join('\n');
-            const code=document.getElementById('adm-coupon-code-separate');if(code)code.value=storeSettings.coupon_code||'';
-            const discount=document.getElementById('adm-coupon-discount-separate');if(discount)discount.value=storeSettings.coupon_discount||10;
-            renderCouponAdminRows();
+            const enabled=document.getElementById('adm-coupon-enabled');if(enabled)enabled.checked=!!storeSettings.coupon_enabled;
+            const code=document.getElementById('adm-coupon-code');if(code)code.value=storeSettings.coupon_code||'SUBHA10';
+            const discount=document.getElementById('adm-coupon-discount');if(discount)discount.value=storeSettings.coupon_discount||10;
         }
  
         async function saveLogoOnly(){
@@ -3984,9 +3946,10 @@ body { background-color:#f7f8fb; }
  
         function applyCoupon() {
             const code = (document.getElementById('coupon-input')?.value || '').trim().toUpperCase();
-            const coupons = Array.isArray(storeSettings.coupons) ? storeSettings.coupons : [];
-            const match = coupons.find(c => c && c.enabled && String(c.code || '').toUpperCase() === code) ||
-                (storeSettings.coupon_enabled && code === String(storeSettings.coupon_code || '').toUpperCase() ? { code: storeSettings.coupon_code, discount: storeSettings.coupon_discount, enabled: true } : null);
+            const singleMatch = storeSettings.coupon_enabled && code === String(storeSettings.coupon_code || '').toUpperCase()
+                ? {code:storeSettings.coupon_code,discount:storeSettings.coupon_discount,enabled:true} : null;
+            const legacyCoupons = Array.isArray(storeSettings.coupons) ? storeSettings.coupons : [];
+            const match = singleMatch || legacyCoupons.find(c => c && c.enabled && String(c.code || '').toUpperCase() === code);
             if (match) {
                 appliedCouponDiscount = Math.min(90, Math.max(1, Number(match.discount) || 10));
                 showToast(`${appliedCouponDiscount}% coupon ${match.code} applied!`);
