@@ -273,6 +273,7 @@
         }
  
         .search-bar {
+            position: relative;
             flex: 1;
             display: flex;
             background: var(--input-bg);
@@ -297,6 +298,14 @@
         .order-detail-toggle { color: var(--brand); font-size: 12px; font-weight: 700; cursor: pointer; }
         .order-detail-panel { margin-top: 8px; padding: 10px; border-radius: 8px; background: var(--input-bg); font-size: 12px; line-height: 1.6; }
         .order-notify-btn { border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-dark); border-radius:8px; padding:7px 10px; font-size:12px; font-weight:700; }
+        .subha-search-suggestions { position:absolute; left:0; right:0; top:calc(100% + 5px); z-index:9999; display:none; max-height: min(55vh, 360px); overflow:auto; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; box-shadow:0 12px 28px rgba(0,0,0,.16); }
+        .subha-search-suggestions.show { display:block; }
+        .subha-search-suggestion { display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:0; border-bottom:1px solid var(--border-color); background:transparent; color:var(--text-dark); text-align:left; cursor:pointer; }
+        .subha-search-suggestion:last-child { border-bottom:0; }
+        .subha-search-suggestion:active { background:var(--input-bg); }
+        .subha-search-suggestion strong { display:block; font-size:13px; }
+        .subha-search-suggestion small { display:block; color:var(--text-light); font-size:11px; margin-top:2px; }
+        .subha-search-suggestion .ri-search-line { margin-left:auto; }
         .search-bar input {
             flex: 1;
             padding: 9.5px 8px;
@@ -1206,6 +1215,7 @@ img { -webkit-user-drag: none; }
      </div>
      <div class="search-bar">
       <i class="ri-search-line"></i> <input type="search" id="search-input" placeholder="Search for medicines, generic salt, brand, or batch..." oninput="renderStoreProducts()">
+      <div id="subha-search-suggestions" class="subha-search-suggestions" role="listbox"></div>
       <button type="button" id="voice-search-btn" class="voice-search-btn" aria-label="Search by voice" title="Search by voice" onclick="startSubhaVoiceSearch()"><i class="ri-mic-line"></i></button>
      </div>
      <select id="voice-search-language" class="sort-select voice-language-select" aria-label="Voice search language" title="Voice search language"> <option value="ta-IN">தமிழ்</option><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="ml-IN">മലയാളം</option><option value="te-IN">తెలుగు</option><option value="kn-IN">ಕನ್ನಡ</option><option value="bn-IN">বাংলা</option><option value="mr-IN">मराठी</option><option value="ur-IN">اردو</option> </select> <select id="sort-select" class="sort-select" onchange="renderStoreProducts()"> <option value="featured">Sort: Relevance</option> <option value="az">Name: A to Z</option> <option value="price-asc">Price: Low to High</option> <option value="price-desc">Price: High to Low</option> </select>
@@ -1383,12 +1393,26 @@ img { -webkit-user-drag: none; }
       <input type="text" id="coupon-input" class="form-control" placeholder="Enter Coupon (e.g. SUBHA10)">
       <button class="secondary-btn" onclick="applyCoupon()">Apply</button>
      </div>
+     <div id="cart-rewards-box" style="border:1px solid var(--border-color);border-radius:12px;padding:11px;margin:10px 0;background:var(--surface-secondary,#f8fafc);">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+       <strong>🪙 Use Reward Coins</strong><span id="cart-reward-balance" class="muted">Sign in to view coins</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+       <input type="number" id="reward-coins-use" class="form-control" min="0" step="1" value="0" placeholder="Coins to redeem" oninput="updateCartRewardPreview()">
+       <button type="button" class="secondary-btn" onclick="useAllRewardCoins()">Use all</button>
+      </div>
+      <small class="muted">1 coin = ₹1. Coins can be redeemed only on a signed-in account.</small>
+      <div id="cart-reward-preview" class="muted" style="margin-top:5px;">Reward discount: ₹0</div>
+     </div>
      <div style="border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 13px;">
       <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
        <span>Items Subtotal:</span> <strong id="sum-subtotal">₹0.00</strong>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--success);">
        <span>Coupon Discount:</span> <strong id="sum-discount">-₹0.00</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:var(--success);">
+       <span>Reward Coins Discount:</span><strong id="sum-reward-discount">-₹0.00</strong>
       </div>
       <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; margin-top: 8px;">
        <span>Total Payable (Incl. GST):</span> <span id="sum-total" style="color: var(--brand);">₹0.00</span>
@@ -1461,6 +1485,24 @@ img { -webkit-user-drag: none; }
       </div>
      </div>
     </div>
+    <div id="customer-rewards-panel" class="panel-card hidden" style="overflow:hidden;">
+     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <h4 style="margin:0;">🪙 My Rewards</h4>
+      <span class="promo-badge">₹1 = 1 coin</span>
+     </div>
+     <div style="display:flex;align-items:center;gap:14px;margin:14px 0;padding:15px;border-radius:14px;background:linear-gradient(120deg,#fff7d6,#ffedd5);color:#854d0e;">
+      <div id="rewards-coin-animation" style="font-size:38px;animation:subhaCoinFloat 1.8s ease-in-out infinite;">🪙</div>
+      <div>
+       <div style="font-size:12px;font-weight:700;">AVAILABLE REWARD BALANCE</div>
+       <div id="customer-reward-balance" style="font-size:30px;font-weight:900;line-height:1.2;">0 coins</div>
+       <div id="customer-reward-value" style="font-size:12px;">Worth ₹0 on your next order</div>
+      </div>
+     </div>
+     <div class="muted" style="font-size:12px;margin-bottom:8px;">Earn 1 coin for every ₹100 of eligible order value. Coins are credited only after delivery is confirmed.</div>
+     <strong style="display:block;margin:10px 0 6px;">Reward History</strong>
+     <div id="customer-reward-history" class="muted">Loading rewards…</div>
+    </div>
+    <style>@keyframes subhaCoinFloat{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-7px) rotate(8deg)}}</style>
     <div id="account-change-password-box" class="panel-card hidden">
      <h4>Change Account Password</h4>
      <p class="muted">Enter your current password and choose a new password.</p>
@@ -1486,6 +1528,7 @@ img { -webkit-user-drag: none; }
      <button class="admin-tab active" onclick="openAdminTab('tab-products', this)"><i class="ri-capsule-line"></i> Products &amp; Stock</button>
      <button class="admin-tab" onclick="openAdminTab('tab-categories', this)"><i class="ri-folders-line"></i> Categories &amp; Images</button>
      <button class="admin-tab" onclick="openAdminTab('tab-appearance', this)"><i class="ri-palette-line"></i> Theme, BG &amp; Promo</button>
+     <button class="admin-tab" onclick="openAdminTab('tab-coupons', this)"><i class="ri-coupon-3-line"></i> Coupons</button>
      <button class="admin-tab" onclick="openAdminTab('tab-orders', this)"><i class="ri-file-list-3-line"></i> Orders, Rx &amp; GST Bills</button>
      <button class="admin-tab" onclick="openAdminTab('tab-sql', this)"><i class="ri-database-2-line"></i> Store, GST &amp; SQL Config</button>
      <button class="admin-tab" onclick="openAdminTab('tab-security', this)"><i class="ri-lock-password-line"></i> Security &amp; Password</button>
@@ -1605,7 +1648,9 @@ img { -webkit-user-drag: none; }
       <h4 style="margin: 0 0 8px;">🖼️ Global Background Image &amp; Promotional Banner Setup</h4>
       <label class="form-label">Site Background Image URL (optional)</label> <input type="url" id="adm-bg-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Background Image from Phone / Device</label> <input type="file" id="adm-bg-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif"> <small class="muted">Uploaded background images need an accessible Supabase Storage URL so all customers can see them.</small> <label class="form-label">Hero Promo Banner Image URL</label> <input type="url" id="adm-promo-image" class="form-control" placeholder="Paste image URL or upload below"> <label class="form-label" style="margin-top:8px;">Upload Promo Banner Image from Phone</label> <input type="file" id="adm-promo-file" class="form-control" accept="image/*,.jpg,.jpeg,.png,.webp,.avif" onchange="previewAdminImageFile(this,'adm-promo-preview')">
       <div id="adm-promo-preview" style="margin:8px 0;"></div>
-      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')"> <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Upload progress will be shown here; after saving, the uploaded video will remain visible below.</small>
+      <label class="form-label" style="margin-top:10px;">Upload Store Promotional Video (optional)</label> <input type="file" id="adm-promo-video-file" class="form-control" accept="video/*,.mp4,.webm,.mov,.m4v" onchange="previewAdminVideoFile(this,'adm-promo-video-preview')">
+      <button type="button" class="primary-btn" style="margin-top:8px;padding:8px 12px;" onclick="saveAppearanceSettings()"><i class="ri-save-line"></i> Save Promotional Video</button>
+      <small class="muted">MP4, WEBM or MOV, maximum 50 MB. Upload progress will be shown here; after saving, the uploaded video will remain visible below.</small>
       <div id="adm-promo-video-progress" style="display:none;margin:10px 0;padding:10px;border:1px solid var(--border-color);border-radius:10px;">
        <div id="adm-promo-video-progress-label" style="font-size:13px;margin-bottom:6px;">Waiting to upload…</div>
        <div style="height:9px;background:var(--border-color);border-radius:20px;overflow:hidden;">
@@ -1626,6 +1671,16 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
       <div id="adm-coupons-preview" class="muted" style="margin-top:6px;"></div>
       <label class="form-label" style="margin-top:10px;">Legacy / default coupon code</label> <input type="text" id="adm-coupon-code" class="form-control" placeholder="Default coupon code"> <label class="form-label">Default discount percentage</label> <input type="number" id="adm-coupon-discount" class="form-control" min="1" max="90" value="10"> <small class="muted">Save settings to publish enabled coupons to the customer store.</small>
       <button class="primary-btn" style="margin-top: 14px;" onclick="saveAppearanceSettings()"><i class="ri-check-line"></i> Apply &amp; Save Visual Settings</button>
+     </div>
+    </div>
+    <div id="tab-coupons" class="admin-tab-pane hidden">
+     <div class="panel-card">
+      <h4>🎟️ Separate Coupon Management</h4>
+      <p class="muted">Add one coupon per line in CODE,DISCOUNT%,ENABLED format. Save here independently from banner and video settings.</p>
+      <label style="display:flex;align-items:center;gap:8px;margin:10px 0;"><input type="checkbox" id="adm-coupon-enabled-separate"> Enable coupon banner</label> <label class="form-label">Coupon codes</label> <textarea id="adm-coupons-list-separate" class="form-control" rows="7" placeholder="SUBHA10,10,true
+WELCOME15,15,true"></textarea> <label class="form-label" style="margin-top:10px;">Default coupon code</label><input id="adm-coupon-code-separate" class="form-control" type="text"> <label class="form-label" style="margin-top:10px;">Default discount (%)</label><input id="adm-coupon-discount-separate" class="form-control" type="number" min="1" max="90" value="10">
+      <button class="primary-btn" style="margin-top:12px;" onclick="saveCouponsOnly()"><i class="ri-save-line"></i> Save Coupons</button>
+      <div id="adm-coupons-save-status" class="muted" style="margin-top:8px;"></div>
      </div>
     </div>
     <!-- ADMIN TAB 4: ORDERS, RX & GST BILLING -->
@@ -1780,6 +1835,8 @@ HEALTH5,5,false"></textarea> <small class="muted">Example: SUBHA10,10,true. Use 
         let reminders = JSON.parse(localStorage.getItem('subha_reminders') || '[]');
         let activeCategory = 'ALL';
         let appliedCouponDiscount = 0;
+        let appliedRewardCoins = 0;
+        let currentRewardBalance = 0;
  
         let currentRxImageData = localStorage.getItem('subha_cart_rx') || '';
  
@@ -2489,7 +2546,8 @@ body { background-color:#f7f8fb; }
             if (!ord) return;
             const previousStatus = ord.status || 'Order Placed';
             if (previousStatus === newStatus && !(newStatus === 'Cancelled' && !ord.stock_restored)) return;
-            // Admin may correct any status, including Delivered -> Cancelled.
+            // Delivered and Cancelled are terminal statuses and cannot be changed again.
+            if (['Delivered','Cancelled'].includes(previousStatus)) { showToast('Delivered and Cancelled orders are locked and cannot be changed.', 'error'); renderOrders(); return; }
             if (!appCurrentUser?.isAdmin) { showToast('Only the admin can change order status.', 'error'); renderOrders(); return; }
             if (!supabaseClient) { showToast('Cloud connection unavailable. Status was not changed.', 'error'); renderOrders(); return; }
             const { error } = await supabaseClient.from('subha_orders').update({ status: newStatus }).eq('id', orderId);
@@ -2499,6 +2557,7 @@ body { background-color:#f7f8fb; }
                 renderOrders(); return;
             }
             ord.status = newStatus;
+            if (newStatus === 'Delivered') await creditDeliveredOrderRewards(orderId);
             if (newStatus === 'Cancelled' && !ord.stock_restored) {
                 const restored = await restoreInventoryStockForCancelledOrder(ord.items);
                 if (!restored.ok) {
@@ -2761,7 +2820,7 @@ body { background-color:#f7f8fb; }
                         <i class="${wished ? 'ri-heart-3-fill' : 'ri-heart-3-line'}"></i>
                     </button>
                     <div class="p-img-box" style="height:250px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;">
-                        <img src="${p.image || fallbackImg}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;" onerror="this.src='${fallbackImg}'">
+                        <img src="${p.image || fallbackImg}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="openProductImageZoom(this.src,'${String(p.name||'Product').replace(/'/g,"\\'")}')" onerror="this.src='${fallbackImg}'">
                     </div>
                     ${getProductGalleryImages(p).length > 1 ? `<div class="medicine-gallery-thumbs" aria-label="More product photos" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0;">${getProductGalleryImages(p).map((src,ix)=>`<button type="button" onclick="this.closest('.p-card').querySelector('.p-img-box img').src=this.querySelector('img').src" aria-label="View product photo ${ix+1}" style="padding:0;border:1px solid var(--border-color);border-radius:6px;background:#fff;flex:0 0 48px;"><img src="${src}" alt="${p.name} photo ${ix+1}" style="width:46px;height:46px;object-fit:contain;display:block;"></button>`).join('')}</div>` : ''}
                     ${p.video ? `<div class="product-video-wrap" style="margin:8px 0;"><video controls playsinline preload="metadata" style="width:100%;max-height:180px;border-radius:10px;background:#111" aria-label="${p.name} product video"><source src="${p.video}">Your browser does not support video playback.</video></div>` : ''}
@@ -2891,23 +2950,59 @@ body { background-color:#f7f8fb; }
         }
         function subhaSearchMatch(query, fields) {
             if(!query) return true;
-            const rawQ=query.normalize('NFC').toLocaleLowerCase().trim().replace(/\s+/g,' ');
-            const joined=fields.map(v=>String(v||'').normalize('NFC').toLocaleLowerCase()).join(' ');
+            const rawQ=String(query).normalize('NFC').toLocaleLowerCase().trim().replace(/\s+/g,' ');
+            const values=fields.map(v=>String(v??'').normalize('NFC').toLocaleLowerCase());
+            const joined=values.join(' ');
             if(joined.includes(rawQ)) return true;
-            const qLatin=(subhaTamilLatin(rawQ)+' '+subhaHindiLatin(rawQ)+' '+subhaOtherIndicLatin(rawQ)).toLocaleLowerCase();
-            const allLatin=fields.map(v=>subhaTamilLatin(v)+' '+subhaHindiLatin(v)+' '+subhaOtherIndicLatin(v)+' '+String(v||'')).join(' ').toLocaleLowerCase();
-            if(allLatin.includes(rawQ) || allLatin.includes(qLatin.trim())) return true;
+            const qVariants=[rawQ,subhaTamilLatin(rawQ),subhaHindiLatin(rawQ),subhaOtherIndicLatin(rawQ)].map(x=>String(x||'').toLocaleLowerCase().trim()).filter(Boolean);
+            const allVariants=values.map(v=>[v,subhaTamilLatin(v),subhaHindiLatin(v),subhaOtherIndicLatin(v)].join(' ')).join(' ').toLocaleLowerCase();
+            if(qVariants.some(q=>q && allVariants.includes(q))) return true;
             const qTokens=rawQ.split(/\s+/).filter(Boolean);
-            const fTokens=allLatin.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
-            const qKeys=qTokens.map(t=>subhaSoundKey(t)||subhaSoundKey(subhaTamilLatin(t))||subhaSoundKey(subhaHindiLatin(t))||subhaSoundKey(subhaOtherIndicLatin(t))).filter(Boolean);
-            const fKeys=fTokens.map(t=>subhaSoundKey(t)).filter(Boolean);
-            if(!qKeys.length)return false;
-            return qKeys.every(qk=>fKeys.some(fk=>{
-                if(fk.includes(qk)||qk.includes(fk))return Math.min(fk.length,qk.length)>=3;
-                if(Math.min(fk.length,qk.length)<4)return false;
-                return subhaEditDistance(qk,fk)<=Math.max(1,Math.floor(Math.max(qk.length,fk.length)*0.24));
-            }));
+            const fTokens=allVariants.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+            // Match every typed word against any product detail: name, brand, salt, strength,
+            // manufacturer, category, batch, description and admin-added alternate names.
+            return qTokens.every(token=>{
+                const variants=[token,subhaTamilLatin(token),subhaHindiLatin(token),subhaOtherIndicLatin(token)].map(x=>String(x||'').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'')).filter(Boolean);
+                return variants.some(v=>fTokens.some(ft=>{
+                    if(ft===v || ft.startsWith(v) || v.startsWith(ft)) return Math.min(ft.length,v.length)>=1;
+                    // Numeric queries such as 500 match 500mg, 500 mcg, 500/5ml, etc.
+                    if(/^\d+(?:\.\d+)?$/.test(v)) return ft.includes(v);
+                    if(Math.min(ft.length,v.length)<4) return false;
+                    const a=subhaSoundKey(v), b=subhaSoundKey(ft);
+                    return (a && b && (a.includes(b)||b.includes(a))) || subhaEditDistance(v,ft)<=Math.max(1,Math.floor(Math.max(v.length,ft.length)*0.22));
+                }));
+            });
         }
+ 
+        let subhaSearchSuggestionProducts=[];
+        function subhaSearchEscape(value) { return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+        function handleSubhaSearchInput() {
+            renderStoreProducts();
+            const input=document.getElementById('search-input');
+            const box=document.getElementById('subha-search-suggestions');
+            if(!input||!box) return;
+            const q=input.value.trim();
+            if(!q){box.classList.remove('show');box.innerHTML='';return;}
+            const norm=v=>String(v??'').toLocaleLowerCase();
+            const ranked=products.map(p=>{
+                const fields=[p.name,p.salt,p.generic_name,p.brand,p.manufacturer,p.category,p.batch,p.batch_number,p.description,p.medicine_name,p.alternative_names,p.search_keywords,p.strength,p.dosage,p.composition];
+                if(!subhaSearchMatch(q,fields)) return null;
+                const qn=norm(q), name=norm(p.name), brand=norm(p.brand), salt=norm(p.salt||p.generic_name), detail=[brand,salt,norm(p.manufacturer),norm(p.category),norm(p.strength),norm(p.batch)].filter(Boolean).join(' • ');
+                const score=(name.startsWith(qn)?100: name.includes(qn)?70:0)+(brand.includes(qn)?35:0)+(salt.includes(qn)?30:0)+(norm(p.manufacturer).includes(qn)?20:0)+(norm(p.strength).includes(qn)?25:0);
+                return {p,score,detail};
+            }).filter(Boolean).sort((a,b)=>b.score-a.score).slice(0,8);
+            subhaSearchSuggestionProducts=ranked.map(x=>x.p);
+            if(!ranked.length){box.innerHTML='<div class="subha-search-suggestion"><span><strong>No matching medicines found</strong><small>Try a brand, salt, strength, manufacturer or another spelling</small></span></div>';box.classList.add('show');return;}
+            box.innerHTML=ranked.map((x,i)=>`<button type="button" class="subha-search-suggestion" role="option" onclick="selectSubhaSearchSuggestion(${i})"><span><strong>${subhaSearchEscape(x.p.name||'Medicine')}</strong><small>${subhaSearchEscape(x.detail||x.p.description||'Medicine')}</small></span><i class="ri-arrow-up-left-line"></i></button>`).join('');
+            box.classList.add('show');
+        }
+        function selectSubhaSearchSuggestion(index) {
+            const p=subhaSearchSuggestionProducts[index]; if(!p)return;
+            const input=document.getElementById('search-input'); if(input) input.value=p.name||'';
+            const box=document.getElementById('subha-search-suggestions'); if(box)box.classList.remove('show');
+            renderStoreProducts();
+        }
+        document.addEventListener('click',event=>{const box=document.getElementById('subha-search-suggestions');const bar=document.querySelector('.search-bar');if(box&&bar&&!bar.contains(event.target))box.classList.remove('show');});
  
         function renderStoreProducts() {
             const q = (document.getElementById('search-input')?.value || '').toLocaleLowerCase().trim().replace(/\s+/g, ' ');
@@ -2994,7 +3089,7 @@ body { background-color:#f7f8fb; }
                 subhaSpeechRecognition.onresult = event => {
                     const phrase = event.results?.[0]?.[0]?.transcript || '';
                     const input = document.getElementById('search-input');
-                    if (input) { input.value = phrase; renderStoreProducts(); }
+                    if (input) { input.value = phrase; handleSubhaSearchInput(); }
                     showToast(phrase ? `Voice search: ${phrase}` : 'மருந்தின் பெயர் தெளிவாக கேட்கவில்லை.', phrase ? 'success' : 'error');
                 };
                 subhaSpeechRecognition.onerror = event => showToast(`Voice search: ${event.error || 'Could not hear you.'}`, 'error');
@@ -3307,6 +3402,7 @@ body { background-color:#f7f8fb; }
                 document.getElementById('prof-email-display').textContent = appCurrentUser.email || appCurrentUser.phone || '';
  
                 if (appCurrentUser.isAdmin) {
+                    syncSeparateCouponEditor();
                     adminBtn.classList.remove('hidden');
                     adminShortcut.classList.remove('hidden');
                     document.getElementById('prof-role-badge').textContent = 'Store Administrator';
@@ -3322,6 +3418,8 @@ body { background-color:#f7f8fb; }
                 profBox.classList.add('hidden');
             }
             renderOrders();
+            if (appCurrentUser && !appCurrentUser.isAdmin) loadCustomerRewards();
+            else { const rewardsPanel=document.getElementById('customer-rewards-panel'); if(rewardsPanel) rewardsPanel.classList.add('hidden'); }
         }
  
         /* =========================================================================
@@ -3759,9 +3857,79 @@ body { background-color:#f7f8fb; }
         function clearCart() {
             cart = [];
             appliedCouponDiscount = 0;
+            appliedRewardCoins = 0;
+            const rewardInput=document.getElementById('reward-coins-use'); if(rewardInput) rewardInput.value='0';
             currentRxImageData = '';
             saveStateLocal();
             renderCart();
+        }
+ 
+        async function saveCouponsOnly(){
+            if(!appCurrentUser?.isAdmin || !supabaseClient) return showToast('Admin sign-in and cloud connection are required.','error');
+            const enabled=!!document.getElementById('adm-coupon-enabled-separate')?.checked;
+            const raw=document.getElementById('adm-coupons-list-separate')?.value||'';
+            const list=raw.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{const a=line.split(',').map(v=>v.trim());return{code:(a[0]||'').toUpperCase(),discount:Math.min(90,Math.max(1,Number(a[1])||10)),enabled:!['false','no','0','off'].includes((a[2]||'true').toLowerCase())};}).filter(c=>/^[A-Z0-9_-]{3,32}$/.test(c.code));
+            if(raw.trim() && !list.length) return showToast('Enter at least one valid coupon code.','error');
+            storeSettings.coupon_enabled=enabled;
+            storeSettings.coupons=list;
+            storeSettings.coupon_code=(document.getElementById('adm-coupon-code-separate')?.value||list[0]?.code||'SUBHA10').trim().toUpperCase();
+            storeSettings.coupon_discount=Math.min(90,Math.max(1,Number(document.getElementById('adm-coupon-discount-separate')?.value)||10));
+            try{const {error}=await supabaseClient.from('subha_settings').upsert(cloudSettingsPayload());if(error)throw error;saveStateLocal();applyStoreBranding();const status=document.getElementById('adm-coupons-save-status');if(status)status.textContent='Coupons saved successfully.';showToast('Coupon settings saved.','success');}
+            catch(e){showToast('Could not save coupons: '+(e.message||e),'error');}
+        }
+        function syncSeparateCouponEditor(){
+            const en=document.getElementById('adm-coupon-enabled-separate');if(en)en.checked=!!storeSettings.coupon_enabled;
+            const list=document.getElementById('adm-coupons-list-separate');if(list)list.value=(storeSettings.coupons||[]).map(c=>`${c.code},${c.discount},${c.enabled?'true':'false'}`).join('\n');
+            const code=document.getElementById('adm-coupon-code-separate');if(code)code.value=storeSettings.coupon_code||'';
+            const discount=document.getElementById('adm-coupon-discount-separate');if(discount)discount.value=storeSettings.coupon_discount||10;
+        }
+        function openProductImageZoom(src,title){
+            if(!src)return;
+            let modal=document.getElementById('subha-product-image-zoom');
+            if(!modal){modal=document.createElement('div');modal.id='subha-product-image-zoom';modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:18px;';modal.innerHTML=`<button type="button" aria-label="Close image" style="position:absolute;right:16px;top:16px;background:#fff;color:#111;border:0;border-radius:50%;width:42px;height:42px;font-size:25px;z-index:2;" onclick="document.getElementById('subha-product-image-zoom').remove()">×</button><div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;"><img id="subha-product-image-zoom-img" style="max-width:100%;max-height:88%;object-fit:contain;touch-action:pinch-zoom;"><div id="subha-product-image-zoom-title" style="color:#fff;text-align:center;font-weight:700;"></div></div>`;
+                modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});document.body.appendChild(modal);}
+            document.getElementById('subha-product-image-zoom-img').src=src;document.getElementById('subha-product-image-zoom-title').textContent=title||'';
+        }
+ 
+        async function loadCustomerRewards() {
+            const panel=document.getElementById('customer-rewards-panel');
+            if (!appCurrentUser || appCurrentUser.isAdmin || !supabaseClient) { if(panel) panel.classList.add('hidden'); return; }
+            if(panel) panel.classList.remove('hidden');
+            const history=document.getElementById('customer-reward-history');
+            if(history) history.textContent='Loading rewards…';
+            const email=String(appCurrentUser.email||'').trim().toLowerCase();
+            const {data,error}=await supabaseClient.from('subha_reward_transactions').select('id,coins,transaction_type,order_id,created_at').eq('customer_email',email).order('created_at',{ascending:false}).limit(50);
+            if(error){ if(history) history.textContent='Rewards are not configured yet. Please ask the store administrator to apply the Rewards SQL setup.'; console.warn('Rewards load failed',error); return; }
+            const rows=data||[]; currentRewardBalance=rows.reduce((sum,r)=>sum+Number(r.coins||0),0);
+            document.getElementById('customer-reward-balance').textContent=currentRewardBalance+' coins';
+            document.getElementById('customer-reward-value').textContent='Worth ₹'+currentRewardBalance+' on your next order';
+            const cartBal=document.getElementById('cart-reward-balance'); if(cartBal) cartBal.textContent=currentRewardBalance+' coins available';
+            if(history) history.innerHTML=rows.length?rows.map(r=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border-color);"><span>${r.transaction_type==='earned'?'Order delivered reward':r.transaction_type==='redeemed'?'Used on order':'Reward adjustment'}<small class="muted" style="display:block;">${r.created_at?new Date(r.created_at).toLocaleDateString('en-IN'):''} ${r.order_id?'• #'+r.order_id:''}</small></span><strong style="color:${Number(r.coins)>=0?'var(--success)':'var(--danger,#dc2626)'};">${Number(r.coins)>0?'+':''}${Number(r.coins)} coins</strong></div>`).join(''):'No rewards yet. Your first reward will arrive after an order is delivered.';
+            updateCartRewardPreview();
+        }
+        function updateCartRewardPreview(){
+            const input=document.getElementById('reward-coins-use'); if(!input)return;
+            const sub=cart.reduce((sum,i)=>sum+Number(i.price||0)*Number(i.qty||0),0);
+            const coupon=sub*(Number(appliedCouponDiscount)||0)/100;
+            const afterCoupon=Math.max(0,sub-coupon);
+            const requested=Math.max(0,Math.floor(Number(input.value)||0));
+            appliedRewardCoins=Math.min(requested,currentRewardBalance,Math.floor(afterCoupon));
+            const preview=document.getElementById('cart-reward-preview'); if(preview) preview.textContent='Reward discount: ₹'+appliedRewardCoins+' ('+appliedRewardCoins+' coins)';
+            const line=document.getElementById('sum-reward-discount'); if(line) line.textContent='-₹'+appliedRewardCoins.toFixed(2);
+            const total=document.getElementById('sum-total'); if(total) total.textContent='₹'+Math.max(0,afterCoupon-appliedRewardCoins).toFixed(2);
+        }
+        function useAllRewardCoins(){ const input=document.getElementById('reward-coins-use'); if(!input)return; input.value=String(Math.min(currentRewardBalance,Math.floor(cart.reduce((s,i)=>s+i.price*i.qty,0)*(1-(Number(appliedCouponDiscount)||0)/100)))); updateCartRewardPreview(); }
+        async function creditDeliveredOrderRewards(orderId){
+            if(!supabaseClient)return;
+            const {data,error}=await supabaseClient.rpc('subha_credit_order_rewards',{p_order_id:String(orderId)});
+            if(error){console.error('Reward credit failed:',error);showToast('Order delivered, but reward credit needs setup/check: '+error.message,'error');return;}
+            const credited=Number(data?.coins_credited||0);
+            if(credited>0) showToast('🎉 '+credited+' reward coins added to customer account!','success');
+        }
+        async function redeemOrderRewards(orderId,email,coins){
+            if(!coins)return {ok:true};
+            const {data,error}=await supabaseClient.rpc('subha_redeem_order_rewards',{p_order_id:String(orderId),p_customer_email:String(email).toLowerCase(),p_coins:Number(coins)});
+            return error?{ok:false,error}:{ok:true,data};
         }
  
         function applyCoupon() {
@@ -3777,6 +3945,7 @@ body { background-color:#f7f8fb; }
                 showToast('Invalid or disabled coupon code', 'error');
             }
             renderCart();
+            updateCartRewardPreview();
         }
  
         function renderCart() {
@@ -3824,12 +3993,11 @@ body { background-color:#f7f8fb; }
             }).join('');
  
             const discAmt = (sub * appliedCouponDiscount) / 100;
-            const finalTotal = Math.max(0, sub - discAmt);
- 
+            updateCartRewardPreview();
+            const finalTotal = Math.max(0, sub - discAmt - appliedRewardCoins);
             document.getElementById('sum-subtotal').textContent = `₹${sub.toFixed(2)}`;
             document.getElementById('sum-discount').textContent = `-₹${discAmt.toFixed(2)}`;
             document.getElementById('sum-total').textContent = `₹${finalTotal.toFixed(2)}`;
- 
             renderRxPreviewState();
         }
  
@@ -3864,7 +4032,10 @@ body { background-color:#f7f8fb; }
             }
  
             const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            const total = Math.max(0, sub - (sub * appliedCouponDiscount) / 100);
+            updateCartRewardPreview();
+            const rewardCoinsToUse = appCurrentUser && !appCurrentUser.isAdmin ? Math.min(appliedRewardCoins,currentRewardBalance) : 0;
+            const rewardDiscount = rewardCoinsToUse;
+            const total = Math.max(0, sub - (sub * appliedCouponDiscount) / 100 - rewardDiscount);
             const orderedItemsSnapshot = [...cart];
             // Open a tab during the original tap so mobile browsers do not block WhatsApp after async saves.
             const whatsappTab = channel === 'WhatsApp' ? window.open('about:blank', '_blank') : null;
@@ -3885,6 +4056,8 @@ body { background-color:#f7f8fb; }
                 payment_mode: 'Cash on Delivery (COD)',
                 items: orderedItemsSnapshot,
                 total: Number(total.toFixed(2)),
+                reward_coins_used: rewardCoinsToUse,
+                reward_discount: Number(rewardDiscount.toFixed(2)),
                 rx_image: currentRxImageData || null,
                 prescription_path: null,
                 prescription_status: currentRxImageData ? 'pending' : 'not_required',
@@ -3907,6 +4080,14 @@ body { background-color:#f7f8fb; }
                 return showToast('Order could not be saved. No stock was deducted. ' + (orderSaveError.message || 'Please try again.'), 'error');
             }
  
+            if (rewardCoinsToUse > 0) {
+                const redemption = await redeemOrderRewards(orderObj.id, orderObj.customer_email, rewardCoinsToUse);
+                if (!redemption.ok) {
+                    await supabaseClient.from('subha_orders').delete().eq('id', orderObj.id);
+                    if (whatsappTab && !whatsappTab.closed) whatsappTab.close();
+                    return showToast('Order was not completed because reward redemption failed: ' + redemption.error.message, 'error');
+                }
+            }
             orders.unshift(orderObj);
             saveStateLocal();
             renderOrders();
@@ -3981,6 +4162,7 @@ body { background-color:#f7f8fb; }
                 <div style="border:1px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
                         <strong>#${o.id} -- ₹${Number(o.total).toFixed(2)}</strong>
+                        ${Number(o.reward_coins_used||0)>0?`<small class="muted">Used ${Number(o.reward_coins_used)} reward coins</small>`:''}
                         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                             ${o.rx_image ? `<button class="secondary-btn" style="padding:4px 8px;font-size:11px;border-color:var(--brand);color:var(--brand);" onclick="viewOrderRxById('${o.id}')"><i class="ri-image-line"></i> View Rx</button>` : ''}
                             ${o.status !== 'Delivered' && o.status !== 'Cancelled' ? `<button class="danger-btn" style="padding:5px 8px;font-size:11px;" onclick="cancelMyOrder('${o.id}')">Cancel Order</button>` : ''}
@@ -4007,7 +4189,7 @@ body { background-color:#f7f8fb; }
                         </div>
  
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                            <select class="sort-select" style="padding:5px 8px;font-size:11px;" onchange="updateOrderStatusAdmin('${o.id}', this.value)">
+                            <select class="sort-select" style="padding:5px 8px;font-size:11px;" ${['Delivered','Cancelled'].includes(o.status)?'disabled':''} onchange="updateOrderStatusAdmin('${o.id}', this.value)">
                                 <option value="Order Placed" ${(!o.status || o.status === 'Order Placed') ? 'selected' : ''}>Order Placed</option>
                                 <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
                                 <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
