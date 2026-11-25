@@ -1228,8 +1228,117 @@ body { background:radial-gradient(ellipse at 8% 12%,rgba(255,225,233,.55),transp
  *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
 }
 
+
+        .stock-upload-progress{margin-top:14px;padding:14px;border:1px solid rgba(26,171,42,.25);border-radius:18px;background:linear-gradient(135deg,rgba(26,171,42,.09),rgba(59,130,246,.07),rgba(255,184,0,.08));box-shadow:0 10px 28px rgba(15,23,42,.08);animation:fadeInUp .35s ease both;overflow:hidden;position:relative}
+        .stock-upload-progress:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.35) 48%,transparent 70%);transform:translateX(-110%);animation:stockShine 2.8s ease-in-out infinite}
+        .stock-progress-top{display:flex;align-items:center;gap:10px;position:relative;z-index:1}.stock-progress-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#16a34a,#0ea5e9);color:#fff;font-size:20px;box-shadow:0 5px 14px rgba(14,165,90,.22);animation:stockPulse 1.8s ease-in-out infinite}
+        .stock-progress-top strong{display:block;font-size:13px;color:var(--text-dark)}.stock-progress-top small{display:block;color:var(--text-light);font-size:11px;margin-top:3px;line-height:1.4}.stock-progress-top>b{font-size:20px;color:#16a34a;font-variant-numeric:tabular-nums}
+        .stock-progress-track{height:11px;background:rgba(100,116,139,.18);border-radius:30px;margin:13px 0 10px;overflow:hidden;position:relative;z-index:1}.stock-progress-fill{height:100%;border-radius:30px;background:linear-gradient(90deg,#16a34a,#22c55e,#06b6d4,#3b82f6);background-size:200% 100%;transition:width .22s ease;animation:stockGradient 2s linear infinite;box-shadow:0 0 12px rgba(34,197,94,.35)}
+        .stock-progress-steps{display:flex;justify-content:space-between;gap:5px;position:relative;z-index:1;font-size:10px;color:var(--text-light);flex-wrap:wrap}.stock-progress-steps .done{color:#16a34a;font-weight:800}.stock-progress-steps .active{color:var(--text-dark);font-weight:800}
+        @keyframes stockShine{0%,45%{transform:translateX(-110%)}75%,100%{transform:translateX(110%)}}@keyframes stockPulse{50%{transform:scale(1.08) rotate(5deg);box-shadow:0 7px 20px rgba(14,165,90,.32)}}@keyframes stockGradient{to{background-position:200% 0}}
+        @media(prefers-reduced-motion:reduce){.stock-upload-progress:after,.stock-progress-icon,.stock-progress-fill{animation:none!important}*{scroll-behavior:auto!important;}}
 </style>
- </head>
+ 
+<style id="subha-premium-motion-upgrade">
+/* Subha Medical — premium visual upgrade. Presentation only; existing app logic is untouched. */
+:root{
+  --subha-pink:#e94f65;--subha-violet:#8b5cf6;--subha-cyan:#38bdf8;
+  --subha-soft-shadow:0 16px 42px rgba(31,41,55,.09);
+}
+html{scroll-behavior:smooth}
+body{position:relative;isolation:isolate}
+body::before,body::after{
+  content:"";position:fixed;z-index:-1;pointer-events:none;border-radius:50%;
+  filter:blur(2px);opacity:.55;will-change:transform;
+}
+body::before{
+  width:260px;height:260px;left:-150px;top:24vh;
+  background:radial-gradient(circle,rgba(244,114,182,.18),rgba(244,114,182,0) 70%);
+  animation:subhaAmbientOne 17s ease-in-out infinite alternate;
+}
+body::after{
+  width:320px;height:320px;right:-190px;top:58vh;
+  background:radial-gradient(circle,rgba(56,189,248,.15),rgba(56,189,248,0) 70%);
+  animation:subhaAmbientTwo 21s ease-in-out infinite alternate;
+}
+@keyframes subhaAmbientOne{0%{transform:translate3d(0,0,0) scale(.9)}100%{transform:translate3d(90px,45px,0) scale(1.2)}}
+@keyframes subhaAmbientTwo{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-80px,-55px,0) scale(1.18)}}
+@keyframes subhaSoftGlow{0%,100%{box-shadow:0 5px 18px rgba(233,79,101,.08)}50%{box-shadow:0 10px 28px rgba(139,92,246,.16)}}
+@keyframes subhaSweep{0%{background-position:-180% 0}100%{background-position:180% 0}}
+@keyframes subhaPopIn{0%{opacity:0;transform:translateY(18px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes subhaIconBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes subhaRing{0%{transform:scale(.75);opacity:.55}100%{transform:scale(1.55);opacity:0}}
+.navbar{box-shadow:0 8px 28px rgba(15,23,42,.055)}
+.brand-logo-badge{position:relative;isolation:isolate}
+.brand-logo-badge::after{
+  content:"";position:absolute;inset:-4px;border:1px solid rgba(233,79,101,.24);
+  border-radius:inherit;animation:subhaRing 3s ease-out infinite;pointer-events:none;z-index:-1
+}
+.moving-ticker-wrap{box-shadow:0 4px 14px rgba(143,18,53,.12)}
+.promo-banner-card{transform:translateZ(0)}
+.promo-banner-card > img{will-change:transform;animation:subhaHeroZoom 18s ease-in-out infinite alternate}
+@keyframes subhaHeroZoom{from{transform:scale(1)}to{transform:scale(1.075)}}
+.promo-banner-overlay{backdrop-filter:saturate(1.1)}
+.coupon-strip{border-style:dashed;animation:subhaSoftGlow 5s ease-in-out infinite}
+.cat-card,.p-card,.panel-card{will-change:transform}
+.p-card{transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,border-color .28s ease!important}
+.p-card:hover{transform:translateY(-7px) scale(1.012)!important;box-shadow:0 18px 35px rgba(31,41,55,.13)!important}
+.p-card .p-img-box{position:relative}
+.p-card .p-img-box::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.48) 50%,transparent 70%);
+  background-size:220% 100%;opacity:0;transition:opacity .25s ease
+}
+.p-card:hover .p-img-box::after{opacity:1;animation:subhaSweep 1.1s ease}
+.cat-img-wrap{transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s ease}
+.cat-card:hover .cat-img-wrap{box-shadow:0 8px 20px rgba(233,79,101,.2)}
+.add-cart-btn,.primary-btn,.quick-action-btn,.nav-pill-btn,.admin-tab{position:relative;overflow:hidden}
+.add-cart-btn::before,.primary-btn::before,.quick-action-btn::before,.nav-pill-btn::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.28) 50%,transparent 75%);
+  transform:translateX(-130%)
+}
+.add-cart-btn:hover::before,.primary-btn:hover::before,.quick-action-btn:hover::before,.nav-pill-btn:hover::before{
+  transform:translateX(130%);transition:transform .7s ease
+}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid rgba(56,189,248,.48)!important;outline-offset:2px
+}
+.bottom-nav{box-shadow:0 -8px 28px rgba(15,23,42,.075)}
+.bottom-nav button.active i{filter:drop-shadow(0 3px 5px rgba(233,79,101,.25));animation:subhaIconBob 2.4s ease-in-out infinite}
+.stock-upload-progress{
+  border:1px solid rgba(26,171,42,.28)!important;
+  box-shadow:0 16px 38px rgba(15,23,42,.11)!important;
+  background:linear-gradient(130deg,rgba(220,252,231,.9),rgba(239,246,255,.92),rgba(255,247,ed,.9))!important;
+  background-size:200% 200%!important;animation:subhaProgressBg 7s ease infinite,subhaPopIn .45s ease both
+}
+@keyframes subhaProgressBg{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+.stock-progress-fill,.stock-upload-progress .progress-bar,.stock-upload-progress [id*="fill"]{
+  background-image:linear-gradient(90deg,rgba(255,255,255,.08),rgba(255,255,255,.38),rgba(255,255,255,.08));
+  background-size:180% 100%;animation:subhaSweep 2s linear infinite
+}
+.stock-progress-icon{filter:drop-shadow(0 5px 8px rgba(22,163,74,.2))}
+.toast{backdrop-filter:blur(16px);border-radius:14px!important;box-shadow:0 16px 38px rgba(15,23,42,.16)!important}
+.toast.success{border-left-color:#16a34a}
+.panel-card{box-shadow:0 8px 26px rgba(15,23,42,.055)}
+/* Elements are revealed only after their first appearance in the viewport. */
+.subha-reveal-ready .subha-reveal{opacity:0;transform:translateY(14px)}
+.subha-reveal-ready .subha-reveal.subha-visible{opacity:1;transform:translateY(0);transition:opacity .48s ease,transform .48s cubic-bezier(.2,.8,.2,1)}
+.subha-ripple{position:absolute;border-radius:50%;pointer-events:none;transform:scale(0);background:rgba(255,255,255,.42);animation:subhaRipple .58s ease-out forwards}
+@keyframes subhaRipple{to{transform:scale(3.5);opacity:0}}
+@media(max-width:600px){
+  body::before{width:190px;height:190px}
+  body::after{width:220px;height:220px}
+  .p-card:hover{transform:translateY(-3px)!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body::before,body::after,.brand-logo-badge::after,.promo-banner-card>img,.coupon-strip,
+  .bottom-nav button.active i{animation:none!important}
+  .subha-reveal-ready .subha-reveal{opacity:1!important;transform:none!important}
+}
+</style>
+
+</head>
  <body>
   <!-- Toast Notifications -->
   <div id="login-heart-overlay" aria-hidden="true">
@@ -1650,9 +1759,14 @@ body { background:radial-gradient(ellipse at 8% 12%,rgba(255,225,233,.55),transp
       <div style="display: flex; gap: 18px; margin-top: 12px; font-size: 12.5px; font-weight: 700;">
        <label><input type="checkbox" id="adm-prod-rx"> Requires Prescription (Rx)</label> <label><input type="checkbox" id="adm-prod-featured" checked> Featured Priority</label>
       </div>
-      <div style="display: flex; gap: 10px; margin-top: 14px;">
-       <button class="primary-btn" onclick="saveProductAdmin()"><i class="ri-save-line"></i> Save Product</button>
+      <div style="display: flex; gap: 10px; margin-top: 14px;flex-wrap:wrap;">
+       <button class="primary-btn" id="adm-prod-save-btn" onclick="saveProductAdmin()"><i class="ri-save-line"></i> Save Product</button>
        <button class="secondary-btn" onclick="resetProductForm()">Clear Form</button>
+      </div>
+      <div id="adm-prod-upload-progress" class="stock-upload-progress" role="status" aria-live="polite" style="display:none;">
+       <div class="stock-progress-top"><span class="stock-progress-icon"><i class="ri-cloud-line"></i></span><div style="flex:1;min-width:0"><strong id="adm-prod-progress-title">Preparing medicine upload</strong><small id="adm-prod-progress-detail">Please keep this page open until the save is complete.</small></div><b id="adm-prod-progress-percent">0%</b></div>
+       <div class="stock-progress-track"><div id="adm-prod-progress-fill" class="stock-progress-fill" style="width:0%"></div></div>
+       <div class="stock-progress-steps"><span id="adm-prod-step-upload">① Upload photos</span><span id="adm-prod-step-save">② Save stock</span><span id="adm-prod-step-check">③ Verify</span></div>
       </div>
      </div>
      <div class="panel-card" style="overflow-x: auto;">
@@ -2611,7 +2725,64 @@ body { background-color:#f7f8fb; }
                             </div>
                         </div>
                     </div>
-                </body>
+                
+<script id="subha-premium-motion-behaviour">
+(function(){
+  'use strict';
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  // Reveal existing catalogue/admin panels as they enter view; no content or data is changed.
+  const revealSelectors = '.section-header,.cat-card,.p-card,.panel-card,.promo-banner-wrap,.coupon-strip,.stock-upload-progress';
+  function prepareReveal(){
+    const nodes = document.querySelectorAll(revealSelectors);
+    if (!('IntersectionObserver' in window)) return;
+    document.documentElement.classList.add('subha-reveal-ready');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('subha-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.08, rootMargin:'0px 0px -24px 0px'});
+    nodes.forEach(node => {
+      if(!node.classList.contains('subha-reveal')){
+        node.classList.add('subha-reveal');
+        observer.observe(node);
+      }
+    });
+  }
+
+  // Subtle tap ripple on buttons; preserve the existing click handlers and actions.
+  document.addEventListener('click', function(event){
+    const button = event.target.closest('button');
+    if(!button || button.disabled || button.classList.contains('subha-no-ripple')) return;
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 0.7;
+    const ripple = document.createElement('span');
+    ripple.className = 'subha-ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (event.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (event.clientY - rect.top - size/2) + 'px';
+    button.appendChild(ripple);
+    window.setTimeout(() => ripple.remove(), 650);
+  }, {passive:true});
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', prepareReveal, {once:true});
+  } else prepareReveal();
+
+  // Newly rendered products/categories are observed without changing their rendering logic.
+  const root = document.getElementById('products-grid') || document.body;
+  if('MutationObserver' in window && 'IntersectionObserver' in window){
+    const mutationObserver = new MutationObserver(() => prepareReveal());
+    mutationObserver.observe(root, {childList:true, subtree:true});
+  }
+})();
+</script>
+
+</body>
                 </html>
             `);
             printWin.document.close();
@@ -3543,7 +3714,7 @@ body { background-color:#f7f8fb; }
             if (!url) throw new Error(`Upload finished but a public URL could not be created for ${bucket}.`);
             return url;
         }
-        async function uploadProductImage(file) { return subhaUploadStorage(file, PRODUCT_IMAGE_BUCKET, 'products', 'image'); }
+        async function uploadProductImage(file, onProgress) { return subhaUploadStorage(file, PRODUCT_IMAGE_BUCKET, 'products', 'image', onProgress); }
         async function uploadAdminImage(file, prefix='admin-image') { return subhaUploadStorage(file, PRODUCT_IMAGE_BUCKET, prefix, 'image'); }
         async function uploadProductVideo(file) { return subhaUploadStorage(file, PRODUCT_VIDEO_BUCKET, 'videos', 'video'); }
  
@@ -3593,7 +3764,25 @@ body { background-color:#f7f8fb; }
             showToast(`${files.length} product photo(s) selected. They will upload when you save the medicine.`, 'success');
         }
  
+        function updateProductUploadProgress(percent, title, detail, stage) {
+            const box=document.getElementById('adm-prod-upload-progress');
+            const fill=document.getElementById('adm-prod-progress-fill');
+            const pct=document.getElementById('adm-prod-progress-percent');
+            const heading=document.getElementById('adm-prod-progress-title');
+            const sub=document.getElementById('adm-prod-progress-detail');
+            if(box)box.style.display='block';
+            if(fill)fill.style.width=Math.max(0,Math.min(100,percent))+'%';
+            if(pct)pct.textContent=Math.round(percent)+'%';
+            if(heading)heading.textContent=title||'Saving medicine';
+            if(sub)sub.textContent=detail||'Please wait…';
+            ['upload','save','check'].forEach((key,i)=>{const el=document.getElementById('adm-prod-step-'+key);if(el){el.classList.toggle('done',i<stage);el.classList.toggle('active',i===stage);}});
+        }
         async function saveProductAdmin() {
+            const saveBtn=document.getElementById('adm-prod-save-btn');
+            if(saveBtn?.disabled)return;
+            if(saveBtn){saveBtn.disabled=true;saveBtn.dataset.oldText=saveBtn.innerHTML;saveBtn.innerHTML='<i class="ri-loader-4-line"></i> Saving…';}
+            const finish=()=>{if(saveBtn){saveBtn.disabled=false;saveBtn.innerHTML=saveBtn.dataset.oldText||'<i class="ri-save-line"></i> Save Product';}};
+            try {
             const id = document.getElementById('adm-prod-id').value || ('med_' + Date.now());
             const name = document.getElementById('adm-prod-name').value.trim();
             const salt = document.getElementById('adm-prod-salt').value.trim();
@@ -3612,58 +3801,55 @@ body { background-color:#f7f8fb; }
             const existingProduct = products.find(p => String(p.id) === String(id));
             let images = Array.isArray(existingProduct?.images) ? [...existingProduct.images] : (existingProduct?.image ? [existingProduct.image] : (image ? [image] : []));
             const videoFile = document.getElementById('adm-prod-video-file')?.files?.[0];
-            if (imageFiles.length) {
-                try {
-                    const uploadedImages = [];
-                    for (let i=0;i<imageFiles.length;i++) {
-                        showToast(`Uploading product photo ${i+1} of ${imageFiles.length}…`);
-                        uploadedImages.push(await uploadProductImage(imageFiles[i]));
-                    }
-                    images = uploadedImages;
-                    image = uploadedImages[0] || image;
-                    renderAdminProductImagePreview(images);
-                } catch (err) { return showToast(err.message || 'Product photo upload failed. Product was not saved.', 'error'); }
-            }
-            if (!images.length && image) images = [image];
-            if (videoFile) {
-                try { showToast('Uploading product video…'); video = await uploadProductVideo(videoFile); }
-                catch (err) { return showToast(err.message || 'Video upload failed.', 'error'); }
-            }
-            const rx = document.getElementById('adm-prod-rx').checked;
-            const featured = document.getElementById('adm-prod-featured').checked;
-            if (!name || price <= 0) return showToast('Please enter Medicine Name and valid Price', 'error');
+            if (!name || price <= 0) {finish();return showToast('Please enter Medicine Name and valid Price', 'error');}
             if (existingProduct && Number(existingProduct.stock || 0) !== stock) {
                 const confirmed = window.confirm(`Overwrite stock for ${name}?\nCurrent stock: ${Number(existingProduct.stock || 0)}\nNew stock: ${stock}\n\nThis will replace the current quantity in the cloud.`);
-                if (!confirmed) return showToast('Product save cancelled. Existing stock was not changed.', 'error');
+                if (!confirmed) {finish();return showToast('Product save cancelled. Existing stock was not changed.', 'error');}
             }
-            const gallery = images.length ? images : (existingProduct?.images || (image ? [image] : []));
-            const item = { id, name, salt, generic_name: salt, brand, manufacturer: brand, uses, usage: uses, indications: uses, description: uses, category, category_name: category, batch, batch_number: batch, expiry, expiry_date: expiry, mrp: mrp || price, price, selling_price: price, stock, image, image_url: image, images: gallery, video, video_url: video, search_keywords: searchKeywords, rx, featured, updated_at: new Date().toISOString() };
- 
-            // Persist to Supabase first. Do not clear the form or announce success if rejected.
-            if (supabaseClient) {
-                showToast('Saving medicine to cloud…');
-                const result = await upsertWithSchemaFallback('subha_products', item);
-                if (result.error) {
-                    console.error('Supabase product save failed:', result.error);
-                    return showToast('Cloud save failed; your form is still available. ' + (result.error.message || 'Check the product table permissions.'), 'error');
+            const totalUploads=imageFiles.length+(videoFile?1:0);
+            let completedUploads=0;
+            if(totalUploads)updateProductUploadProgress(0,'Uploading new stock images','Starting secure upload…',0);
+            if (imageFiles.length) {
+                const uploadedImages=[];
+                for(let i=0;i<imageFiles.length;i++){
+                    const file=imageFiles[i];let current=0;
+                    updateProductUploadProgress((completedUploads/totalUploads)*75,`Uploading photo ${i+1} of ${imageFiles.length}`,`${file.name} • ${Math.max(1,Math.round(file.size/1024))} KB`,0);
+                    try{uploadedImages.push(await uploadProductImage(file,(percent)=>{current=percent;const overall=((completedUploads+current/100)/totalUploads)*75;updateProductUploadProgress(overall,`Uploading photo ${i+1} of ${imageFiles.length}`,`${file.name} • ${percent}% uploaded`,0);}));}
+                    catch(err){updateProductUploadProgress((completedUploads/totalUploads)*75,'Photo upload failed',err.message||'Check internet and Storage permissions.',0);throw new Error((err.message||'Photo upload failed')+'. Product stock was not saved.');}
+                    completedUploads++;updateProductUploadProgress((completedUploads/totalUploads)*75,'Photos uploaded',`${completedUploads} of ${totalUploads} file(s) uploaded`,0);
+                }
+                images=uploadedImages;image=uploadedImages[0]||image;renderAdminProductImagePreview(images);
+            }
+            if (!images.length && image) images=[image];
+            if(videoFile){let current=0;try{video=await subhaUploadStorage(videoFile,PRODUCT_VIDEO_BUCKET,'videos','video',(percent)=>{current=percent;updateProductUploadProgress(((completedUploads+current/100)/totalUploads)*75,'Uploading product video',`${percent}% uploaded`,0);});completedUploads++;}catch(err){updateProductUploadProgress(0,'Video upload failed',err.message||'Product not saved.',0);throw err;}}
+            const rx=document.getElementById('adm-prod-rx').checked;
+            const featured=document.getElementById('adm-prod-featured').checked;
+            const gallery=images.length?images:(existingProduct?.images||(image?[image]:[]));
+            const item={id,name,salt,generic_name:salt,brand,manufacturer:brand,uses,usage:uses,indications:uses,description:uses,category,category_name:category,batch,batch_number:batch,expiry,expiry_date:expiry,mrp:mrp||price,price,selling_price:price,stock,image,image_url:image,images:gallery,video,video_url:video,search_keywords:searchKeywords,rx,featured,updated_at:new Date().toISOString()};
+            updateProductUploadProgress(82,'Saving medicine and stock','Sending product details to the database…',1);
+            if(supabaseClient){
+                const result=await upsertWithSchemaFallback('subha_products',item);
+                if(result.error){console.error('Supabase product save failed:',result.error);updateProductUploadProgress(0,'Save failed',result.error.message||'Database rejected the product.',1);throw new Error('Cloud save failed. Your form is still available. '+(result.error.message||'Check product table permissions.'));}
+            }
+            updateProductUploadProgress(94,'Checking saved product','Confirming the product is present in the inventory…',2);
+            let verified=false;
+            if(supabaseClient){
+                const fresh=await fetchAllCloudRows('subha_products');
+                if(!fresh.error){
+                    const rows=(fresh.data||[]).map(normalizeCloudProduct).filter(p=>p.id&&p.name);
+                    verified=rows.some(p=>String(p.id)===String(id));
+                    if(verified)products=rows.sort((a,b)=>a.name.localeCompare(b.name));
                 }
             }
-            const idx = products.findIndex(p => String(p.id) === String(id));
-            if (idx >= 0) products[idx] = item; else products.unshift(item);
-            saveStateLocal();
+            if(!verified){const idx=products.findIndex(p=>String(p.id)===String(id));if(idx>=0)products[idx]=item;else products.unshift(item);}
+            saveStateLocal();renderStoreProducts();
+            updateProductUploadProgress(100,verified?'Product uploaded and verified!':'Product save accepted',verified?'Success — this medicine is visible in cloud inventory.':(supabaseClient?'Database accepted the save; live verification could not complete. Check Live Inventory.':'Saved on this device only — cloud connection is not available.'),3);
             resetProductForm();
-            renderStoreProducts();
-            showToast(supabaseClient ? 'Medicine saved to cloud successfully.' : 'Medicine saved on this device. Connect to cloud to sync across devices.', 'success');
-            if (supabaseClient) {
-                const fresh = await fetchAllCloudRows('subha_products');
-                if (!fresh.error) {
-                    products = (fresh.data || []).map(normalizeCloudProduct).filter(p => p.id && p.name).sort((a,b) => a.name.localeCompare(b.name));
-                    saveStateLocal();
-                    renderStoreProducts();
-                }
-            }
+            showToast(verified?'Product uploaded successfully and verified in inventory.':(supabaseClient?'Product save accepted. Please check Live Inventory for confirmation.':'Product saved on this device only.'),'success');
+            } catch(err){console.error('Product upload/save error:',err);showToast(err.message||'Product could not be saved. Please retry.','error');}
+            finally{finish();}
         }
- 
+
         function editProductAdmin(id) {
             const p = products.find(x => x.id === id);
             if (!p) return;
