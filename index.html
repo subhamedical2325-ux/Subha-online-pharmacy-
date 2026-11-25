@@ -1168,6 +1168,66 @@ img { -webkit-user-drag: none; }
         .promo-banner-overlay { padding:8px 10px !important; }
         .promo-banner-overlay h2 { font-size:15px !important; line-height:1.15 !important; margin:3px 0 !important; }
         .promo-banner-overlay p { font-size:9px !important; line-height:1.2 !important; }
+
+
+/* Subha Medical customer-facing visual experience: lightweight motion + premium graphics */
+:root { --subha-glow: rgba(201,31,69,.18); }
+@keyframes subhaHeroDrift { 0%,100% { transform:translate3d(0,0,0) scale(1); } 50% { transform:translate3d(0,-8px,0) scale(1.015); } }
+@keyframes subhaShimmer { 0% { background-position:180% 0; } 100% { background-position:-180% 0; } }
+@keyframes subhaSoftPulse { 0%,100% { box-shadow:0 8px 24px rgba(201,31,69,.08); } 50% { box-shadow:0 12px 34px rgba(201,31,69,.19); } }
+@keyframes subhaCardIn { from { opacity:0; transform:translateY(15px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes subhaFloat { 0%,100% { transform:translateY(0) rotate(-4deg); } 50% { transform:translateY(-7px) rotate(4deg); } }
+@keyframes subhaTickerGlow { 0%,100% { text-shadow:0 0 0 transparent; } 50% { text-shadow:0 0 12px rgba(255,255,255,.38); } }
+
+body { background:radial-gradient(ellipse at 8% 12%,rgba(255,225,233,.55),transparent 32%),radial-gradient(ellipse at 92% 34%,rgba(219,234,254,.48),transparent 30%),#f7f8fb !important; }
+.navbar { border-bottom:1px solid rgba(201,31,69,.10); backdrop-filter:blur(14px); }
+.brand-logo-badge { box-shadow:0 7px 20px var(--subha-glow); animation:subhaFloat 4.2s ease-in-out infinite; }
+.moving-ticker-wrap { background:linear-gradient(100deg,#8f1235,#c91f45,#ed5570,#a5163c) !important; background-size:220% 100% !important; animation:subhaShimmer 9s linear infinite; }
+.moving-ticker-content { animation:subhaTickerGlow 3.5s ease-in-out infinite; }
+.promo-banner-wrap { position:relative; }
+.promo-banner-card { isolation:isolate; box-shadow:0 18px 42px rgba(36,22,36,.16),0 0 0 1px rgba(255,255,255,.75) inset !important; }
+.promo-banner-card::before { content:""; position:absolute; z-index:1; inset:0; pointer-events:none; background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.16) 48%,transparent 68%); background-size:220% 100%; animation:subhaShimmer 8s ease-in-out infinite; }
+.promo-banner-card::after { content:"✦"; position:absolute; z-index:2; right:7%; top:15%; color:rgba(255,255,255,.82); font-size:clamp(20px,4vw,38px); text-shadow:0 4px 18px rgba(0,0,0,.28); animation:subhaFloat 4s ease-in-out infinite; pointer-events:none; }
+.promo-banner-card > img { transition:transform 8s ease !important; }
+.promo-banner-card:hover > img { transform:scale(1.045); }
+.promo-banner-overlay { background:linear-gradient(0deg,rgba(13,20,36,.91),rgba(13,20,36,.05) 78%) !important; }
+.promo-badge { display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.16); backdrop-filter:blur(8px); border-radius:999px; padding:6px 10px; box-shadow:0 5px 16px rgba(0,0,0,.12); }
+.promo-badge::before { content:""; width:7px; height:7px; border-radius:50%; background:#86efac; box-shadow:0 0 0 4px rgba(134,239,172,.2); }
+.coupon-strip { position:relative; overflow:hidden; animation:subhaSoftPulse 4.5s ease-in-out infinite; }
+.coupon-strip::after { content:"🎁"; position:absolute; right:17%; top:50%; transform:translateY(-50%); font-size:26px; opacity:.13; pointer-events:none; }
+.section-header h3 { letter-spacing:-.25px; }
+.section-header h3::after { content:""; display:block; width:44px; height:3px; margin-top:6px; border-radius:99px; background:linear-gradient(90deg,var(--brand),#f59e0b); }
+.cat-card { position:relative; overflow:hidden; border-radius:16px !important; border:1px solid rgba(201,31,69,.10) !important; background:linear-gradient(145deg,#fff,#fff7f9) !important; box-shadow:0 5px 16px rgba(31,41,55,.055); transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease !important; animation:subhaCardIn .55s both; }
+.cat-card:nth-child(2n) { animation-delay:.06s; } .cat-card:nth-child(3n) { animation-delay:.12s; } .cat-card:nth-child(4n) { animation-delay:.18s; }
+.cat-card::after { content:""; position:absolute; width:64px; height:64px; right:-28px; top:-28px; border-radius:50%; background:rgba(201,31,69,.055); transition:transform .35s ease; pointer-events:none; }
+.cat-card:hover { transform:translateY(-5px) scale(1.025) !important; box-shadow:0 13px 26px rgba(201,31,69,.13) !important; border-color:rgba(201,31,69,.28) !important; }
+.cat-card:hover::after { transform:scale(2.2); }
+.cat-img-wrap { box-shadow:0 5px 14px rgba(201,31,69,.10); transition:transform .3s ease; }
+.cat-card:hover .cat-img-wrap { transform:translateY(-3px) rotate(-3deg); }
+.p-card { overflow:hidden; animation:subhaCardIn .48s both; border:1px solid rgba(148,163,184,.22) !important; box-shadow:0 5px 18px rgba(15,23,42,.055) !important; }
+.p-card:nth-child(2n) { animation-delay:.035s; } .p-card:nth-child(3n) { animation-delay:.07s; } .p-card:nth-child(4n) { animation-delay:.105s; }
+.p-card::before { content:""; position:absolute; left:0; right:0; top:0; height:3px; background:linear-gradient(90deg,#c91f45,#fb7185,#fbbf24); transform:scaleX(0); transform-origin:left; transition:transform .32s ease; }
+.p-card:hover::before { transform:scaleX(1); }
+.p-card .p-img-box { overflow:hidden; background:radial-gradient(circle at 50% 45%,#fff,#f8fafc) !important; }
+.p-card .p-img-box img { transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .45s ease !important; }
+.p-card:hover .p-img-box img { transform:scale(1.075); filter:saturate(1.08); }
+.add-cart-btn { position:relative; overflow:hidden; box-shadow:0 5px 12px rgba(201,31,69,.13); transition:transform .2s ease,box-shadow .2s ease !important; }
+.add-cart-btn:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(201,31,69,.23); }
+.add-cart-btn::after { content:""; position:absolute; inset:0; background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.28) 50%,transparent 75%); transform:translateX(-120%); transition:transform .6s ease; }
+.add-cart-btn:hover::after { transform:translateX(120%); }
+.quick-action-btn,.nav-pill-btn { transition:transform .2s ease,box-shadow .2s ease !important; }
+.quick-action-btn:hover,.nav-pill-btn:hover { transform:translateY(-2px); box-shadow:0 7px 17px rgba(15,23,42,.10); }
+.panel-card { border-radius:16px !important; }
+#products-grid, #categories-container { perspective:900px; }
+@media(max-width:600px) {
+ .promo-banner-card::after { right:5%; top:10%; }
+ .cat-card { border-radius:13px !important; }
+ .p-card { border-radius:14px !important; }
+}
+@media(prefers-reduced-motion:reduce) {
+ *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+}
+
 </style>
  </head>
  <body>
@@ -3652,29 +3712,72 @@ body { background-color:#f7f8fb; }
         async function saveCategoryAdmin() {
             const id = document.getElementById('adm-cat-id').value || ('cat_' + Date.now());
             const name = document.getElementById('adm-cat-name').value.trim();
+            const existingIndex = categories.findIndex(c => String(c.id) === String(id));
+            const existingCategory = existingIndex >= 0 ? categories[existingIndex] : null;
+            const oldName = existingCategory ? String(existingCategory.name || existingCategory.label_en || existingCategory.label_ta || existingCategory.category_name || '').trim() : '';
             let image = document.getElementById('adm-cat-img').value.trim();
             const imageFile = document.getElementById('adm-cat-image-file')?.files?.[0];
             if (imageFile) { try { image = await uploadAdminImage(imageFile, 'categories'); } catch (err) { return showToast(err.message || 'Category image upload failed.', 'error'); } }
             if (!name) return showToast('Enter Category Name', 'error');
+
             const catObj = { id, name, label_ta: name, label_en: name, label_hi: name, category_name: name, image, image_url: image, updated_at: new Date().toISOString() };
             if (supabaseClient) {
-                showToast('Saving category to cloud…');
-                const result = await upsertWithSchemaFallback('subha_categories', catObj);
-                if (result.error) {
-                    console.error('Supabase category save failed:', result.error);
-                    return showToast('Category was not saved to cloud; the form is still available. ' + (result.error.message || 'Check category table permissions.'), 'error');
+                showToast(existingCategory ? 'Updating category in cloud…' : 'Saving category to cloud…');
+                if (existingCategory) {
+                    // An edit must UPDATE the existing row by its id; upsert can create a
+                    // second row when the table's conflict key is not the same as this id.
+                    let payload = { name, label_ta: name, label_en: name, label_hi: name, category_name: name, image, image_url: image, updated_at: catObj.updated_at };
+                    let updateResult = null;
+                    for (let attempt = 0; attempt < 12; attempt++) {
+                        updateResult = await supabaseClient.from('subha_categories').update(payload).eq('id', id).select('id');
+                        if (!updateResult.error) break;
+                        const message = String(updateResult.error.message || '');
+                        const missing = message.match(/Could not find the ['\"]([^'\"]+)['\"] column/i)
+                            || message.match(/column ['\"]?([a-zA-Z0-9_]+)['\"]? does not exist/i)
+                            || message.match(/The field ['\"]([^'\"]+)['\"] is not present/i);
+                        if (missing && Object.prototype.hasOwnProperty.call(payload, missing[1])) { delete payload[missing[1]]; continue; }
+                        break;
+                    }
+                    if (updateResult?.error) {
+                        console.error('Supabase category update failed:', updateResult.error);
+                        return showToast('Category update failed. ' + (updateResult.error.message || 'Check category table permissions.'), 'error');
+                    }
+                    if (!updateResult?.data?.length) return showToast('Category was not found in cloud. Refresh the page and try again.', 'error');
+
+                    // Keep existing medicines assigned to this category after a rename.
+                    if (oldName && oldName !== name) {
+                        const { error: productUpdateError } = await supabaseClient.from('subha_products').update({ category: name }).eq('category', oldName);
+                        if (productUpdateError) {
+                            console.error('Products category rename sync failed:', productUpdateError);
+                            return showToast('Category name was updated, but linked medicines could not be updated: ' + productUpdateError.message, 'error');
+                        }
+                    }
+                } else {
+                    const result = await upsertWithSchemaFallback('subha_categories', catObj);
+                    if (result.error) {
+                        console.error('Supabase category save failed:', result.error);
+                        return showToast('Category was not saved to cloud; the form is still available. ' + (result.error.message || 'Check category table permissions.'), 'error');
+                    }
                 }
             }
-            const idx = categories.findIndex(c => String(c.id) === String(id));
-            const normalizedCategory = {...catObj, id:String(id), name};
-            if (idx >= 0) categories[idx] = normalizedCategory; else categories.push(normalizedCategory);
+
+            const normalizedCategory = { ...catObj, id:String(id), name };
+            if (existingIndex >= 0) categories[existingIndex] = normalizedCategory;
+            else categories.push(normalizedCategory);
+            if (oldName && oldName !== name) {
+                products = products.map(product => String(product.category || '').trim() === oldName
+                    ? { ...product, category:name, category_name:name }
+                    : product);
+                if (activeCategory === oldName) activeCategory = name;
+            }
             saveStateLocal();
             document.getElementById('adm-cat-id').value = '';
             document.getElementById('adm-cat-name').value = '';
             document.getElementById('adm-cat-img').value = '';
             if (document.getElementById('adm-cat-image-file')) document.getElementById('adm-cat-image-file').value = '';
             renderCategories();
-            showToast(supabaseClient ? 'Category saved to cloud successfully.' : 'Category saved on this device only.', 'success');
+            renderStoreProducts();
+            showToast(supabaseClient ? 'Category updated and linked medicines kept in this category.' : 'Category saved on this device only.', 'success');
         }
  
         function editCategoryAdmin(id) {
