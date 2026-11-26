@@ -2940,7 +2940,7 @@ body { background-color:#f7f8fb; }
                         <i class="${wished ? 'ri-heart-3-fill' : 'ri-heart-3-line'}"></i>
                     </button>
                     <div class="p-img-box" style="height:250px;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden;">
-                        <img src="${p.image || fallbackImg}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="openProductImageZoom(this.src,'${String(p.name||'Product').replace(/'/g,"\\'")}')" onerror="this.src='${fallbackImg}'">
+                        <img src="${resolveSubhaStorageUrl((getProductGalleryImages(p)[0] || p.image || p.image_url || fallbackImg), PRODUCT_IMAGE_BUCKET)}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="openProductImageZoom(this.src,'${String(p.name||'Product').replace(/'/g,"\\'")}')" onerror="this.onerror=null;this.src='${fallbackImg}';this.style.padding='35px';">
                     </div>
                     ${getProductGalleryImages(p).length > 1 ? `<div class="medicine-gallery-thumbs" aria-label="More product photos" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0;">${getProductGalleryImages(p).map((src,ix)=>`<button type="button" onclick="this.closest('.p-card').querySelector('.p-img-box img').src=this.querySelector('img').src" aria-label="View product photo ${ix+1}" style="padding:0;border:1px solid var(--border-color);border-radius:6px;background:#fff;flex:0 0 48px;"><img src="${src}" alt="${p.name} photo ${ix+1}" style="width:46px;height:46px;object-fit:contain;display:block;"></button>`).join('')}</div>` : ''}
                     ${p.video ? `<div class="product-video-wrap" style="margin:8px 0;"><video controls playsinline preload="metadata" style="width:100%;max-height:180px;border-radius:10px;background:#111" aria-label="${p.name} product video"><source src="${p.video}">Your browser does not support video playback.</video></div>` : ''}
@@ -4879,6 +4879,94 @@ button:focus-visible,a:focus-visible{outline:3px solid rgba(13,148,136,.55);outl
   document.addEventListener('pointermove',e=>{const card=e.target.closest('.p-card,.cat-card');if(!card)return;const r=card.getBoundingClientRect();if(!r.width||!r.height)return;const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;card.style.transform=`perspective(900px) rotateX(${(-y*2.2).toFixed(2)}deg) rotateY(${(x*2.2).toFixed(2)}deg) translateY(-3px)`},{passive:true});
   document.addEventListener('pointerout',e=>{const card=e.target.closest('.p-card,.cat-card');if(card&&!card.contains(e.relatedTarget))card.style.transform=''});
  }
+})();
+</script>
+
+
+<style id="subha-customer-engagement-polish">
+@keyframes subhaSparkle{0%,100%{transform:translateY(0) rotate(0);opacity:.55}50%{transform:translateY(-8px) rotate(12deg);opacity:1}}
+@keyframes subhaPopupIn{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes subhaGlow{0%,100%{box-shadow:0 8px 24px rgba(201,31,69,.12)}50%{box-shadow:0 12px 32px rgba(201,31,69,.25)}}
+.subha-welcome-card{position:fixed;z-index:10001;left:14px;right:14px;bottom:82px;max-width:440px;margin:auto;padding:17px 18px;border-radius:20px;background:linear-gradient(130deg,#fff 0%,#fff1f4 58%,#eef8ff 100%);color:#263044;border:1px solid rgba(201,31,69,.18);box-shadow:0 18px 55px rgba(15,23,42,.22);animation:subhaPopupIn .4s ease both}
+.subha-welcome-card .subha-pop-close{float:right;border:0;background:#fce4e9;border-radius:50%;width:30px;height:30px;font-size:18px}
+.subha-welcome-card .subha-pop-icon{font-size:28px;display:inline-block;animation:subhaSparkle 2s infinite}
+.subha-welcome-card h3{margin:7px 0 4px;font-size:17px;color:#a51c42}
+.subha-welcome-card p{margin:4px 0;font-size:12px;line-height:1.55}
+.subha-welcome-card button.subha-pop-action{margin-top:10px;border:0;border-radius:11px;background:linear-gradient(100deg,#c91f45,#f36b7e);color:#fff;padding:10px 15px;font-weight:800}
+.subha-location-hint{font-size:11px;color:#64748b;margin:5px 0 0}
+.subha-image-placeholder{display:flex;align-items:center;justify-content:center;flex-direction:column;color:#9aa4b2;font-size:12px;gap:5px}
+.p-card .p-img-box img{transition:transform .5s ease,filter .4s ease}
+.p-card:hover .p-img-box img{transform:scale(1.07);filter:saturate(1.08)}
+@media(prefers-reduced-motion:reduce){.subha-welcome-card,.subha-welcome-card *{animation:none!important}}
+</style>
+<script id="subha-customer-engagement-patch">
+(function(){
+  const $=id=>document.getElementById(id);
+  function popup(title,message,actionLabel,action){
+    document.getElementById('subha-engagement-popup')?.remove();
+    const el=document.createElement('section');el.id='subha-engagement-popup';el.className='subha-welcome-card';
+    el.innerHTML=`<button class="subha-pop-close" aria-label="Close">×</button><span class="subha-pop-icon">✨</span><h3>${title}</h3><p>${message}</p>${actionLabel?`<button class="subha-pop-action">${actionLabel}</button>`:''}`;
+    el.querySelector('.subha-pop-close').onclick=()=>el.remove();
+    if(actionLabel)el.querySelector('.subha-pop-action').onclick=()=>{el.remove();action&&action();};
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),10000);
+  }
+  function showTamilWelcome(){
+    const now=new Date(),key='subha_tamil_greeting_'+now.toLocaleDateString('en-CA');
+    if(sessionStorage.getItem(key))return;
+    sessionStorage.setItem(key,'1');
+    const h=now.getHours(),g=h<12?'காலை வணக்கம்':h<16?'மதிய வணக்கம்':h<19?'மாலை வணக்கம்':'இனிய இரவு வணக்கம்';
+    const name=(window.appCurrentUser&&appCurrentUser.name)?appCurrentUser.name.split(' ')[0]:'அன்பான வாடிக்கையாளரே';
+    setTimeout(()=>popup(`🌸 ${g}, ${name}!`,'Subha Medical-க்கு உங்களை அன்புடன் வரவேற்கிறோம். உங்கள் ஆரோக்கியமே எங்கள் முன்னுரிமை. தேவையான மருந்துகளை எளிதாகத் தேர்வு செய்யுங்கள்.','மருந்துகளைப் பார்க்க',()=>window.scrollTo({top:0,behavior:'smooth'})),1200);
+  }
+  function remindCart(){
+    if(!Array.isArray(window.cart)||!cart.length)return;
+    const count=cart.reduce((n,x)=>n+(Number(x.qty)||1),0);
+    setTimeout(()=>popup('🛒 உங்கள் கார்ட்டில் பொருட்கள் காத்திருக்கின்றன',`${count} பொருள்(கள்) உங்கள் கார்ட்டில் உள்ளன. தேவையானால் அளவைச் சரிபார்த்து ஆர்டரைத் தொடருங்கள்.`,`கார்ட்டைப் பார்க்க`,()=>{if(typeof switchView==='function')switchView('cart');}),3600);
+  }
+  async function reverseGeocode(lat,lng){
+    const status=$('subha-map-status'),address=$('chk-address');
+    try{
+      if(status)status.textContent='உங்கள் முகவரியை கண்டறிகிறோம்…';
+      const url=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&accept-language=ta,en`;
+      const res=await fetch(url,{headers:{'Accept':'application/json'}});
+      if(!res.ok)throw new Error('Address lookup unavailable');
+      const data=await res.json(),a=data.address||{};
+      const parts=[a.house_number,a.road||a.pedestrian||a.neighbourhood,a.suburb||a.village||a.town||a.city,a.district,a.state,a.postcode].filter(Boolean);
+      const found=parts.join(', ')||data.display_name||'';
+      if(address&&found){address.value=found;address.dispatchEvent(new Event('input',{bubbles:true}));if(status)status.textContent='முகவரி தானாக நிரப்பப்பட்டது. Door No / Landmark சரிபார்த்து உறுதிசெய்யவும்.';}
+      else if(status)status.textContent='முகவரி கிடைக்கவில்லை. தயவுசெய்து முகவரியை கைமுறையாக உள்ளிடவும்.';
+    }catch(e){if(status)status.textContent='தானியங்கி முகவரி கிடைக்கவில்லை. உங்கள் முகவரியை கைமுறையாக உள்ளிடவும்.';}
+  }
+  // Enhance the existing GPS success flow without replacing its map/pin handling.
+  const oldCapture=window.captureCustomerLocation;
+  if(typeof oldCapture==='function'){
+    window.captureCustomerLocation=function(){
+      const original= navigator.geolocation?.getCurrentPosition;
+      if(!original)return oldCapture();
+      // Existing function obtains the GPS pin; watch the coordinate object shortly after it completes.
+      oldCapture();
+      let tries=0;const timer=setInterval(()=>{tries++;if(typeof subhaCustomerCoordinates!=='undefined'&&subhaCustomerCoordinates){clearInterval(timer);reverseGeocode(subhaCustomerCoordinates.latitude,subhaCustomerCoordinates.longitude);}if(tries>30)clearInterval(timer);},250);
+    };
+  }
+  // Give the checkout address a clear hint that GPS can fill it; retain manual editing.
+  const addr=$('chk-address');
+  if(addr&&!$('subha-address-help')){
+    const hint=document.createElement('div');hint.id='subha-address-help';hint.className='subha-location-hint';hint.textContent='📍 GPS location pin செய்தால் கிடைக்கும் முகவரி இங்கே தானாக நிரப்பப்படும். தயவுசெய்து சரிபார்க்கவும்.';
+    addr.insertAdjacentElement('afterend',hint);
+  }
+  // Friendly Tamil status toast for live customer order changes.
+  const oldToast=window.showToast;
+  if(typeof oldToast==='function'&&!window.__subhaToastWrapped){
+    window.showToast=function(msg,type){
+      let out=String(msg||'');
+      out=out.replace(/Your Subha Medical order #(.+?) is now (.+?)\./g,'உங்கள் ஆர்டர் #$1 இப்போது $2 நிலையில் உள்ளது.');
+      return oldToast(out,type);
+    };
+    window.__subhaToastWrapped=true;
+  }
+  document.addEventListener('DOMContentLoaded',()=>{showTamilWelcome();remindCart();});
+  if(document.readyState!=='loading'){showTamilWelcome();remindCart();}
 })();
 </script>
 
