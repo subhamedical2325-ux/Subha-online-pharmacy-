@@ -4355,12 +4355,25 @@ body { background-color:#f7f8fb; }
             };
  
             // Save to Supabase FIRST. Never show success or deduct stock if this fails.
-            const { error: orderSaveError } = await supabaseClient
-                .from('subha_orders')
-                .insert(orderObj);
- 
+            // Keep checkout compatible with the live subha_orders schema. If PostgREST
+            // reports a missing optional column, omit only that column and retry; do not
+            // discard the order or deduct stock before a successful insert.
+            let orderInsertPayload = { ...orderObj };
+            let orderSaveError = null;
+            for (let schemaAttempt = 0; schemaAttempt < 12; schemaAttempt++) {
+                const insertResult = await supabaseClient.from('subha_orders').insert(orderInsertPayload);
+                orderSaveError = insertResult.error || null;
+                if (!orderSaveError) break;
+                const missingColumnMatch = String(orderSaveError.message || '').match(/Could not find the ['"]([^'"]+)['"] column of ['"]subha_orders['"] in the schema cache/i);
+                if (!missingColumnMatch) break;
+                const missingColumn = missingColumnMatch[1];
+                if (!Object.prototype.hasOwnProperty.call(orderInsertPayload, missingColumn)) break;
+                console.warn('Order schema compatibility: omitting unavailable subha_orders column:', missingColumn);
+                delete orderInsertPayload[missingColumn];
+            }
+
             if (orderSaveError) {
-                console.error('Order insert failed:', orderSaveError);
+                console.error('Order insert failed after schema compatibility checks:', orderSaveError);
                 if (whatsappTab && !whatsappTab.closed) whatsappTab.close();
                 return showToast('Order could not be saved. No stock was deducted. ' + (orderSaveError.message || 'Please try again.'), 'error');
             }
@@ -4916,8 +4929,8 @@ button:focus-visible,a:focus-visible{outline:3px solid rgba(13,148,136,.55);outl
     if(sessionStorage.getItem(key))return;
     sessionStorage.setItem(key,'1');
     const h=now.getHours(),g=h<12?'காலை வணக்கம்':h<16?'மதிய வணக்கம்':h<19?'மாலை வணக்கம்':'இனிய இரவு வணக்கம்';
-    const name=(window.appCurrentUser&&appCurrentUser.name)?appCurrentUser.name.split(' ')[0]:'அன்பான வாடிக்கையாளரே';
-    setTimeout(()=>popup(`🌸 ${g}, ${name}!`,'Subha Medical-க்கு உங்களை அன்புடன் வரவேற்கிறோம். உங்கள் ஆரோக்கியமே எங்கள் முன்னுரிமை. தேவையான மருந்துகளை எளிதாகத் தேர்வு செய்யுங்கள்.','மருந்துகளைப் பார்க்க',()=>window.scrollTo({top:0,behavior:'smooth'})),1200);
+    const name=(window.appCurrentUser&&appCurrentUser.name)?appCurrentUser.name.split(' ')[0]:'நண்பரே';
+    setTimeout(()=>popup(`🌸 ${g}, ${name}!`,'Subha Medical-க்கு வரவேற்கிறோம். ஆரோக்கியமாக இருங்கள்!','சரி',null),900);
   }
   function remindCart(){
     if(!Array.isArray(window.cart)||!cart.length)return;
